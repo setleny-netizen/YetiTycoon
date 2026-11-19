@@ -729,6 +729,38 @@
         #b-sell:active { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
         #b-sell:disabled { background: #9ca3af; box-shadow: 0 4px 0 #6b7280; cursor: default; }
 
+        /* ---------------- ОКНО «С ВОЗВРАЩЕНИЕМ» ---------------- */
+        #offline-popup {
+            position: absolute;
+            inset: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.55);
+            z-index: 700;
+            padding: 20px;
+        }
+        #offline-popup.show { display: flex; }
+        .offline-card {
+            width: min(100%, 360px);
+            background: #fff;
+            border: 3px solid #3b82f6;
+            border-radius: 20px;
+            box-shadow: 0 5px 0 #1e40af, 0 10px 24px rgba(0,0,0,0.45);
+            padding: 20px;
+            text-align: center;
+            color: #1e3a8a;
+        }
+        .offline-title { font-weight: 900; font-size: 24px; margin-bottom: 6px; }
+        .offline-time { font-weight: 800; font-size: 15px; opacity: 0.8; margin-bottom: 12px; }
+        .offline-lines { font-weight: 800; font-size: 17px; line-height: 1.5; margin-bottom: 16px; }
+        #offline-ok {
+            font-family: inherit; font-weight: 900; font-size: 20px; border: none; cursor: pointer;
+            border-radius: 12px; padding: 12px 40px; color: #fff; text-transform: uppercase;
+            background: linear-gradient(to bottom, #4ade80, #16a34a); box-shadow: 0 4px 0 #166534;
+        }
+        #offline-ok:active { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
+
         /* ---------------- МЕНЮ ПРОФИЛЯ ---------------- */
         #profile-menu {
             position: absolute;
@@ -859,6 +891,15 @@
 
         <div id="profile-menu">
             <button id="reset-btn">Сбросить прогресс</button>
+        </div>
+
+        <div id="offline-popup">
+            <div class="offline-card">
+                <div class="offline-title">С возвращением!</div>
+                <div class="offline-time" id="offline-time"></div>
+                <div class="offline-lines" id="offline-lines"></div>
+                <button id="offline-ok">Отлично</button>
+            </div>
         </div>
 
         <div id="toast"></div>
@@ -998,6 +1039,7 @@
         let dollarCount = START_DOLLARS;
         let cannonsOwned = [false, false, false, false];
         let foremanOwned = false;
+        let savedAtLoaded = 0, savedPilesLoaded = 0; // для оффлайн-прогресса
 
         try {
             const raw = localStorage.getItem(SAVE_KEY);
@@ -1007,6 +1049,8 @@
                 dollarCount = (typeof s.dollars === 'number') ? s.dollars : START_DOLLARS;
                 if (Array.isArray(s.cannons)) cannonsOwned = [0, 1, 2, 3].map(i => !!s.cannons[i]);
                 foremanOwned = !!s.foreman;
+                savedAtLoaded = s.savedAt || 0;
+                savedPilesLoaded = s.piles || 0;
             }
         } catch (e) {}
 
@@ -1015,12 +1059,14 @@
             if (resetting) return;
             try {
                 localStorage.setItem(SAVE_KEY, JSON.stringify({
-                    ice: iceCount, dollars: dollarCount, cannons: cannonsOwned, foreman: foremanOwned
+                    ice: iceCount, dollars: dollarCount, cannons: cannonsOwned, foreman: foremanOwned,
+                    savedAt: Date.now(), piles: pilesNow()
                 }));
             } catch (e) {}
         }
         setInterval(saveState, 2000);
         document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+        window.addEventListener('pagehide', saveState);
 
         const fmt = n => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         const round1 = n => Math.round(n * 10) / 10;
@@ -1850,6 +1896,82 @@
             }
         }
 
+        // --- Оффлайн-прогресс (без ограничения по времени) ---
+        const MAX_PILES = COLS * ROWS - 4; // клетки карты минус занятые площадкой прораба
+        let lastTickAt = Date.now();
+
+        function pilesNow() {
+            try { return piles.length; } catch (e) { return 0; }
+        }
+
+        function fmtDuration(ms) {
+            const m = Math.floor(ms / 60000);
+            const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
+            const parts2 = [];
+            if (d) parts2.push(d + ' д');
+            if (h) parts2.push(h + ' ч');
+            if (mm || !parts2.length) parts2.push(mm + ' мин');
+            return parts2.join(' ');
+        }
+
+        // elapsed — сколько прошло, p0 — сколько куч лежало на карте в момент ухода
+        function applyOffline(elapsed, p0) {
+            const now = Date.now();
+
+            // убираем текущие кучи и пересчитываем всё одним расчётом
+            piles.forEach(pl => pl.el.remove());
+            piles.length = 0;
+            fTask = null;
+            fLast = 0;
+
+            const activeCannons = cannons.filter(c => c.owned);
+            const n = activeCannons.length;
+            const produced = Math.floor(n * elapsed / CANNON_INTERVAL);
+
+            let collected = 0;
+            let remaining;
+            if (foremanOwned) {
+                const capacity = Math.floor(elapsed / HOLD_TIME); // прораб убирает кучу за 1.5 сек
+                collected = Math.min(p0 + produced, capacity);
+                remaining = Math.min(MAX_PILES, p0 + produced - collected);
+            } else {
+                remaining = Math.min(MAX_PILES, p0 + produced); // карта заполнилась — пушки простаивают
+            }
+
+            // расставляем оставшиеся кучи по случайным клеткам
+            for (let i = 0; i < remaining; i++) {
+                const free = freeCells();
+                if (!free.length) break;
+                createPile(free[Math.floor(Math.random() * free.length)], null);
+            }
+
+            // таймеры пушек начинаются заново, чтобы не было двойного счёта
+            activeCannons.forEach(c => { c.nextAt = now + CANNON_INTERVAL; c.blocked = false; });
+
+            if (collected > 0) addIce(collected * ICE_PER_PILE);
+            saveState();
+
+            if (elapsed >= 60000 && n > 0) showOfflinePopup(elapsed, produced, collected, remaining);
+        }
+
+        const offlinePopup = document.getElementById('offline-popup');
+        document.getElementById('offline-ok').addEventListener('click', () => offlinePopup.classList.remove('show'));
+
+        function showOfflinePopup(elapsed, produced, collected, remaining) {
+            document.getElementById('offline-time').innerText = 'Вас не было: ' + fmtDuration(elapsed);
+            const lines = [];
+            if (foremanOwned) {
+                lines.push('Прораб собрал куч: ' + fmt(collected));
+                lines.push('Лёд: +' + fmt(collected * ICE_PER_PILE));
+            } else {
+                lines.push('Пушки насыпали куч: ' + fmt(produced));
+                lines.push('На карте сейчас: ' + fmt(remaining) + (remaining >= MAX_PILES ? ' (место закончилось)' : ''));
+                lines.push('Заберите их вручную!');
+            }
+            document.getElementById('offline-lines').innerHTML = lines.join('<br>');
+            offlinePopup.classList.add('show');
+        }
+
         function updateGrowth(now) {
             for (const p of piles) {
                 if (p.ready) continue;
@@ -1861,6 +1983,14 @@
 
         function tick() {
             const now = Date.now();
+            // Если страницу «заморозили» (свернули приложение, фон) — досчитываем пропущенное время
+            if (now - lastTickAt > 5000) {
+                const gap = now - lastTickAt;
+                lastTickAt = now;
+                applyOffline(gap, pilesNow());
+                return;
+            }
+            lastTickAt = now;
             updateCannons(now);
             updateGrowth(now);
             updatePlayerHolds(now);
@@ -1887,6 +2017,13 @@
         requestAnimationFrame(renderBars);
         // запасной таймер: кучи растут, появляются и убираются, даже когда вкладка браузера в фоне
         setInterval(tick, 500);
+
+        // Оффлайн-прогресс после закрытия игры
+        if (savedAtLoaded) {
+            const away = Date.now() - savedAtLoaded;
+            if (away > 5000) applyOffline(away, savedPilesLoaded);
+        }
+        lastTickAt = Date.now();
 
         // Ловим отпускание пальца/мыши вне кучи
         window.addEventListener('pointerup', (e) => {
