@@ -1,1358 +1,733 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-  <title>Лохматый клуб — Заработок</title>
-  <style>
-    /* ============================================================
-       CSS: СТИЛИ
-       ============================================================ */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ice Miner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap');
 
-    :root {
-      --bg:         #0A0A0A;
-      --card:       #141414;
-      --card-2:     #1A1A1A;
-      --border:     #1F1F1F;
-      --gold:       #C9A227;
-      --gold-2:     #D4AF37;
-      --cream:      #F2EFE6;
-      --muted:      #6E6E6E;
-      --green:      #4ADE80;
-      --nav-height: 72px;
-    }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--cream);
-      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-      overflow: hidden;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+        body {
+            background-color: #87CEEB;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            font-family: 'Nunito', sans-serif;
+        }
 
-    /* ================= ШАПКА ================= */
-    .header {
-      position: relative;
-      z-index: 5;
-      padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/fon.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
 
-    .header__avatar {
-      width: 44px;
-      height: 44px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #1B2A41 0%, #243B55 100%);
-      border: 1px solid var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 0 12px rgba(201,162,39,0.25);
-    }
-    .header__avatar svg { width: 70%; height: 70%; color: var(--cream); }
+        /* ---------------- ЭКРАН ЗАГРУЗКИ ---------------- */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0f172a; /* Темный фон на случай, если картинка не покроет края */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Прижимаем контент к низу */
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+            overflow: hidden;
+        }
 
-    .header__info { flex: 1; min-width: 0; }
-    .header__name { font-size: 16px; font-weight: 800; color: var(--cream); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .header__username { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
 
-    .header__stats { 
-      display: flex; 
-      align-items: center; 
-      gap: 6px; 
-      flex-shrink: 0; 
-    }
+        /* Картинка на весь экран */
+        #loading-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Заполняет весь экран, обрезая лишнее */
+            z-index: -1; /* Уходит под прогресс-бар */
+            /* Легкая пульсация для живости */
+            animation: bgPulse 3s infinite alternate;
+        }
 
-    .stat-pill {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--card-2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 6px 10px;
-      font-size: 12px; font-weight: 700; color: var(--cream);
-      line-height: 1; justify-content: flex-start;
-      height: 32px;
-    }
+        @keyframes bgPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
 
-    .stat-pill__icon { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .stat-pill__icon svg { width: 100%; height: 100%; display: block; }
-    
-    .stat-pill--click .stat-pill__icon { color: #FCA5A5; }
-    .stat-pill--passive .stat-pill__icon { color: #93C5FD; }
+        /* Контейнер для прогресс-бара внизу */
+        .loading-ui {
+            width: 100%;
+            padding: 20px 20px 40px 20px; /* Отступы по бокам и снизу */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); /* Затемнение внизу для читаемости */
+            z-index: 1;
+        }
 
-    .stat-pill__value { font-variant-numeric: tabular-nums; }
-    .stat-pill__value.pulse { animation: pulse 0.3s ease; }
+        /* Прогресс-бар загрузки */
+        #loading-bar-container {
+            width: 80vw;
+            max-width: 400px;
+            height: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 2px solid #93c5fd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
 
-    @keyframes pulse {
-      0%   { transform: scale(1);    color: var(--cream); }
-      50%  { transform: scale(1.15); color: var(--gold-2); }
-      100% { transform: scale(1);    color: var(--cream); }
-    }
+        #loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #93c5fd);
+            transition: width 0.1s linear;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+        }
 
-    /* ================= КОНТЕЙНЕР СТРАНИЦЫ ================= */
-    .page {
-      position: relative;
-      height: calc(100vh - 90px - var(--nav-height));
-      padding: 4px 16px 16px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      display: none;
-    }
+        #loading-text {
+            margin-top: 12px;
+            color: #fff;
+            font-weight: 900;
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            text-transform: uppercase;
+        }
 
-    .page.active { display: flex; flex-direction: column; }
+        /* ---------------- ВЕРХНЯЯ ПАНЕЛЬ ---------------- */
+        #top-ui {
+            position: absolute;
+            top: 15px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
 
-    /* ================= ЭКРАН: ЗАРАБОТОК ================= */
-    .page--earn {
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      overflow: hidden;
-      /* Темно-серый градиент на фоне */
-      background: radial-gradient(circle at center 60%, #1A1A1A 0%, #0A0A0A 70%);
-    }
+        /* Профиль КРУГЛЫЙ */
+        .profile-box {
+            width: 55px;
+            height: 55px;
+            background: #fff;
+            border: 3px solid #4A90E2;
+            border-radius: 50%;
+            box-shadow: 0 4px 0 #2C5F9E, 0 6px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-shrink: 0;
+            background-image: url('assets/profile.png');
+            background-size: cover;
+            background-position: center;
+        }
 
-    /* Обертка для сцены (монстр + снег) */
-    .scene-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 400px;
-      height: 350px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      overflow: hidden;
-      /* Маска, чтобы снег не вылезал за края */
-      -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-      mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-    }
+        .resources {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
 
-    /* Монстр */
-    .monster-wrap {
-      position: relative;
-      width: 280px;
-      height: 280px;
-      z-index: 2;
-      transition: transform 0.08s ease;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: -40px; /* Немного опускаем в снег */
-    }
+        .resource-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 3px 10px 3px 4px;
+            box-shadow: 0 3px 0 #1e40af, 0 4px 8px rgba(0,0,0,0.25);
+            min-width: 80px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            transition: transform 0.1s, background 0.2s;
+        }
 
-    .monster-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      pointer-events: none;
-      transition: transform 0.1s;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
-      user-drag: none; user-select: none; -webkit-user-drag: none;
-    }
+        .pop {
+            transform: scale(1.1);
+            background: #ffffff;
+        }
 
-    .monster-wrap.hit .monster-img {
-      animation: hit 0.12s ease;
-    }
+        .resource-icon {
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-right: 6px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
 
-    @keyframes hit {
-      0%   { transform: translateY(0) scale(1); }
-      50%  { transform: translateY(4px) scale(0.96); }
-      100% { transform: translateY(0) scale(1); }
-    }
+        .icon-ice { background-image: url('assets/ice.png'); }
 
-    /* Дорога из версии со снеговиками */
-    #snowGround { 
-      transition: transform 0.55s cubic-bezier(.6,.05,.3,1); 
-      z-index: 1;
-      pointer-events: none;
-    }
+        .icon-dollar {
+            background: #4caf50;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #2e7d32;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+        .icon-dollar::after {
+            content: '$';
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+            text-shadow: 1px 1px 0 #1b5e20;
+        }
 
-    /* HP-бар */
-    .hp-bar-container {
-      width: 260px;
-      height: 34px;
-      position: relative;
-      z-index: 5;
-      margin-top: -10px;
-      transition: opacity 0.3s ease;
-    }
+        .resource-value {
+            font-weight: 900;
+            font-size: 14px;
+            color: #1e3a8a;
+            text-shadow: 0 1px 0 #fff;
+        }
 
-    .hp-bar-bg {
-      position: absolute; inset: 0;
-      background: #1A1A1A; border: 2px solid #0A0A0A;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-    }
+        /* ---------------- НИЖНЕЕ МЕНЮ ---------------- */
+        #bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 75px;
+            background: linear-gradient(to top, #1e3a8a, #3b82f6);
+            border-top: 3px solid #93c5fd;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+        }
 
-    .hp-bar-fill {
-      height: 100%;
-      background: linear-gradient(180deg, #FF4B4B 0%, #E11D1D 50%, #8A0F0F 100%);
-      transition: width 0.1s linear;
-    }
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #bfdbfe;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            flex: 1;
+            height: 100%;
+            opacity: 0.7;
+            transition: opacity 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
 
-    .hp-bar-text {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 900; color: #FFF;
-      text-shadow: 0 0 4px #000, 1px 1px 0 #000;
-      letter-spacing: 1px;
-      z-index: 2;
-    }
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+            transition: transform 0.2s;
+        }
 
-    /* Всплывающий урон/доход */
-    .dmg-pop {
-      position: fixed; pointer-events: none; z-index: 200;
-      font-weight: 800; font-size: 16px; color: #FF6B6B;
-      text-shadow: 0 0 6px rgba(0,0,0,0.9);
-      transform: translate(-50%, -50%);
-      animation: dmgPop 0.55s ease-out forwards;
-    }
-    .passive-pop {
-      position: fixed; pointer-events: none; z-index: 200;
-      font-weight: 800; font-size: 12px; color: #4ADE80;
-      text-shadow: 0 0 6px rgba(0,0,0,0.9);
-      transform: translate(-50%, -50%);
-      animation: dmgPop 0.55s ease-out forwards;
-    }
-    @keyframes dmgPop {
-      0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -140%) scale(0.8); }
-    }
+        .nav-btn.active {
+            opacity: 1;
+            color: #ffffff;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+            border-top: 3px solid #fbbf24;
+            position: relative;
+        }
+        .nav-btn.active::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            width: 30px;
+            height: 3px;
+            background: #fbbf24;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        
+        .nav-btn.active .nav-icon {
+            transform: scale(1.1) translateY(-2px);
+            filter: drop-shadow(0 0 8px #fbbf24);
+        }
 
-    /* Летящий кубик */
-    .cubes-layer { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
+        .nav-btn:active .nav-icon {
+            transform: scale(0.9);
+        }
 
-    .cube {
-      position: fixed; width: 22px; height: 22px;
-      border-radius: 4px;
-      background: linear-gradient(135deg, #EAF6FF 0%, #BFE3F5 40%, #7FB8D9 100%);
-      box-shadow: inset 2px 2px 4px rgba(255,255,255,0.9), inset -2px -2px 6px rgba(27,42,65,0.4), 0 0 10px rgba(191,227,245,0.7);
-      transform: translate(-50%, -50%);
-      animation: flyToBalance 0.7s cubic-bezier(0.5, -0.3, 0.7, 1.2) forwards;
-      display: flex; justify-content: center; align-items: center;
-      font-size: 12px; font-weight: 800; color: #1B2A41;
-      pointer-events: none; z-index: 10;
-    }
+        /* ---------------- ИГРОВЫЕ ЭЛЕМЕНТЫ ---------------- */
+        
+        #floor {
+            position: absolute;
+            bottom: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;
+            max-width: 800px;
+            pointer-events: none;
+            z-index: 10;
+        }
 
-    @keyframes flyToBalance {
-      0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-      40% { transform: translate(calc(-50% + var(--dx) * 0.4 + var(--jx)), calc(-50% + var(--dy) * 0.4 - 40px)) scale(1.1) rotate(120deg); opacity: 1; }
-      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3) rotate(360deg); opacity: 0; }
-    }
+        #miner-wrapper {
+            position: absolute;
+            bottom: calc(18vh + 75px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75vw; 
+            max-width: 400px; 
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    /* Выпадающий лёд */
-    .loot-cube {
-      position: fixed; width: 18px; height: 18px;
-      border-radius: 3px;
-      background: linear-gradient(135deg, #EAF6FF 0%, #BFE3F5 40%, #7FB8D9 100%);
-      box-shadow: inset 1px 1px 2px rgba(255,255,255,0.9), inset -1px -1px 3px rgba(27,42,65,0.4), 0 0 8px rgba(191,227,245,0.6);
-      transform: translate(-50%, -50%);
-      pointer-events: none; z-index: 5;
-      animation: lootDrop 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-    }
-    
-    @keyframes lootDrop {
-      0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-      50% { transform: translate(calc(-50% + var(--lx) * 0.6), calc(-50% + var(--ly) * 0.6 - 30px)) scale(1.1) rotate(90deg); opacity: 1; }
-      100% { transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) scale(0.8) rotate(180deg); opacity: 0.8; }
-    }
+        #progress-container {
+            width: 70%;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
 
-    /* Искры */
-    .particle {
-      position: fixed; width: 6px; height: 6px;
-      background-color: #fff; border-radius: 50%; pointer-events: none; z-index: 100;
-      box-shadow: 0 0 10px #fff, 0 0 20px #00e5ff, 0 0 30px #2962ff;
-      transform: translate(-50%, -50%);
-      animation: explode 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-    }
-    @keyframes explode {
-      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      100% { transform: translate(calc(-50% + cos(var(--angle)) * var(--distance)), calc(-50% + sin(var(--angle)) * var(--distance) + 30px)) scale(0.3); opacity: 0; }
-    }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+            background-size: 280px 100%;
+            background-position: left;
+        }
 
-    .hintbar { text-align: center; pointer-events: none; margin-top: -10px; }
-    .hint-text { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; }
+        #miner {
+            width: 100%;
+            height: auto;
+            transition: transform 0.05s;
+            transform-origin: center bottom;
+        }
 
-    /* ================= ЭКРАН: УЛУЧШЕНИЯ (КАК НА КАРТИНКЕ) ================= */
-    .page--upgrades {
-      padding: 10px 12px;
-      background: #0A0A0A;
-    }
+        .shake { animation: shakeAnim 0.08s infinite; }
 
-    .upgrades-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-    }
+        @keyframes shakeAnim {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            25% { transform: translate(-2px, -1px) rotate(-1.5deg); }
+            50% { transform: translate(-1px, 2px) rotate(1.5deg); }
+            75% { transform: translate(2px, -1px) rotate(0deg); }
+            100% { transform: translate(1px, 1px) rotate(0deg); }
+        }
 
-    .upgrades-col {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 90px;
-      z-index: 2;
-    }
+        #particles-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999; 
+            overflow: hidden;
+        }
 
-    .item-slot {
-      width: 90px;
-      height: 110px;
-      background: #E5E5E5;
-      border: 3px solid #A0A0A0;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      position: relative;
-      transition: border-color 0.2s, transform 0.1s;
-      padding: 4px;
-    }
+        .ice-particle {
+            position: absolute;
+            width: 35px; 
+            height: 35px; 
+            background-image: url('assets/ice.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0px 4px 3px rgba(0,0,0,0.6)); 
+            mix-blend-mode: normal;
+        }
 
-    .item-slot:active { transform: scale(0.95); }
-    
-    .item-slot.active { 
-      border-color: #8A2BE2; 
-      box-shadow: 0 0 15px rgba(138, 43, 226, 0.4); 
-    }
-    .item-slot.legendary { border-color: #D4AF37; }
-    .item-slot.legendary.active { 
-      border-color: #FFD700; 
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); 
-    }
+        /* Звездочки */
+        #stars-container {
+            position: absolute;
+            top: -50px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px; 
+            height: 100px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 30;
+        }
 
-    .item-slot__img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-      margin-top: 4px;
-    }
+        .orbit {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            animation: spin 1.5s linear infinite;
+        }
 
-    .item-slot__stars {
-      display: flex;
-      gap: 2px;
-      background: #333;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-bottom: 2px;
-    }
-    
-    .item-slot__stars svg { width: 10px; height: 10px; fill: #D4AF37; }
+        .star {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 23px; 
+            text-shadow: 0 0 5px #fff, 0 0 10px #FFD700, 0 0 20px #FFA500;
+            animation: pulse 0.4s infinite alternate;
+        }
 
-    .item-slot__lvl {
-      font-size: 11px;
-      font-weight: 700;
-      color: #333;
-      text-align: center;
-    }
+        .orbit:nth-child(2) {
+            animation-duration: 2s;
+            animation-direction: reverse;
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+        }
+        .orbit:nth-child(2) .star {
+            font-size: 16px; 
+            text-shadow: 0 0 5px #fff, 0 0 15px #00FFFF;
+        }
 
-    /* Центральный персонаж */
-    .character-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1;
-    }
+        .orbit:nth-child(3) {
+            animation-duration: 1.2s;
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+        }
+        .orbit:nth-child(3) .star {
+            font-size: 13px; 
+            text-shadow: 0 0 5px #fff, 0 0 15px #fff;
+        }
 
-    .character-card {
-      width: 90%;
-      max-width: 220px;
-      height: 85%;
-      max-height: 500px;
-      background: #F2EFE6;
-      border-radius: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      border: 2px solid #CCC;
-      padding: 10px;
-    }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-    .character-center__img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      user-drag: none; user-select: none; -webkit-user-drag: none;
-    }
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(0.9); }
+            100% { transform: translateX(-50%) scale(1.2); }
+        }
 
-    /* Нижняя панель улучшения */
-    .upgrade-bottom-panel {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      z-index: 10;
-    }
-
-    .upgrade-bottom-panel.open {
-      transform: translateY(0);
-    }
-
-    .panel-info {
-      flex: 1;
-    }
-
-    .panel-info__name {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--cream);
-      margin-bottom: 4px;
-    }
-
-    .panel-info__desc {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.3;
-      margin-bottom: 4px;
-    }
-
-    .panel-info__stats {
-      font-size: 12px;
-      color: var(--gold-2);
-      font-weight: 600;
-    }
-
-    .buy-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 20px;
-      background: var(--gold);
-      color: #0A0A0A;
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: background 0.15s, opacity 0.15s;
-      flex-shrink: 0;
-    }
-
-    .buy-btn:hover:not(:disabled) { background: var(--gold-2); }
-    .buy-btn:disabled { background: var(--card-2); color: var(--muted); cursor: not-allowed; }
-    .buy-btn__price { font-size: 12px; margin-top: 2px; opacity: 0.9; }
-
-    /* ================= ЭКРАН: ПРОФИЛЬ ================= */
-    .page--profile { padding-top: 8px; }
-    .profile-stats { display: flex; flex-direction: column; gap: 10px; padding-bottom: 8px; }
-    .stat-card { background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .stat-card__label { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; }
-    .stat-card__value { font-size: 18px; font-weight: 700; color: var(--cream); letter-spacing: -0.01em; }
-    .reset-block { margin-top: 6px; }
-
-    .reset-btn { width: 100%; padding: 14px 16px; background: transparent; border: 1px solid #7F1D1D; color: #F87171; border-radius: 14px; font-family: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
-    .reset-btn:hover { background: rgba(127, 29, 29, 0.15); border-color: #B91C1C; color: #FCA5A5; }
-
-    /* ================= НИЖНЕЕ МЕНЮ ================= */
-    .bottomnav {
-      position: fixed; left: 0; right: 0; bottom: 0;
-      height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
-      padding: 8px 8px calc(env(safe-area-inset-bottom, 0px) + 8px);
-      background: var(--card); border-top: 1px solid var(--border);
-      display: flex; align-items: stretch; justify-content: space-around; z-index: 20;
-    }
-
-    .nav-btn {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: transparent; border: none; color: var(--muted); font-family: inherit; font-size: 11px;
-      letter-spacing: 0.02em; cursor: pointer; padding: 6px 4px; border-radius: 12px; text-decoration: none;
-      transition: color 0.15s ease, background 0.15s ease;
-    }
-    .nav-btn:hover { color: var(--cream); }
-    .nav-btn.active { color: var(--gold-2); }
-    .nav-btn.active .nav-icon { filter: drop-shadow(0 0 8px rgba(212,175,55,0.45)); }
-    .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: filter 0.15s ease; }
-    .nav-icon svg { width: 100%; height: 100%; }
-    .nav-label { font-size: 11px; line-height: 1; }
-
-    /* ================= МОДАЛКА ================= */
-    .modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-    .modal.open { opacity: 1; pointer-events: auto; }
-    .modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
-    .confirm { position: relative; width: 100%; max-width: 340px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 22px 20px 18px; display: flex; flex-direction: column; gap: 14px; transform: scale(0.9); opacity: 0; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-    .modal.open .confirm { transform: scale(1); opacity: 1; }
-    .confirm__title { font-size: 18px; font-weight: 700; color: var(--cream); text-align: center; }
-    .confirm__text { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.5; }
-    .confirm__actions { display: flex; gap: 10px; margin-top: 4px; }
-    .confirm__btn { flex: 1; padding: 12px 16px; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
-    .confirm__btn--ghost { background: transparent; border: 1px solid var(--border); color: var(--cream); }
-    .confirm__btn--ghost:hover { border-color: var(--gold-2); color: var(--gold-2); }
-    .confirm__btn--danger { background: #B91C1C; border: 1px solid #B91C1C; color: #FFFFFF; }
-    .confirm__btn--danger:hover { background: #DC2626; border-color: #DC2626; }
-  </style>
+    </style>
 </head>
 <body>
 
-  <!-- ШАПКА -->
-  <header class="header">
-    <div class="header__avatar">
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <path fill="currentColor" d="M20 6c-6 0 -10 4 -10 10c0 2 0.5 3.5 1.5 5c-1.5 1 -2.5 2.5 -3 4c-0.5 1.5 0 2.5 1 2.5c0.7 0 1.2 -0.4 1.6 -1c0.6 1.5 1.8 2.6 3.4 3c1 2 3 3.5 5.5 3.5s4.5 -1.5 5.5 -3.5c1.6 -0.4 2.8 -1.5 3.4 -3c0.4 0.6 0.9 1 1.6 1c1 0 1.5 -1 1 -2.5c-0.5 -1.5 -1.5 -3 -3 -4c1 -1.5 1.5 -3 1.5 -5c0 -6 -4 -10 -10 -10z" />
-        <circle cx="16" cy="17" r="1.6" fill="#0A0A0A"/>
-        <circle cx="24" cy="17" r="1.6" fill="#0A0A0A"/>
-      </svg>
-    </div>
-
-    <div class="header__info">
-      <div class="header__name" id="userName">Гость</div>
-      <div class="header__username" id="userUsername">@guest</div>
-    </div>
-
-    <div class="header__stats">
-      <div class="stat-pill stat-pill--click" title="Урон от клика">
-        <span class="stat-pill__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11V6a2 2 0 0 1 4 0v5"/>
-            <path d="M13 11V7a2 2 0 0 1 4 0v4"/>
-            <path d="M17 11V9a2 2 0 0 1 4 0v5a8 8 0 0 1-8 8H9a8 8 0 0 1-8-8v-3a2 2 0 0 1 4 0v2"/>
-            <path d="M5 11v2"/>
-          </svg>
-        </span>
-        <span class="stat-pill__value" id="clickTop">1</span>
-      </div>
-      
-      <div class="stat-pill stat-pill--passive" title="Урон в секунду">
-        <span class="stat-pill__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
-            <path d="M13 19l6-6"/>
-            <path d="M16 16l4 4"/>
-            <path d="M19 21l2-2"/>
-          </svg>
-        </span>
-        <span class="stat-pill__value" id="rateTop">+0</span>
-      </div>
-
-      <div class="stat-pill" style="min-width: 100px; justify-content: flex-end;">
-        <span class="stat-pill__value" id="balanceTop">0</span>
-        <span class="stat-pill__icon" style="color: #BFE3F5;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="M3 8l9-5 9 5-9 5-9-5z" fill="currentColor" fill-opacity="0.25"/>
-            <path d="M3 8v8l9 5 9-5V8"/>
-            <path d="M3 8l9 5 9-5"/>
-            <path d="M12 13v8"/>
-          </svg>
-        </span>
-      </div>
-    </div>
-  </header>
-
-  <!-- ЭКРАН: ЗАРАБОТОК -->
-  <main class="page page--earn active" id="page-earn">
-    
-    <div class="scene-wrap">
-      
-      <!-- ВОЗВРАЩЕННАЯ ДОРОГА СО СНЕГОВИКОВ -->
-      <svg id="icebergSvg" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; pointer-events: none;" viewBox="0 0 400 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="snowPattern" x="0" y="0" width="80" height="120" patternUnits="userSpaceOnUse">
-            <rect width="80" height="120" fill="#0A0A0A"/>
-            <circle cx="10" cy="20"  r="2.5" fill="#FFFFFF" opacity="0.85"/>
-            <circle cx="45" cy="55"  r="2"   fill="#FFFFFF" opacity="0.7"/>
-            <circle cx="70" cy="90"  r="2.6" fill="#FFFFFF" opacity="0.9"/>
-            <circle cx="25" cy="100" r="1.8" fill="#FFFFFF" opacity="0.6"/>
-            <circle cx="60" cy="15"  r="2.2" fill="#FFFFFF" opacity="0.8"/>
-          </pattern>
-
-          <linearGradient id="driftGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#FFFFFF"/>
-            <stop offset="40%"  stop-color="#E4F1FA"/>
-            <stop offset="100%" stop-color="#9FC4DF"/>
-          </linearGradient>
-        </defs>
-
-        <g id="snowGround">
-          <rect x="-1400" y="60" width="3200" height="120" fill="#9FC4DF" opacity="0.55"/>
-          <path d="
-            M -1400 60 Q -1350 40 -1300 54 Q -1250 68 -1200 54 Q -1150 40 -1100 54
-            Q -1050 68 -1000 54 Q  -950 40  -900 54 Q  -850 68  -800 54
-            Q  -750 40  -700 54 Q  -650 68  -600 54 Q  -550 40  -500 54
-            Q  -450 68  -400 54 Q  -350 40  -300 54 Q  -250 68  -200 54
-            Q  -150 40  -100 54 Q   -50 68     0 54 Q    50 40   100 54
-            Q   150 68   200 54 Q   250 40   300 54 Q   350 68   400 54
-            Q   450 40   500 54 Q   550 68   600 54 Q   650 40   700 54
-            Q   750 68   800 54 Q   850 40   900 54 Q   950 68  1000 54
-            Q  1050 40  1100 54 Q  1150 68  1200 54 Q  1250 40  1300 54
-            Q  1350 68  1400 54 Q  1450 40  1500 54 Q  1550 68  1600 54
-            Q  1650 40  1700 54 Q  1750 68  1800 54 L 1800 200 L -1400 200 Z
-          " fill="url(#driftGrad)" opacity="0.97"/>
-          <rect x="-1400" y="60" width="3200" height="50" fill="url(#snowPattern)" opacity="0.55"/>
-          <path d="
-            M -1400 60 Q -1350 40 -1300 54 Q -1250 68 -1200 54 Q -1150 40 -1100 54
-            Q -1050 68 -1000 54 Q  -950 40  -900 54 Q  -850 68  -800 54
-            Q  -750 40  -700 54 Q  -650 68  -600 54 Q  -550 40  -500 54
-            Q  -450 68  -400 54 Q  -350 40  -300 54 Q  -250 68  -200 54
-            Q  -150 40  -100 54 Q   -50 68     0 54 Q    50 40   100 54
-            Q   150 68   200 54 Q   250 40   300 54 Q   350 68   400 54
-            Q   450 40   500 54 Q   550 68   600 54 Q   650 40   700 54
-            Q   750 68   800 54 Q   850 40   900 54 Q   950 68  1000 54
-            Q  1050 40  1100 54 Q  1150 68  1200 54 Q  1250 40  1300 54
-            Q  1350 68  1400 54 Q  1450 40  1500 54 Q  1550 68  1600 54
-            Q  1650 40  1700 54 Q  1750 68  1800 54
-          " stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="2.5" fill="none"/>
-        </g>
-      </svg>
-
-      <!-- Монстр -->
-      <div class="monster-wrap" id="monsterWrap">
-        <img src="монстр1.png" id="monsterImg" class="monster-img" alt="Монстр" draggable="false">
-      </div>
-    </div>
-    
-    <!-- HP-бар -->
-    <div class="hp-bar-container" id="hpBarContainer">
-      <div class="hp-bar-bg">
-        <div class="hp-bar-fill" id="hpFill"></div>
-      </div>
-      <div class="hp-bar-text" id="hpText">100</div>
-    </div>
-
-    <div class="cubes-layer" id="cubesLayer"></div>
-    <div class="hintbar">
-      <span class="hint-text">Бейте монстра, чтобы добыть лёд</span>
-    </div>
-  </main>
-
-  <!-- ЭКРАН: УЛУЧШЕНИЯ (КАК НА КАРТИНКЕ №2) -->
-  <main class="page page--upgrades" id="page-upgrades" style="position: relative;">
-    
-    <div class="upgrades-container">
-      <!-- ЛЕВАЯ КОЛОНКА -->
-      <div class="upgrades-col">
-        <div class="item-slot" id="item-helmet" data-id="helmet" style="border-color: #8A2BE2;">
-          <img src="шлем.png" class="item-slot__img" alt="Шлем" draggable="false">
-          <div class="item-slot__stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <span class="item-slot__lvl">Ур. 50</span>
-        </div>
-        <div class="item-slot legendary" id="item-weapon" data-id="weapon">
-          <img src="оружие.png" class="item-slot__img" alt="Оружие" draggable="false">
-          <div class="item-slot__stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <span class="item-slot__lvl">Ур. 50</span>
-        </div>
-        <div class="item-slot legendary" id="item-accessory" data-id="accessory">
-          <img src="акссесуар.png" class="item-slot__img" alt="Аксессуар" draggable="false">
-          <div class="item-slot__stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <span class="item-slot__lvl">Ур. 50</span>
-        </div>
-      </div>
-
-      <!-- ЦЕНТР (Персонаж) -->
-      <div class="character-center">
-        <div class="character-card">
-          <img src="персонаж.png" class="character-center__img" alt="Персонаж" draggable="false">
-        </div>
-      </div>
-
-      <!-- ПРАВАЯ КОЛОНКА -->
-      <div class="upgrades-col">
-        <div class="item-slot" id="item-cape" data-id="cape" style="border-color: #5DADE2;">
-          <img src="плащ.png" class="item-slot__img" alt="Плащ" draggable="false">
-          <div class="item-slot__stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <span class="item-slot__lvl">Ур. 50</span>
-        </div>
-        <div class="item-slot" id="item-armor" data-id="armor" style="border-color: #8A2BE2;">
-          <img src="броня.png" class="item-slot__img" alt="Броня" draggable="false">
-          <div class="item-slot__stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <span class="item-slot__lvl">Ур. 50</span>
-        </div>
-        <div class="item-slot" id="item-pet" data-id="pet" style="border-color: #BDC3C7;">
-          <img src="питомец.png" class="item-slot__img" alt="Питомец" draggable="false">
-          <div class="item-slot__stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <span class="item-slot__lvl">Ур. 50</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- НИЖНЯЯ ПАНЕЛЬ -->
-    <div class="upgrade-bottom-panel" id="upgradePanel">
-      <div class="panel-info">
-        <div class="panel-info__name" id="panelName">Шлем</div>
-        <div class="panel-info__desc" id="panelDesc">Описание</div>
-        <div class="panel-info__stats" id="panelStats">Уровень: 1</div>
-      </div>
-      <button class="buy-btn" id="buyBtn">
-        Улучшить
-        <span class="buy-btn__price" id="buyPrice">50</span>
-      </button>
-    </div>
-
-  </main>
-
-  <!-- ЭКРАН: ПРОФИЛЬ -->
-  <main class="page page--profile" id="page-profile">
-    <div class="profile-stats">
-      <div class="stat-card">
-        <div class="stat-card__label">Всего добыто льда</div>
-        <div class="stat-card__value" id="statTotalEarned">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__label">Ударов по монстру</div>
-        <div class="stat-card__value" id="statClicks">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__label">Текущий баланс</div>
-        <div class="stat-card__value" id="statBalance">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__label">Доход в секунду</div>
-        <div class="stat-card__value" id="statRate">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__label">Добыча за клик</div>
-        <div class="stat-card__value" id="statClickBonus">1</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__label">Монстров повержено</div>
-        <div class="stat-card__value" id="statKills">0</div>
-      </div>
-      <div class="reset-block">
-        <button class="reset-btn" type="button" id="resetStartBtn">Сбросить прогресс</button>
-      </div>
-    </div>
-  </main>
-
-  <!-- НИЖНЕЕ МЕНЮ -->
-  <nav class="bottomnav">
-    <a class="nav-btn" data-nav="upgrades" href="#">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M12 16V8"/>
-          <path d="M8.5 11.5L12 8l3.5 3.5"/>
-        </svg>
-      </span>
-      <span class="nav-label">Улучшения</span>
-    </a>
-    <a class="nav-btn active" data-nav="earn" href="#">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M12 7v10"/>
-          <path d="M14.5 9.5c0-1-1.1-1.5-2.5-1.5s-2.5.5-2.5 1.5 1.1 1.5 2.5 1.5 2.5.5 2.5 1.5-1.1 1.5-2.5 1.5-2.5-.5-2.5-1.5"/>
-        </svg>
-      </span>
-      <span class="nav-label">Заработок</span>
-    </a>
-    <a class="nav-btn" data-nav="profile" href="#">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="3.5"/>
-          <path d="M4.5 20c1-3.5 4-5.5 7.5-5.5s6.5 2 7.5 5.5"/>
-        </svg>
-      </span>
-      <span class="nav-label">Профиль</span>
-    </a>
-  </nav>
-
-  <!-- МОДАЛКА -->
-  <div class="modal" id="confirmModal" aria-hidden="true">
-    <div class="modal__backdrop" data-close></div>
-    <div class="confirm" role="dialog" aria-label="Подтверждение сброса">
-      <div class="confirm__title">Сбросить прогресс?</div>
-      <div class="confirm__text">Весь баланс, улучшения и статистика будут удалены. Это нельзя отменить.</div>
-      <div class="confirm__actions">
-        <button class="confirm__btn confirm__btn--ghost" type="button" data-close>Отмена</button>
-        <button class="confirm__btn confirm__btn--danger" type="button" id="resetConfirmBtn">Да, сбросить</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // === ПРЕЛОАД КАРТИНОК ===
-    const imagesToPreload = [
-      'монстр1.png', 'монстр2.png', 'монстр3.png', 'персонаж.png',
-      'шлем.png', 'оружие.png', 'акссесуар.png', 'плащ.png', 'броня.png', 'питомец.png'
-    ];
-    imagesToPreload.forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
-
-    // === ЛОГИКА ИГРЫ ===
-    const STORAGE_KEY = 'lohmaty_club_state_v2';
-
-    const ITEMS = {
-      helmet:    { name: 'Шлем',      bonus: 1, basePrice: 50, desc: 'Глубокий капюшон с меховой опушкой. Скрывает лицо, позволяя видеть в непроглядной тьме.' },
-      weapon:    { name: 'Оружие',    bonus: 1, basePrice: 50, desc: 'Тяжелый ритуальный топор с рунной вязью. Раскалывает не только преграду, но и суть врага.' },
-      accessory: { name: 'Аксессуар', bonus: 1, basePrice: 50, desc: 'Кованый кулон с сапфировым древом. Питает владельца силой увядших миров.' },
-      cape:      { name: 'Плащ',      bonus: 1, basePrice: 50, desc: 'Рваная накидка из шкур и перьев, увешанная тяжелыми цепями. Сливает владельца с метелью.' },
-      armor:     { name: 'Броня',     bonus: 1, basePrice: 50, desc: 'Кожаный доспех с массивными пряжками. Защищает от сокрушительных ударов и скрывает трофеи.' },
-      pet:       { name: 'Питомец',   bonus: 1, basePrice: 50, desc: 'Древний зверь с глазами цвета северного сияния. Его ледяное дыхание замораживает плоть.' }
-    };
-
-    function defaultState() {
-      return {
-        balance: 0, totalEarned: 0, totalClicks: 0, totalKills: 0, monsterIndex: 0,
-        itemLevels: {
-          helmet: 1, weapon: 1, accessory: 1, cape: 1, armor: 1, pet: 1
-        },
-        userName: 'Гость', userUsername: '@guest',
-        lastPlayed: Date.now(), currentHp: 100,
-      };
-    }
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return defaultState();
-        const parsed = JSON.parse(raw);
-        const merged = { ...defaultState(), ...parsed };
-        if (!merged.itemLevels) merged.itemLevels = defaultState().itemLevels;
-        if (!merged.lastPlayed) merged.lastPlayed = Date.now();
-        if (typeof merged.currentHp !== 'number') merged.currentHp = 100;
-        return merged;
-      } catch (e) {
-        return defaultState();
-      }
-    }
-
-    function saveState() {
-      try {
-        state.lastPlayed = Date.now();
-        state.currentHp = hp;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {}
-    }
-
-    const state = loadState();
-
-    const balanceTopEl = document.getElementById('balanceTop');
-    const rateTopEl    = document.getElementById('rateTop');
-    const clickTopEl   = document.getElementById('clickTop');
-    const userNameEl   = document.getElementById('userName');
-    const userUsernameEl = document.getElementById('userUsername');
-
-    function formatNumber(num) {
-      if (num < 100000000) {
-        return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-      }
-      const units = [
-        { value: 1e9, symbol: 'млрд' },
-        { value: 1e6, symbol: 'млн' },
-      ];
-      for (let i = 0; i < units.length; i++) {
-        if (num >= units[i].value) {
-          let formatted = (num / units[i].value).toFixed(2);
-          formatted = parseFloat(formatted).toString().replace('.', ',');
-          return formatted + ' ' + units[i].symbol;
-        }
-      }
-      return Math.floor(num).toString();
-    }
-
-    function getTotalItemLevels() {
-      return Object.values(state.itemLevels).reduce((a, b) => a + b, 0);
-    }
-
-    function getClickBonus() {
-      return getTotalItemLevels();
-    }
-
-    function getPassiveBonus() {
-      return getTotalItemLevels();
-    }
-
-    function getUpgradePrice(itemId) {
-      const lvl = state.itemLevels[itemId] || 1;
-      return Math.floor(ITEMS[itemId].basePrice * Math.pow(1.5, lvl - 1));
-    }
-
-    function updateHeaderUI() {
-      if (balanceTopEl) balanceTopEl.textContent = formatNumber(state.balance);
-      if (rateTopEl)    rateTopEl.textContent    = `+${formatNumber(getPassiveBonus())}`;
-      if (clickTopEl)   clickTopEl.textContent   = formatNumber(getClickBonus());
-    }
-
-    function pulseBalance() {
-      if (!balanceTopEl) return;
-      balanceTopEl.classList.remove('pulse');
-      void balanceTopEl.offsetWidth;
-      balanceTopEl.classList.add('pulse');
-    }
-
-    // ======================== ЭКРАН ЗАРАБОТКА ========================
-    const wrap  = document.getElementById('monsterWrap');
-    const monsterImg = document.getElementById('monsterImg');
-    const layer = document.getElementById('cubesLayer');
-    const hpFill     = document.getElementById('hpFill');
-    const hpText     = document.getElementById('hpText');
-    const hpBarContainer = document.getElementById('hpBarContainer');
-    
-    // Элементы дороги
-    const snowGround = document.getElementById('snowGround');
-    let snowOffset = 0;
-
-    const FALLBACK_MONSTER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%232A2A2A"><circle cx="50" cy="50" r="40" stroke="%23C9A227" stroke-width="4"/><text x="50" y="55" font-size="20" fill="%23C9A227" text-anchor="middle" font-family="sans-serif" font-weight="bold">?</text></svg>';
-    const FALLBACK_ITEM = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%231A1A1A"><rect x="10" y="10" width="80" height="80" rx="10" stroke="%23C9A227" stroke-width="4"/></svg>';
-    const FALLBACK_CHAR = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23141414"><rect width="100" height="100"/></svg>';
-
-    document.querySelectorAll('img').forEach(img => {
-      img.onerror = function() {
-        if (this.classList.contains('monster-img')) {
-          this.src = FALLBACK_MONSTER;
-        } else if (this.classList.contains('item-slot__img')) {
-          this.src = FALLBACK_ITEM;
-        } else if (this.classList.contains('character-center__img')) {
-          this.src = FALLBACK_CHAR;
-        }
-      };
-    });
-
-    let hp = 0;
-    function getMaxHp() {
-      return 100 + 20 * (state.monsterIndex || 0);
-    }
-
-    function updateHpBar() {
-      const maxHp = getMaxHp();
-      const pct = Math.max(0, hp) / maxHp;
-      hpFill.style.width = (pct * 100) + '%';
-      hpText.textContent = Math.max(0, Math.ceil(hp));
-    }
-
-    function updateMonsterImage() {
-      const type = (state.monsterIndex || 0) % 3;
-      const monsters = [
-        'монстр1.png', 
-        'монстр2.png', 
-        'монстр3.png' 
-      ];
-      monsterImg.src = monsters[type];
-    }
-
-    hp = state.currentHp;
-    updateHpBar();
-    updateMonsterImage();
-
-    let lastClick = 0;
-    const CLICK_COOLDOWN = 60;
-    let dead = false;
-
-    wrap.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      if (dead) return;
-
-      const now = performance.now();
-      if (now - lastClick < CLICK_COOLDOWN) return;
-      lastClick = now;
-
-      wrap.classList.remove('hit');
-      void wrap.offsetWidth;
-      wrap.classList.add('hit');
-
-      spawnParticles(e.clientX, e.clientY);
-
-      const reward = getClickBonus();
-      applyDamage(reward);
-      spawnCube(e.clientX, e.clientY, reward);
-      spawnDmgPop(e.clientX, e.clientY, reward);
-
-      state.totalClicks += 1;
-      saveState();
-    });
-
-    function applyDamage(amount) {
-      if (dead) return;
-      hp -= amount;
-      updateHpBar();
-
-      if (hp <= 0) {
-        hp = 0;
-        updateHpBar();
-        killMonster();
-      }
-    }
-
-    function killMonster() {
-      dead = true;
-
-      const rect = wrap.getBoundingClientRect();
-      const cx = rect.left + rect.width  * 0.5;
-      const cy = rect.top  + rect.height * 0.5;
-      spawnParticles(cx, cy, 30);
-
-      monsterImg.style.transition = 'opacity 0.3s, transform 0.3s';
-      monsterImg.style.opacity = '0';
-      monsterImg.style.transform = 'scale(0.8) translateY(20px)';
-      hpBarContainer.style.opacity = '0';
-
-      const lootCount = Math.floor(Math.random() * 6) + 5;
-      for (let i = 0; i < lootCount; i++) {
-        spawnLootCube(cx, cy, 0);
-      }
-
-      state.totalKills = (state.totalKills || 0) + 1;
-      state.monsterIndex = (state.monsterIndex || 0) + 1;
-      saveState();
-
-      // Прокрутка дороги
-      snowOffset -= 420;
-      snowGround.setAttribute('transform', `translate(${snowOffset} 0)`);
-
-      setTimeout(() => {
-        hp = getMaxHp();
-        updateHpBar();
-        updateMonsterImage();
-
-        monsterImg.style.transition = 'none';
-        monsterImg.style.opacity = '0';
-        monsterImg.style.transform = 'scale(0.8) translateX(100px)';
+    <!-- ЭКРАН ЗАГРУЗКИ (КАРТИНКА НА ВЕСЬ ЭКРАН) -->
+    <div id="loading-screen">
+        <img id="loading-img" src="assets/loading.png" alt="Loading...">
         
-        // Возврат дороги в исходное положение
-        snowGround.style.transition = 'none';
-        snowGround.setAttribute('transform', 'translate(0 0)');
-        snowOffset = 0;
-        void snowGround.offsetWidth;
-        snowGround.style.transition = 'transform 0.55s cubic-bezier(.6,.05,.3,1)';
+        <div class="loading-ui">
+            <div id="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+            <div id="loading-text">0%</div>
+        </div>
+    </div>
 
-        requestAnimationFrame(() => {
-          monsterImg.style.transition = 'opacity 0.4s, transform 0.4s';
-          monsterImg.style.opacity = '1';
-          monsterImg.style.transform = 'scale(1) translateX(0)';
-          hpBarContainer.style.opacity = '1';
+    <div id="game-container">
+        
+        <div id="top-ui">
+            <div class="profile-box"></div>
+            <div class="resources">
+                <div class="resource-box" id="ui-ice-box">
+                    <div class="resource-icon icon-ice"></div>
+                    <div class="resource-value" id="ice-count">0</div>
+                </div>
+                <div class="resource-box" id="ui-dollar-box">
+                    <div class="resource-icon icon-dollar"></div>
+                    <div class="resource-value" id="dollar-count">0</div>
+                </div>
+            </div>
+        </div>
 
-          setTimeout(() => {
-            dead = false;
-          }, 400);
+        <img id="floor" src="assets/pol.png" alt="floor">
+        
+        <div id="miner-wrapper">
+            <div id="stars-container">
+                <div class="orbit"><div class="star">⭐</div></div>
+                <div class="orbit"><div class="star">⭐</div></div>
+                <div class="orbit"><div class="star">⭐</div></div>
+            </div>
+
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+
+            <img id="miner" src="assets/minerOFF.png" alt="miner">
+        </div>
+        
+        <div id="particles-layer"></div>
+
+        <div id="bottom-nav">
+            <div class="nav-btn">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 16L10 10L14 14L20 6" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6H15" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6V11" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Биржа</span>
+            </div>
+            <div class="nav-btn">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 4L20 10L17 13L11 7L14 4Z" fill="#FFF"/>
+                    <path d="M11.5 7.5L4 15C3 16 3 17.5 4 18.5C5 19.5 6.5 19.5 7.5 18.5L15 11" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 20L2 22" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span>Добыча</span>
+            </div>
+            <div class="nav-btn active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="#93C5FD" stroke="#FFF" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M12 22V12M3 7L12 12L21 7" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Ледник</span>
+            </div>
+            <div class="nav-btn">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="8" fill="#FFF"/>
+                    <circle cx="7" cy="7" r="3" fill="#FFF"/>
+                    <circle cx="17" cy="7" r="3" fill="#FFF"/>
+                    <circle cx="9" cy="11" r="1.5" fill="#1e3a8a"/>
+                    <circle cx="15" cy="11" r="1.5" fill="#1e3a8a"/>
+                    <path d="M10 15C10 15 11 17 12 17C13 17 14 15 14 15" stroke="#1e3a8a" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>Берлога</span>
+            </div>
+            <div class="nav-btn">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3H5L7 15H19L21 7H6" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="7" cy="19" r="2" fill="#FFF"/>
+                    <circle cx="17" cy="19" r="2" fill="#FFF"/>
+                </svg>
+                <span>Магазин</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. ЛОГИКА ЗАГРУЗКИ РЕСУРСОВ (PRELOADER)
+        // ==========================================
+        const assetsToLoad = [
+            'assets/fon.png',
+            'assets/pol.png',
+            'assets/minerOFF.png',
+            'assets/minerON.png',
+            'assets/ice.png',
+            'assets/profile.png',
+            'assets/loading.png'
+        ];
+
+        let loadedCount = 0;
+        const totalAssets = assetsToLoad.length;
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingText = document.getElementById('loading-text');
+        const loadingScreen = document.getElementById('loading-screen');
+
+        function assetLoaded() {
+            loadedCount++;
+            const percent = Math.floor((loadedCount / totalAssets) * 100);
+            loadingBar.style.width = percent + '%';
+            loadingText.innerText = percent + '%';
+
+            if (loadedCount === totalAssets) {
+                // Все загружено, скрываем экран
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    // Запускаем игру (инициализация таймера)
+                    lastFrameTime = 0;
+                    requestAnimationFrame(gameLoop);
+                }, 500); // Небольшая задержка, чтобы игрок увидел 100%
+            }
+        }
+
+        // Запускаем предзагрузку
+        assetsToLoad.forEach(src => {
+            const img = new Image();
+            img.onload = assetLoaded;
+            img.onerror = assetLoaded; // Даже если ошибка, считаем загруженным, чтобы не зависнуть
+            img.src = src;
         });
-      }, 300);
-    }
 
-    function spawnCube(startX, startY, reward) {
-      const cube = document.createElement('div');
-      cube.className = 'cube';
-      cube.style.left = startX + 'px';
-      cube.style.top  = startY + 'px';
-      cube.textContent = '+';
-      const target  = balanceTopEl.getBoundingClientRect();
-      const targetX = target.left + target.width  / 2;
-      const targetY = target.top  + target.height / 2;
-      const dx = targetX - startX;
-      const dy = targetY - startY;
-      const jitter = (Math.random() - 0.5) * 60;
-      cube.style.setProperty('--dx', dx + 'px');
-      cube.style.setProperty('--dy', dy + 'px');
-      cube.style.setProperty('--jx', jitter + 'px');
-      layer.appendChild(cube);
-      cube.addEventListener('animationend', () => {
-        state.balance     += reward;
-        state.totalEarned += reward;
-        updateHeaderUI();
-        pulseBalance();
-        saveState();
-        cube.remove();
-      });
-    }
 
-    function spawnLootCube(startX, startY, reward) {
-      const cube = document.createElement('div');
-      cube.className = 'loot-cube';
-      cube.style.left = startX + 'px';
-      cube.style.top  = startY + 'px';
-
-      const lx = (Math.random() - 0.5) * 160;
-      const ly = (Math.random() - 0.5) * 100;
-      
-      cube.style.setProperty('--lx', lx + 'px');
-      cube.style.setProperty('--ly', ly + 'px');
-
-      layer.appendChild(cube);
-
-      cube.addEventListener('animationend', () => {
-        cube.remove();
-      });
-    }
-
-    function spawnDmgPop(x, y, amount) {
-      const el = document.createElement('div');
-      el.className = 'dmg-pop';
-      el.style.left = x + 'px';
-      el.style.top  = y + 'px';
-      el.textContent = '-' + formatNumber(amount);
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 600);
-    }
-
-    function spawnPassivePop(x, y, amount) {
-      const el = document.createElement('div');
-      el.className = 'passive-pop';
-      el.style.left = x + 'px';
-      el.style.top  = y + 'px';
-      el.textContent = '+' + formatNumber(amount);
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 600);
-    }
-
-    function spawnParticles(x, y, count = 18) {
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.left = x + 'px';
-        p.style.top  = y + 'px';
-        const angle = Math.random() * Math.PI * 2;
-        const dist  = 50 + Math.random() * 80;
-        p.style.setProperty('--angle', `${angle}rad`);
-        p.style.setProperty('--distance', `${dist}px`);
-        const size = 6 + Math.random() * 8;
-        p.style.width  = `${size}px`;
-        p.style.height = `${size}px`;
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 600);
-      }
-    }
-
-    setInterval(() => {
-      const incomePerSec = getPassiveBonus();
-      if (incomePerSec > 0 && !dead) {
-        const amount = incomePerSec / 20;
-        applyDamage(amount);
+        // ==========================================
+        // 2. ИГРОВАЯ ЛОГИКА
+        // ==========================================
+        const miner = document.getElementById('miner');
+        const gameContainer = document.getElementById('game-container');
+        const particlesLayer = document.getElementById('particles-layer');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const starsContainer = document.getElementById('stars-container');
         
-        state.balance += amount;
-        state.totalEarned += amount;
-        updateHeaderUI();
-        saveState();
+        const iceCountEl = document.getElementById('ice-count');
+        const dollarCountEl = document.getElementById('dollar-count');
+        const uiIceBox = document.getElementById('ui-ice-box');
 
-        if (Math.random() < 0.1) {
-          const rect = wrap.getBoundingClientRect();
-          const cx = rect.left + rect.width * 0.5;
-          const cy = rect.top + rect.height * 0.6;
-          spawnPassivePop(cx, cy, amount * 10);
-        }
-      }
-    }, 50);
+        let iceCount = 0;
+        let dollarCount = 0;
 
-    function processOfflineProgress() {
-      const now = Date.now();
-      const last = state.lastPlayed || now;
-      const diffMs = now - last;
-      if (diffMs < 5000) return;
-
-      const income = getPassiveBonus();
-      if (income <= 0) return;
-
-      const offlineSeconds = Math.min(diffMs / 1000, 24 * 3600);
-      let totalDamage = income * offlineSeconds;
-      
-      const offlineEarned = income * offlineSeconds;
-      state.balance += offlineEarned;
-      state.totalEarned += offlineEarned;
-
-      while (totalDamage > 0) {
-        if (dead) {
-          hp = getMaxHp(); updateHpBar();
-          state.monsterIndex++; state.totalKills = (state.totalKills || 0) + 1;
-          continue;
-        }
-        if (totalDamage >= hp) {
-          totalDamage -= hp;
-          state.monsterIndex++; state.totalKills = (state.totalKills || 0) + 1;
-          hp = getMaxHp();
-        } else {
-          hp -= totalDamage; totalDamage = 0;
-        }
-      }
-
-      updateHpBar(); updateHeaderUI(); saveState();
-      if (hp <= 0) { hp = getMaxHp(); updateHpBar(); }
-      updateMonsterImage();
-    }
-
-    processOfflineProgress();
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        processOfflineProgress(); saveState();
-      } else {
-        saveState();
-      }
-    });
-
-    // ======================== ЭКРАН УЛУЧШЕНИЙ ========================
-    const upgradePanel = document.getElementById('upgradePanel');
-    const panelName    = document.getElementById('panelName');
-    const panelDesc    = document.getElementById('panelDesc');
-    const panelStats   = document.getElementById('panelStats');
-    const buyBtn       = document.getElementById('buyBtn');
-    const buyPrice     = document.getElementById('buyPrice');
-    
-    let activeItemId = null;
-
-    function renderUpgradeScreen() {
-      Object.keys(ITEMS).forEach(id => {
-        const lvl = state.itemLevels[id] || 1;
-        const el = document.querySelector(`.item-slot[data-id="${id}"] .item-slot__lvl`);
-        // Тут можно менять текст на "Ур. 50", если хочешь статично, но пока выводим реальный
-        if (el) el.textContent = `Ур. ${lvl}`; 
-      });
-      if (activeItemId) openItemPanel(activeItemId);
-    }
-
-    function openItemPanel(id) {
-      activeItemId = id;
-      
-      document.querySelectorAll('.item-slot').forEach(el => el.classList.remove('active'));
-      document.querySelector(`.item-slot[data-id="${id}"]`).classList.add('active');
-
-      const lvl = state.itemLevels[id] || 1;
-      const price = getUpgradePrice(id);
-      
-      panelName.textContent = ITEMS[id].name;
-      panelDesc.textContent = ITEMS[id].desc;
-      panelStats.textContent = `Уровень: ${lvl} (+${lvl} урона)`;
-      buyPrice.textContent = formatNumber(price);
-
-      if (state.balance >= price) {
-        buyBtn.disabled = false;
-      } else {
-        buyBtn.disabled = true;
-      }
-
-      upgradePanel.classList.add('open');
-    }
-
-    document.querySelectorAll('.item-slot').forEach(el => {
-      el.addEventListener('click', () => {
-        const id = el.dataset.id;
-        openItemPanel(id);
-      });
-    });
-
-    buyBtn.addEventListener('click', () => {
-      if (!activeItemId) return;
-      const price = getUpgradePrice(activeItemId);
-      if (state.balance < price) return;
-
-      state.balance -= price;
-      state.itemLevels[activeItemId] = (state.itemLevels[activeItemId] || 1) + 1;
-      
-      updateHeaderUI();
-      saveState();
-      renderUpgradeScreen();
-    });
-
-    document.getElementById('page-upgrades').addEventListener('click', (e) => {
-      if (!e.target.closest('.item-slot') && !e.target.closest('.upgrade-bottom-panel')) {
-        upgradePanel.classList.remove('open');
-        document.querySelectorAll('.item-slot').forEach(el => el.classList.remove('active'));
-        activeItemId = null;
-      }
-    });
-
-    // ======================== НАВИГАЦИЯ ========================
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const pages = {
-      earn: document.getElementById('page-earn'),
-      upgrades: document.getElementById('page-upgrades'),
-      profile: document.getElementById('page-profile')
-    };
-
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = btn.dataset.nav;
-        navButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        Object.keys(pages).forEach(key => pages[key].classList.remove('active'));
-        pages[target].classList.add('active');
+        let isMining = false;
+        let isOverheated = false;
         
-        if (target === 'upgrades') {
-          renderUpgradeScreen();
+        let progress = 0; 
+        let lastFrameTime = 0;
+        let accumulatedProgress = 0; 
+
+        function getSpawnRate(progressPercent) {
+            if (progressPercent < 20) return 2;
+            if (progressPercent < 40) return 4;
+            if (progressPercent < 60) return 6;
+            if (progressPercent < 80) return 12;
+            return 24;
         }
-        if (target === 'profile') {
-          updateProfileUI();
+
+        function addIce() {
+            iceCount++;
+            iceCountEl.innerText = iceCount;
+            uiIceBox.classList.add('pop');
+            setTimeout(() => uiIceBox.classList.remove('pop'), 100);
         }
-      });
-    });
 
-    // ======================== ПРОФИЛЬ ========================
-    function updateProfileUI() {
-      document.getElementById('statTotalEarned').textContent = formatNumber(state.totalEarned);
-      document.getElementById('statClicks').textContent      = formatNumber(state.totalClicks);
-      document.getElementById('statBalance').textContent     = formatNumber(state.balance);
-      document.getElementById('statRate').textContent        = formatNumber(getPassiveBonus());
-      document.getElementById('statClickBonus').textContent  = formatNumber(getClickBonus());
-      document.getElementById('statKills').textContent       = formatNumber(state.totalKills || 0);
-    }
+        function spawnIce() {
+            const ice = document.createElement('div');
+            ice.classList.add('ice-particle');
+            
+            const minerRect = miner.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            const targetRect = uiIceBox.getBoundingClientRect();
 
-    const confirmModal    = document.getElementById('confirmModal');
-    const resetStartBtn   = document.getElementById('resetStartBtn');
-    const resetConfirmBtn = document.getElementById('resetConfirmBtn');
+            const startX = (minerRect.left - containerRect.left) + (minerRect.width / 2);
+            const startY = (minerRect.top - containerRect.top) + minerRect.height * 0.85; 
 
-    function openModal(modal) { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); }
-    function closeModal(modal) { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); }
+            const endX = (targetRect.left - containerRect.left) + (targetRect.width / 2);
+            const endY = (targetRect.top - containerRect.top) + (targetRect.height / 2);
 
-    confirmModal.addEventListener('click', (e) => {
-      if (e.target.closest('[data-close]')) closeModal(confirmModal);
-    });
+            ice.style.left = startX + 'px';
+            ice.style.top = startY + 'px';
 
-    resetStartBtn.addEventListener('click', () => openModal(confirmModal));
+            particlesLayer.appendChild(ice);
 
-    resetConfirmBtn.addEventListener('click', () => {
-      const fresh = defaultState();
-      Object.keys(state).forEach((k) => delete state[k]);
-      Object.assign(state, fresh);
-      localStorage.removeItem(STORAGE_KEY);
-      
-      hp = getMaxHp();
-      updateHpBar();
-      updateHeaderUI();
-      updateProfileUI();
-      updateMonsterImage();
-      renderUpgradeScreen();
-      closeModal(confirmModal);
-    });
+            const midX = startX + (Math.random() - 0.5) * 100;
+            const midY = startY - (50 + Math.random() * 100);
 
-    updateHeaderUI();
-    updateProfileUI();
-    renderUpgradeScreen();
+            const animation = ice.animate([
+                { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${midX - startX}px), calc(-50% + ${midY - startY}px)) scale(1) rotate(${Math.random() * 360}deg)`, opacity: 1, offset: 0.4 },
+                { transform: `translate(calc(-50% + ${endX - startX}px), calc(-50% + ${endY - startY}px)) scale(0.2) rotate(${Math.random() * 720}deg)`, opacity: 0.5 }
+            ], {
+                duration: 400, 
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)', 
+                fill: 'forwards'
+            });
 
-    setInterval(saveState, 5000);
-  </script>
+            animation.onfinish = () => {
+                ice.remove();
+                addIce(); 
+            };
+        }
+
+        function gameLoop(timestamp) {
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const deltaTime = timestamp - lastFrameTime;
+            lastFrameTime = timestamp;
+
+            if (isMining && !isOverheated) {
+                progress += deltaTime * 0.02;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = progress + '%';
+
+                const currentRate = getSpawnRate(progress);
+                const ratePerMs = currentRate / 1000;
+                
+                accumulatedProgress += deltaTime * ratePerMs;
+                
+                while (accumulatedProgress >= 1) {
+                    spawnIce();
+                    accumulatedProgress -= 1;
+                }
+
+                if (progress >= 100) {
+                    triggerOverheat();
+                }
+
+            } else if (!isMining && !isOverheated) {
+                if (progress > 0) {
+                    progress -= deltaTime * 0.05; 
+                    if (progress < 0) progress = 0;
+                    progressBar.style.width = progress + '%';
+                    if (progress === 0) progressContainer.style.opacity = 0;
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startMining(e) {
+            if (e.cancelable) e.preventDefault();
+            if (isOverheated || isMining) return; 
+            
+            isMining = true;
+            miner.src = 'assets/minerON.png';
+            miner.classList.add('shake');
+            progressContainer.style.opacity = 1;
+            lastFrameTime = 0; 
+        }
+
+        function stopMining(e) {
+            if (e && e.cancelable) e.preventDefault();
+            if (isOverheated || !isMining) return;
+            
+            isMining = false;
+            miner.src = 'assets/minerOFF.png';
+            miner.classList.remove('shake');
+        }
+
+        function triggerOverheat() {
+            isOverheated = true;
+            isMining = false;
+            
+            miner.src = 'assets/minerOFF.png';
+            miner.classList.remove('shake');
+            starsContainer.style.display = 'flex';
+
+            let cooldownTimer = setInterval(() => {
+                progress -= 2;
+                if (progress <= 0) {
+                    progress = 0;
+                    clearInterval(cooldownTimer);
+                    isOverheated = false;
+                    starsContainer.style.display = 'none';
+                    progressContainer.style.opacity = 0; 
+                    progressBar.style.width = '0%';
+                }
+                progressBar.style.width = progress + '%';
+            }, 50);
+        }
+
+        gameContainer.addEventListener('touchstart', startMining, { passive: false });
+        gameContainer.addEventListener('touchend', stopMining);
+        gameContainer.addEventListener('touchcancel', stopMining);
+
+        gameContainer.addEventListener('mousedown', startMining);
+        gameContainer.addEventListener('mouseup', stopMining);
+        gameContainer.addEventListener('mouseleave', stopMining); 
+    </script>
 </body>
 </html>
