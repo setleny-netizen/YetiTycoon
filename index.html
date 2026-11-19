@@ -37,10 +37,10 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #0f172a; /* Темный фон на случай, если картинка не покроет края */
+            background-color: #0f172a;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Прижимаем контент к низу */
+            justify-content: flex-end;
             align-items: center;
             z-index: 9999;
             transition: opacity 0.5s ease;
@@ -52,45 +52,37 @@
             pointer-events: none;
         }
 
-        /* Картинка на весь экран */
+        /* Картинка на весь экран, БЕЗ АНИМАЦИИ */
         #loading-img {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Заполняет весь экран, обрезая лишнее */
-            z-index: -1; /* Уходит под прогресс-бар */
-            /* Легкая пульсация для живости */
-            animation: bgPulse 3s infinite alternate;
+            object-fit: cover;
+            z-index: -1;
         }
 
-        @keyframes bgPulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
-
-        /* Контейнер для прогресс-бара внизу */
         .loading-ui {
             width: 100%;
-            padding: 20px 20px 40px 20px; /* Отступы по бокам и снизу */
+            padding: 20px 20px 50px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); /* Затемнение внизу для читаемости */
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
             z-index: 1;
         }
 
-        /* Прогресс-бар загрузки */
+        /* ПРОГРЕСС-БАР ЗАГРУЗКИ */
         #loading-bar-container {
-            width: 80vw;
+            width: 85vw;
             max-width: 400px;
-            height: 16px;
+            height: 32px;
             background-color: rgba(0, 0, 0, 0.6);
-            border: 2px solid #93c5fd;
-            border-radius: 10px;
+            border: 3px solid #93c5fd;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
             position: relative;
         }
 
@@ -103,12 +95,12 @@
         }
 
         #loading-text {
-            margin-top: 12px;
+            margin-top: 15px;
             color: #fff;
             font-weight: 900;
-            font-size: 16px;
+            font-size: 20px;
             letter-spacing: 2px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.9);
             text-transform: uppercase;
         }
 
@@ -125,7 +117,6 @@
             pointer-events: none;
         }
 
-        /* Профиль КРУГЛЫЙ */
         .profile-box {
             width: 55px;
             height: 55px;
@@ -428,7 +419,7 @@
 </head>
 <body>
 
-    <!-- ЭКРАН ЗАГРУЗКИ (КАРТИНКА НА ВЕСЬ ЭКРАН) -->
+    <!-- ЭКРАН ЗАГРУЗКИ -->
     <div id="loading-screen">
         <img id="loading-img" src="assets/loading.png" alt="Loading...">
         
@@ -522,16 +513,11 @@
 
     <script>
         // ==========================================
-        // 1. ЛОГИКА ЗАГРУЗКИ РЕСУРСОВ (PRELOADER)
+        // 1. ЛОГИКА ЗАГРУЗКИ (МИНИМУМ 2 СЕКУНДЫ)
         // ==========================================
         const assetsToLoad = [
-            'assets/fon.png',
-            'assets/pol.png',
-            'assets/minerOFF.png',
-            'assets/minerON.png',
-            'assets/ice.png',
-            'assets/profile.png',
-            'assets/loading.png'
+            'assets/fon.png', 'assets/pol.png', 'assets/minerOFF.png', 
+            'assets/minerON.png', 'assets/ice.png', 'assets/profile.png', 'assets/loading.png'
         ];
 
         let loadedCount = 0;
@@ -540,30 +526,58 @@
         const loadingText = document.getElementById('loading-text');
         const loadingScreen = document.getElementById('loading-screen');
 
-        function assetLoaded() {
-            loadedCount++;
-            const percent = Math.floor((loadedCount / totalAssets) * 100);
-            loadingBar.style.width = percent + '%';
-            loadingText.innerText = percent + '%';
+        const MIN_LOADING_TIME = 2000; // 2 секунды
+        const startTime = Date.now();
+        let allAssetsReady = false;
 
-            if (loadedCount === totalAssets) {
-                // Все загружено, скрываем экран
+        function checkLoadingStatus() {
+            const elapsedTime = Date.now() - startTime;
+            
+            if (allAssetsReady && elapsedTime >= MIN_LOADING_TIME) {
+                loadingBar.style.width = '100%';
+                loadingText.innerText = '100%';
+                
                 setTimeout(() => {
                     loadingScreen.classList.add('hidden');
-                    // Запускаем игру (инициализация таймера)
                     lastFrameTime = 0;
                     requestAnimationFrame(gameLoop);
-                }, 500); // Небольшая задержка, чтобы игрок увидел 100%
+                }, 300);
+            } else {
+                if (allAssetsReady) {
+                    loadingBar.style.width = '99%';
+                    loadingText.innerText = '99%';
+                }
             }
         }
 
-        // Запускаем предзагрузку
+        function assetLoaded() {
+            loadedCount++;
+            const percent = Math.floor((loadedCount / totalAssets) * 100);
+            
+            if (!allAssetsReady) {
+                loadingBar.style.width = percent + '%';
+                loadingText.innerText = percent + '%';
+            }
+
+            if (loadedCount === totalAssets) {
+                allAssetsReady = true;
+            }
+            checkLoadingStatus();
+        }
+
         assetsToLoad.forEach(src => {
             const img = new Image();
             img.onload = assetLoaded;
-            img.onerror = assetLoaded; // Даже если ошибка, считаем загруженным, чтобы не зависнуть
+            img.onerror = assetLoaded; 
             img.src = src;
         });
+
+        const loadingInterval = setInterval(() => {
+            checkLoadingStatus();
+            if (allAssetsReady && Date.now() - startTime >= MIN_LOADING_TIME) {
+                clearInterval(loadingInterval);
+            }
+        }, 100);
 
 
         // ==========================================
@@ -682,6 +696,11 @@
         function startMining(e) {
             if (e.cancelable) e.preventDefault();
             if (isOverheated || isMining) return; 
+
+            const target = e.target;
+            if (target.closest('#bottom-nav') || target.closest('#top-ui')) {
+                return; 
+            }
             
             isMining = true;
             miner.src = 'assets/minerON.png';
