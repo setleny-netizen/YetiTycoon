@@ -677,57 +677,170 @@
             bottom: 83px;
             left: 0;
             right: 0;
+            padding: 6px 12px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 0 12px;
         }
         .bourse-card {
-            width: min(100%, 420px);
+            width: min(100%, 560px);
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1.4vh, 12px);
             background: rgba(255,255,255,0.93);
             border: 3px solid #3b82f6;
             border-radius: 20px;
             box-shadow: 0 5px 0 #1e40af, 0 8px 18px rgba(0,0,0,0.35);
-            padding: 18px 18px 20px;
+            padding: clamp(8px, 1.6vh, 16px);
             color: #1e3a8a;
-            text-align: center;
+            overflow: hidden;
+        }
+        .b-head {
+            flex: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .b-head-left { min-width: 0; }
+        .b-title {
+            font-weight: 900;
+            font-size: clamp(18px, 3.4vh, 26px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        .b-sub {
+            font-weight: 800;
+            font-size: clamp(10px, 1.6vh, 13px);
+            opacity: 0.7;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .b-price {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #dbeafe;
+            border-radius: 12px;
+            padding: 6px 10px;
+        }
+        .b-ico { width: clamp(22px, 3.6vh, 30px); height: clamp(22px, 3.6vh, 30px); flex-shrink: 0; }
+        .b-ice { background: url('assets/ice.png') center/contain no-repeat; }
+        .b-price-val { font-weight: 900; font-size: clamp(16px, 2.9vh, 22px); line-height: 1.05; white-space: nowrap; }
+        .b-change { font-weight: 900; font-size: clamp(10px, 1.6vh, 13px); white-space: nowrap; line-height: 1.1; }
+        .b-change.up { color: #16a34a; }
+        .b-change.down { color: #dc2626; }
+
+        .b-chart-box {
+            flex: 1 1 0;
+            min-height: 90px;
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #12304f, #0b1f36);
+            box-shadow: inset 0 0 0 2px #3b82f6, inset 0 4px 14px rgba(0,0,0,0.4);
+        }
+        #b-chart {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            display: block;
+        }
+
+        .b-trade {
+            flex: none;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: clamp(4px, 1vh, 10px);
         }
-        .bourse-title { font-weight: 900; font-size: 26px; letter-spacing: 1px; text-transform: uppercase; }
-        .bourse-rate {
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            font-weight: 900; font-size: 20px;
-            background: #dbeafe; border-radius: 12px; padding: 8px;
+        .b-mode {
+            display: flex;
+            gap: 3px;
+            background: #dbeafe;
+            border-radius: 12px;
+            padding: 3px;
         }
-        .b-ico { width: 26px; height: 26px; flex-shrink: 0; }
-        .b-ice { background: url('assets/ice.png') center/contain no-repeat; }
-        .b-dollar {
-            background: #4caf50; border: 2px solid #2e7d32; border-radius: 5px;
-            color: #fff; font-size: 15px; display: flex; justify-content: center; align-items: center;
+        .b-mode button {
+            flex: 1;
+            font-family: inherit;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            border-radius: 9px;
+            background: transparent;
+            color: #1e3a8a;
+            padding: clamp(5px, 1vh, 8px) 0;
+            font-size: clamp(13px, 2.2vh, 16px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .bourse-have { font-weight: 800; font-size: 16px; }
-        .bourse-sell { font-weight: 800; font-size: 18px; }
-        .bourse-sell b, .bourse-have b, .bourse-get b { font-weight: 900; }
-        #b-slider { width: 100%; height: 34px; accent-color: #3b82f6; touch-action: auto; }
+        .b-mode button.active {
+            background: #3b82f6;
+            color: #fff;
+            box-shadow: 0 2px 0 #1e40af;
+        }
+        .b-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: clamp(13px, 2.2vh, 17px);
+        }
+        .b-row > div { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .b-row b { font-weight: 900; }
+        #b-slider { width: 100%; height: clamp(24px, 4vh, 34px); margin: 0; accent-color: #3b82f6; touch-action: auto; }
         .bourse-quick { display: flex; gap: 8px; }
         .bourse-quick button, #b-sell, #reset-btn {
             font-family: inherit; font-weight: 900; border: none; cursor: pointer; border-radius: 12px;
         }
         .bourse-quick button {
-            flex: 1; padding: 10px 0; font-size: 16px;
+            flex: 1; padding: clamp(6px, 1.2vh, 10px) 0; font-size: clamp(13px, 2.2vh, 16px);
             background: #93c5fd; color: #1e3a8a; box-shadow: 0 3px 0 #3b82f6;
         }
         .bourse-quick button:active { transform: translateY(2px); box-shadow: 0 1px 0 #3b82f6; }
-        .bourse-get { font-weight: 800; font-size: 18px; }
+        .b-sellrow { align-items: stretch; }
+        .b-get {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.15;
+            font-size: clamp(11px, 1.8vh, 14px);
+        }
+        .b-get b { font-size: clamp(15px, 2.6vh, 20px); }
         #b-sell {
-            padding: 14px 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;
+            flex: 1.3;
+            padding: clamp(8px, 1.8vh, 14px) 0;
+            font-size: clamp(15px, 2.6vh, 20px);
+            text-transform: uppercase; letter-spacing: 1px;
             background: linear-gradient(to bottom, #4ade80, #16a34a); color: #fff;
             box-shadow: 0 4px 0 #166534; text-shadow: 0 2px 0 rgba(0,0,0,0.3);
         }
+        #b-sell.buy { background: linear-gradient(to bottom, #60a5fa, #2563eb); box-shadow: 0 4px 0 #1e40af; }
         #b-sell:active { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
         #b-sell:disabled { background: #9ca3af; box-shadow: 0 4px 0 #6b7280; cursor: default; }
+
+        /* Широкий экран: график слева, торговля справа */
+        @media (min-aspect-ratio: 11/10) {
+            .bourse-card {
+                width: min(100%, 920px);
+                display: grid;
+                grid-template-columns: 1.5fr 1fr;
+                grid-template-rows: auto minmax(0, 1fr);
+                column-gap: 16px;
+            }
+            .b-head { grid-column: 1 / 3; }
+            .b-chart-box { min-height: 0; }
+            .b-trade { justify-content: center; }
+        }
 
         /* ---------------- ОКНО «С ВОЗВРАЩЕНИЕМ» ---------------- */
         #offline-popup {
@@ -856,21 +969,44 @@
         <div id="screen-bourse" class="screen hidden">
             <div id="bourse-wrap">
                 <div class="bourse-card">
-                    <div class="bourse-title">Биржа</div>
-                    <div class="bourse-rate">
-                        <div class="b-ico b-ice"></div><span>1</span><span>=</span>
-                        <div class="b-ico b-dollar">$</div><span>0,1</span>
+                    <div class="b-head">
+                        <div class="b-head-left">
+                            <div class="b-title">Биржа</div>
+                            <div class="b-sub">Курс 1 льда · график 3 часа</div>
+                        </div>
+                        <div class="b-price">
+                            <div class="b-ico b-ice"></div>
+                            <div class="b-price-col">
+                                <div class="b-price-val" id="b-price">$0,000</div>
+                                <div class="b-change" id="b-change">—</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bourse-have">У вас льда: <b id="b-have">0</b></div>
-                    <div class="bourse-sell">Продать: <b id="b-amount">0</b></div>
-                    <input type="range" id="b-slider" min="0" max="0" step="1" value="0">
-                    <div class="bourse-quick">
-                        <button data-p="0.25">25%</button>
-                        <button data-p="0.5">50%</button>
-                        <button data-p="1">Всё</button>
+
+                    <div class="b-chart-box">
+                        <canvas id="b-chart"></canvas>
                     </div>
-                    <div class="bourse-get">Вы получите: <b id="b-get">$0</b></div>
-                    <button id="b-sell" disabled>Продать</button>
+
+                    <div class="b-trade">
+                        <div class="b-mode">
+                            <button id="b-mode-sell" class="active">Продать</button>
+                            <button id="b-mode-buy">Купить</button>
+                        </div>
+                        <div class="b-row">
+                            <div><span id="b-have-lbl">Лёд:</span> <b id="b-have">0</b></div>
+                            <div><span id="b-amt-lbl">Продать:</span> <b id="b-amount">0</b></div>
+                        </div>
+                        <input type="range" id="b-slider" min="0" max="0" step="1" value="0">
+                        <div class="bourse-quick">
+                            <button data-p="0.25">25%</button>
+                            <button data-p="0.5">50%</button>
+                            <button data-p="1">Всё</button>
+                        </div>
+                        <div class="b-row b-sellrow">
+                            <div class="b-get"><span id="b-get-lbl">Получите</span><b id="b-get">$0</b></div>
+                            <button id="b-sell" disabled>Продать</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1026,7 +1162,9 @@
         const SAVE_KEY = 'iceMiner_v1';
         const START_DOLLARS = 15000;  // стартовый баланс при первом запуске
         const RESET_DOLLARS = 0;      // баланс после «Сбросить прогресс»
-        const ICE_PRICE = 0.1;        // 1 лёд = 0.1 $
+        const PRICE_MIN = 0.1;        // курс 1 льда колеблется от 0.1 $
+        const PRICE_MAX = 0.3;        // до 0.3 $
+        const BOURSE_WINDOW = 3 * 3600 * 1000; // окно графика — 3 часа
 
         const CANNON_PRICES = [1000, 7000, 25000, 70000];
         const FOREMAN_PRICE = 5000;
@@ -1069,11 +1207,11 @@
         window.addEventListener('pagehide', saveState);
 
         const fmt = n => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-        const round1 = n => Math.round(n * 10) / 10;
+        const round2 = n => Math.round(n * 100) / 100;
         const fmtMoney = n => {
-            const v = round1(n);
+            const v = round2(n);
             if (Number.isInteger(v)) return fmt(v);
-            return fmt(Math.floor(v)) + ',' + (Math.round(v * 10) % 10);
+            return fmt(Math.floor(v)) + ',' + String(Math.round(v * 100) % 100).padStart(2, '0');
         };
         const hooks = { res: null }; // обновление вкладки «Биржа» при смене ресурсов
 
@@ -1100,7 +1238,7 @@
         }
 
         function spendDollars(n) {
-            dollarCount = round1(dollarCount - n);
+            dollarCount = round2(dollarCount - n);
             renderResources();
             uiDollarBox.classList.add('pop');
             setTimeout(() => uiDollarBox.classList.remove('pop'), 120);
@@ -1313,55 +1451,278 @@
 
 
         // ==========================================
-        // 4.5 ЭКРАН «БИРЖА»: продажа льда за доллары (1 лёд = 0.1 $)
+        // 4.5 ЭКРАН «БИРЖА»: курс льда 0.1–0.3 $, график за 3 часа
         // ==========================================
+        // Курс — детерминированная функция от времени: одинаков на всех устройствах,
+        // история графика всегда восстанавливается, в том числе после оффлайна.
+        function hash01(n) {
+            let x = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b);
+            x ^= x >>> 13;
+            x = Math.imul(x, 0xc2b2ae35);
+            x ^= x >>> 16;
+            return (x >>> 0) / 4294967296;
+        }
+        function smooth01(t) { return t * t * (3 - 2 * t); }
+        function noise1(ms, period, seed) {
+            const k = ms / period;
+            const i = Math.floor(k);
+            const f = k - i;
+            const a = hash01((i * 7919 + seed) | 0);
+            const b = hash01(((i + 1) * 7919 + seed) | 0);
+            return a + (b - a) * smooth01(f);
+        }
+        // Курс меняется раз в минуту: значение берётся на начало минуты, цена в сотых
+        function priceAt(ms) {
+            const m = Math.floor(ms / 60000) * 60000;
+            const v = 0.50 * noise1(m, 45 * 60000, 11) + 0.28 * noise1(m, 12 * 60000, 23)
+                    + 0.14 * noise1(m, 3 * 60000, 37) + 0.08 * noise1(m, 60000, 53);
+            const x = Math.max(0, Math.min(1, (v - 0.5) * 1.7 + 0.5));
+            return Math.round((PRICE_MIN + (PRICE_MAX - PRICE_MIN) * x) * 100) / 100;
+        }
+        const fmtPrice = pr => '$' + pr.toFixed(2).replace('.', ',');
+        const fmtClock = t => new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
         const bSlider = document.getElementById('b-slider');
         const bAmount = document.getElementById('b-amount');
         const bGet = document.getElementById('b-get');
         const bHave = document.getElementById('b-have');
         const bSell = document.getElementById('b-sell');
-        let sellAmount = 0;
+        const bPrice = document.getElementById('b-price');
+        const bChange = document.getElementById('b-change');
+        const bChart = document.getElementById('b-chart');
+        const bctx = bChart.getContext('2d');
+        let tradeAmount = 0;   // сколько льда продаём/покупаем
+        let bMode = 'sell';    // 'sell' | 'buy'
+        let bHover = null; // x касания/курсора на графике (css px)
 
-        function renderBourse() {
-            const max = Math.floor(iceCount);
-            if (sellAmount > max) sellAmount = max;
-            bSlider.max = max;
-            bSlider.value = sellAmount;
-            bSlider.disabled = max <= 0;
-            bHave.innerText = fmt(max);
-            bAmount.innerText = fmt(sellAmount);
-            bGet.innerText = '$' + fmtMoney(sellAmount * ICE_PRICE);
-            bSell.disabled = sellAmount <= 0;
+        const AXIS_MIN = 0.08, AXIS_MAX = 0.32;
+
+        function drawChart() {
+            const box = bChart.parentElement;
+            const w = box.clientWidth, h = box.clientHeight;
+            if (!w || !h) return;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const cw = Math.round(w * dpr), ch = Math.round(h * dpr);
+            if (bChart.width !== cw || bChart.height !== ch) { bChart.width = cw; bChart.height = ch; }
+
+            const ctx = bctx;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, w, h);
+
+            const fs = Math.max(9, Math.min(12, h * 0.065));
+            ctx.font = '800 ' + fs + 'px Nunito, sans-serif';
+            const padL = ctx.measureText('0,30').width + 14;
+            const padR = 12, padT = 12, padB = fs + 12;
+            const pw = w - padL - padR, ph = h - padT - padB;
+            if (pw < 20 || ph < 20) return;
+
+            const now = Date.now();
+            const t0 = now - BOURSE_WINDOW;
+            const xOf = t => padL + (t - t0) / BOURSE_WINDOW * pw;
+            const yOf = pr => padT + (1 - (pr - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * ph;
+
+            // горизонтальная сетка и подписи цены
+            ctx.lineWidth = 1;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'right';
+            [0.10, 0.15, 0.20, 0.25, 0.30].forEach(v => {
+                const y = Math.round(yOf(v)) + 0.5;
+                ctx.strokeStyle = 'rgba(147,197,253,0.18)';
+                ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + pw, y); ctx.stroke();
+                ctx.fillStyle = 'rgba(191,219,254,0.85)';
+                ctx.fillText(v.toFixed(2).replace('.', ','), padL - 6, y);
+            });
+
+            // вертикальная сетка по часам и подписи времени
+            ctx.textBaseline = 'alphabetic';
+            for (let k = 0; k <= 3; k++) {
+                const x = Math.round(xOf(t0 + k * 3600000)) + 0.5;
+                ctx.strokeStyle = 'rgba(147,197,253,0.12)';
+                ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + ph); ctx.stroke();
+                ctx.fillStyle = 'rgba(191,219,254,0.85)';
+                ctx.textAlign = k === 0 ? 'left' : (k === 3 ? 'right' : 'center');
+                const lx = k === 0 ? padL : (k === 3 ? padL + pw : x);
+                ctx.fillText(k === 3 ? 'сейчас' : '-' + (3 - k) + ' ч', lx, h - 5);
+            }
+
+            // линия курса
+            // курс держится минуту и меняется скачком — рисуем ступенями
+            const STEP = 60000;
+            const pts = [];
+            const first = Math.floor(t0 / STEP) * STEP;
+            let prevY = yOf(priceAt(first));
+            pts.push([xOf(t0), prevY]);
+            for (let t = first + STEP; t <= now; t += STEP) {
+                const x = xOf(t), y = yOf(priceAt(t));
+                pts.push([x, prevY]);
+                pts.push([x, y]);
+                prevY = y;
+            }
+            pts.push([xOf(now), prevY]);
+
+            const grad = ctx.createLinearGradient(0, padT, 0, padT + ph);
+            grad.addColorStop(0, 'rgba(96,165,250,0.45)');
+            grad.addColorStop(1, 'rgba(96,165,250,0)');
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], padT + ph);
+            pts.forEach(q => ctx.lineTo(q[0], q[1]));
+            ctx.lineTo(pts[pts.length - 1][0], padT + ph);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.beginPath();
+            pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]));
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#bfdbfe';
+            ctx.shadowColor = 'rgba(96,165,250,0.9)';
+            ctx.shadowBlur = 8;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // текущая цена: пунктир и точка
+            const last = pts[pts.length - 1];
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(padL, last[1]); ctx.lineTo(last[0], last[1]); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath(); ctx.arc(last[0], last[1], 5.5, 0, 6.2832);
+            ctx.fillStyle = 'rgba(96,165,250,0.5)'; ctx.fill();
+            ctx.beginPath(); ctx.arc(last[0], last[1], 3.5, 0, 6.2832);
+            ctx.fillStyle = '#fff'; ctx.fill();
+
+            // подсказка при касании графика
+            if (bHover !== null) {
+                const hx = Math.max(padL, Math.min(padL + pw, bHover));
+                const ht = t0 + (hx - padL) / pw * BOURSE_WINDOW;
+                const hp = priceAt(ht);
+                const hy = yOf(hp);
+                ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, padT + ph); ctx.stroke();
+                ctx.beginPath(); ctx.arc(hx, hy, 4, 0, 6.2832);
+                ctx.fillStyle = '#fbbf24'; ctx.fill();
+
+                const label = fmtClock(ht) + ' · ' + fmtPrice(hp);
+                ctx.font = '900 ' + fs + 'px Nunito, sans-serif';
+                const tw = ctx.measureText(label).width + 14;
+                const th = fs + 10;
+                let bx = hx - tw / 2;
+                bx = Math.max(4, Math.min(w - tw - 4, bx));
+                const by = hy < padT + ph / 2 ? hy + 12 : hy - th - 12;
+                ctx.fillStyle = 'rgba(15,23,42,0.9)';
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(bx, by, tw, th, 6); else ctx.rect(bx, by, tw, th);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, bx + tw / 2, by + th / 2 + 0.5);
+            }
         }
 
+        const maxAmount = pr => bMode === 'sell' ? Math.floor(iceCount) : Math.floor(dollarCount / pr + 1e-9);
+
+        function updateTradeInfo(price) {
+            const sell = bMode === 'sell';
+            const max = maxAmount(price);
+            if (tradeAmount > max) tradeAmount = max;
+            bSlider.max = max;
+            if (parseInt(bSlider.value, 10) !== tradeAmount) bSlider.value = tradeAmount;
+            bSlider.disabled = max <= 0;
+
+            document.getElementById('b-have-lbl').innerText = sell ? 'Лёд:' : 'Баланс:';
+            document.getElementById('b-amt-lbl').innerText = sell ? 'Продать:' : 'Купить:';
+            document.getElementById('b-get-lbl').innerText = sell ? 'Получите' : 'Заплатите';
+            bHave.innerText = sell ? fmt(iceCount) : '$' + fmtMoney(dollarCount);
+            bAmount.innerText = fmt(tradeAmount);
+            bGet.innerText = '$' + fmtMoney(tradeAmount * price);
+            bSell.innerText = sell ? 'Продать' : 'Купить';
+            bSell.classList.toggle('buy', !sell);
+            bSell.disabled = tradeAmount <= 0;
+            document.getElementById('b-mode-sell').classList.toggle('active', sell);
+            document.getElementById('b-mode-buy').classList.toggle('active', !sell);
+        }
+
+        function liveBourse() {
+            const now = Date.now();
+            const price = priceAt(now);
+            const prev = priceAt(now - BOURSE_WINDOW);
+            const pct = (price / prev - 1) * 100;
+            bPrice.innerText = fmtPrice(price);
+            bChange.innerText = (pct >= 0 ? '▲ +' : '▼ ') + pct.toFixed(1).replace('.', ',') + '% / 3ч';
+            bChange.classList.toggle('up', pct >= 0);
+            bChange.classList.toggle('down', pct < 0);
+            updateTradeInfo(price);
+            drawChart();
+        }
+
+        function renderBourse() { liveBourse(); }
+
         bSlider.addEventListener('input', () => {
-            sellAmount = parseInt(bSlider.value, 10) || 0;
-            renderBourse();
+            tradeAmount = parseInt(bSlider.value, 10) || 0;
+            updateTradeInfo(priceAt(Date.now()));
         });
 
         document.querySelectorAll('.bourse-quick button').forEach(btn => {
             btn.addEventListener('click', () => {
-                sellAmount = Math.floor(Math.floor(iceCount) * parseFloat(btn.dataset.p));
+                tradeAmount = Math.floor(maxAmount(priceAt(Date.now())) * parseFloat(btn.dataset.p));
+                updateTradeInfo(priceAt(Date.now()));
+            });
+        });
+
+        ['sell', 'buy'].forEach(mode => {
+            document.getElementById('b-mode-' + mode).addEventListener('click', () => {
+                bMode = mode;
+                tradeAmount = 0;
                 renderBourse();
             });
         });
 
         bSell.addEventListener('click', () => {
-            const amount = Math.min(sellAmount, Math.floor(iceCount));
+            const price = priceAt(Date.now());
+            const amount = Math.min(tradeAmount, maxAmount(price));
             if (amount <= 0) return;
-            const gain = round1(amount * ICE_PRICE);
-            iceCount -= amount;
-            dollarCount = round1(dollarCount + gain);
-            sellAmount = 0;
+            const total = round2(amount * price);
+            if (bMode === 'sell') {
+                iceCount -= amount;
+                dollarCount = round2(dollarCount + total);
+                toast('+$' + fmtMoney(total));
+            } else {
+                if (total > dollarCount) return;
+                iceCount += amount;
+                dollarCount = round2(dollarCount - total);
+                toast('+' + fmt(amount) + ' льда · −$' + fmtMoney(total));
+                uiIceBox.classList.add('pop');
+                setTimeout(() => uiIceBox.classList.remove('pop'), 150);
+            }
+            tradeAmount = 0;
             renderResources();
             updatePriceColors();
             uiDollarBox.classList.add('pop');
             setTimeout(() => uiDollarBox.classList.remove('pop'), 150);
-            toast('+$' + fmtMoney(gain));
             saveState();
         });
 
+        // Касание графика показывает цену в выбранный момент
+        function setHover(e) {
+            const rect = bChart.getBoundingClientRect();
+            bHover = e.clientX - rect.left;
+            drawChart();
+        }
+        bChart.addEventListener('pointerdown', setHover);
+        bChart.addEventListener('pointermove', (e) => { if (e.buttons || e.pointerType === 'touch') setHover(e); });
+        const clearHover = () => { bHover = null; drawChart(); };
+        bChart.addEventListener('pointerup', clearHover);
+        bChart.addEventListener('pointercancel', clearHover);
+        bChart.addEventListener('pointerleave', clearHover);
+
         hooks.res = () => { if (currentTab === 'bourse') renderBourse(); };
+        setInterval(() => { if (currentTab === 'bourse' && !document.hidden) liveBourse(); }, 1000);
+        window.addEventListener('resize', () => { if (currentTab === 'bourse') drawChart(); });
 
         // ==========================================
         // 4.6 ПРОФИЛЬ: кнопка «Сбросить прогресс»
