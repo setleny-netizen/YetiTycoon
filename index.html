@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ice Miner</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap');
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: #87CEEB;
@@ -16,9 +16,12 @@
             height: 100vh;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
             touch-action: none;
             font-family: 'Nunito', sans-serif;
         }
+
+        img { -webkit-user-drag: none; user-select: none; }
 
         #game-container {
             position: relative;
@@ -52,7 +55,6 @@
             pointer-events: none;
         }
 
-        /* Картинка на весь экран, БЕЗ АНИМАЦИИ */
         #loading-img {
             position: absolute;
             top: 0;
@@ -73,7 +75,6 @@
             z-index: 1;
         }
 
-        /* ПРОГРЕСС-БАР ЗАГРУЗКИ */
         #loading-bar-container {
             width: 85vw;
             max-width: 400px;
@@ -157,6 +158,18 @@
             background: #ffffff;
         }
 
+        .resource-box.deny {
+            animation: denyAnim 0.4s;
+        }
+
+        @keyframes denyAnim {
+            0%, 100% { background: rgba(255,255,255,0.9); transform: translateX(0); }
+            20% { background: #fecaca; transform: translateX(-4px); }
+            40% { background: #fecaca; transform: translateX(4px); }
+            60% { background: #fecaca; transform: translateX(-3px); }
+            80% { background: #fecaca; transform: translateX(3px); }
+        }
+
         .resource-icon {
             width: 24px;
             height: 24px;
@@ -165,6 +178,7 @@
             background-position: center;
             margin-right: 6px;
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+            flex-shrink: 0;
         }
 
         .icon-ice { background-image: url('assets/ice.png'); }
@@ -250,7 +264,7 @@
             background: #fbbf24;
             box-shadow: 0 0 10px #fbbf24;
         }
-        
+
         .nav-btn.active .nav-icon {
             transform: scale(1.1) translateY(-2px);
             filter: drop-shadow(0 0 8px #fbbf24);
@@ -260,8 +274,17 @@
             transform: scale(0.9);
         }
 
-        /* ---------------- ИГРОВЫЕ ЭЛЕМЕНТЫ ---------------- */
-        
+        /* ---------------- ЭКРАНЫ ---------------- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .screen.hidden { display: none; }
+
+        /* ---------------- ЭКРАН «ЛЕДНИК» ---------------- */
         #floor {
             position: absolute;
             bottom: 75px;
@@ -278,8 +301,8 @@
             bottom: calc(18vh + 75px);
             left: 50%;
             transform: translateX(-50%);
-            width: 75vw; 
-            max-width: 400px; 
+            width: 75vw;
+            max-width: 400px;
             z-index: 20;
             pointer-events: none;
             display: flex;
@@ -332,29 +355,28 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 999; 
+            z-index: 999;
             overflow: hidden;
         }
 
         .ice-particle {
             position: absolute;
-            width: 35px; 
-            height: 35px; 
+            width: 35px;
+            height: 35px;
             background-image: url('assets/ice.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            filter: drop-shadow(0px 4px 3px rgba(0,0,0,0.6)); 
+            filter: drop-shadow(0px 4px 3px rgba(0,0,0,0.6));
             mix-blend-mode: normal;
         }
 
-        /* Звездочки */
         #stars-container {
             position: absolute;
-            top: -50px; 
+            top: -50px;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px; 
+            width: 100px;
             height: 100px;
             display: none;
             justify-content: center;
@@ -375,7 +397,7 @@
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 23px; 
+            font-size: 23px;
             text-shadow: 0 0 5px #fff, 0 0 10px #FFD700, 0 0 20px #FFA500;
             animation: pulse 0.4s infinite alternate;
         }
@@ -389,7 +411,7 @@
             left: 10%;
         }
         .orbit:nth-child(2) .star {
-            font-size: 16px; 
+            font-size: 16px;
             text-shadow: 0 0 5px #fff, 0 0 15px #00FFFF;
         }
 
@@ -401,7 +423,7 @@
             left: 20%;
         }
         .orbit:nth-child(3) .star {
-            font-size: 13px; 
+            font-size: 13px;
             text-shadow: 0 0 5px #fff, 0 0 15px #fff;
         }
 
@@ -415,6 +437,255 @@
             100% { transform: translateX(-50%) scale(1.2); }
         }
 
+        /* ---------------- ЭКРАН «ДОБЫЧА» ---------------- */
+        #screen-mining {
+            background: #274b73; /* однотонный фон */
+            z-index: 50;
+            touch-action: none;
+        }
+
+        /* Область под карту: между верхней панелью и нижним меню, с отступами от краёв */
+        #map-area {
+            position: absolute;
+            top: 80px;
+            bottom: 83px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --u = 1% ширины карты (задаётся из JS), все размеры внутри карты считаются от неё */
+        #map {
+            position: relative;
+            flex-shrink: 0;
+            --u: 4px;
+        }
+
+        #map-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Пушки и замки */
+        .slot {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .cannon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: calc(var(--u) * 16);
+            transform: translate(-50%, -56%);
+            pointer-events: none;
+            display: none;
+        }
+        .cannon.flip { transform: translate(-50%, -56%) scaleX(-1); }
+        .cannon img { width: 100%; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35)); }
+        .slot.unlocked .cannon { display: block; }
+        .cannon.idle img { filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35)) grayscale(0.5) brightness(0.85); }
+
+        .lock-box {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(var(--u) * 0.6);
+            cursor: pointer;
+            z-index: 5;
+            padding: calc(var(--u) * 1);
+        }
+        .slot.unlocked .lock-box { display: none; }
+
+        .lock-icon {
+            width: calc(var(--u) * 6);
+            height: calc(var(--u) * 6);
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+        }
+
+        .price {
+            background: rgba(0, 0, 0, 0.78);
+            color: #86efac;
+            border: 2px solid #4caf50;
+            border-radius: calc(var(--u) * 1.4);
+            font-weight: 900;
+            font-size: calc(var(--u) * 2.6);
+            line-height: 1.1;
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+            white-space: nowrap;
+            text-shadow: 0 1px 0 #000;
+        }
+        .price.poor { color: #fca5a5; border-color: #ef4444; }
+
+        .lock-box.deny { animation: lockDeny 0.4s; }
+        @keyframes lockDeny {
+            0%, 100% { transform: translate(-50%, -50%); }
+            20% { transform: translate(calc(-50% - 5px), -50%); }
+            40% { transform: translate(calc(-50% + 5px), -50%); }
+            60% { transform: translate(calc(-50% - 4px), -50%); }
+            80% { transform: translate(calc(-50% + 4px), -50%); }
+        }
+
+        /* Прораб */
+        #foreman {
+            position: absolute;
+            left: 81%;
+            top: 88%;
+            width: calc(var(--u) * 25);
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+        }
+        #foreman-img {
+            width: 100%;
+            display: block;
+            transform-origin: center bottom;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35));
+        }
+        #foreman.locked #foreman-img { filter: brightness(0.22) contrast(0.9); }
+        #foreman.working #foreman-img { animation: foremanBob 0.5s ease-in-out infinite alternate; }
+        @keyframes foremanBob {
+            from { transform: scale(1, 1); }
+            to { transform: scale(1.02, 0.98); }
+        }
+
+        #foreman-lock {
+            position: absolute;
+            left: 81%;
+            top: 78%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(var(--u) * 0.6);
+            cursor: pointer;
+            z-index: 6;
+            padding: calc(var(--u) * 1);
+        }
+        #foreman-lock.show { display: flex; }
+        #foreman-lock .lock-icon { width: calc(var(--u) * 8); height: calc(var(--u) * 8); }
+        #foreman-lock .price { font-size: calc(var(--u) * 3); }
+        #foreman-lock.deny { animation: lockDeny 0.4s; }
+
+        /* Счётчик «льда в час» от прораба */
+        #foreman-rate {
+            position: absolute;
+            left: 81%;
+            top: 89%;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.92);
+            border: 2px solid #3b82f6;
+            border-radius: calc(var(--u) * 1.6);
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1.2) calc(var(--u) * 0.3) calc(var(--u) * 0.6);
+            box-shadow: 0 3px 0 #1e40af;
+            white-space: nowrap;
+            z-index: 6;
+            pointer-events: none;
+        }
+        #foreman-rate.show { display: flex; }
+        #foreman-rate .ico {
+            width: calc(var(--u) * 3.2);
+            height: calc(var(--u) * 3.2);
+            background: url('assets/ice.png') center/contain no-repeat;
+            margin-right: calc(var(--u) * 0.6);
+        }
+        #foreman-rate .txt {
+            font-weight: 900;
+            font-size: calc(var(--u) * 2.5);
+            color: #1e3a8a;
+        }
+
+        /* Кучи снега */
+        #piles-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .pile {
+            position: absolute;
+            width: calc(var(--u) * 9.5);
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            touch-action: none;
+            cursor: pointer;
+            opacity: 0;
+            padding: calc(var(--u) * 0.6);
+        }
+        .pile.in { opacity: 1; animation: pileIn 0.28s ease-out; }
+        .pile img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+        }
+        .pile.active img { transform: scale(0.96); }
+
+        @keyframes pileIn {
+            0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+            70% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .pile-bar {
+            position: absolute;
+            left: 12%;
+            width: 76%;
+            top: calc(var(--u) * -1.6);
+            height: calc(var(--u) * 1.4);
+            background: rgba(0, 0, 0, 0.55);
+            border: 2px solid #fff;
+            border-radius: calc(var(--u) * 1);
+            overflow: hidden;
+            display: none;
+            pointer-events: none;
+        }
+        .pile.active .pile-bar { display: block; }
+        .pile-bar > div {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffeb3b);
+        }
+
+        /* Летящие частицы снега внутри карты */
+        .snow-fly {
+            position: absolute;
+            pointer-events: none;
+            z-index: 8;
+        }
+
+        /* Подсказка */
+        #toast {
+            position: absolute;
+            left: 50%;
+            bottom: 100px;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #toast.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -422,7 +693,7 @@
     <!-- ЭКРАН ЗАГРУЗКИ -->
     <div id="loading-screen">
         <img id="loading-img" src="assets/loading.png" alt="Loading...">
-        
+
         <div class="loading-ui">
             <div id="loading-bar-container">
                 <div id="loading-bar"></div>
@@ -432,7 +703,7 @@
     </div>
 
     <div id="game-container">
-        
+
         <div id="top-ui">
             <div class="profile-box"></div>
             <div class="resources">
@@ -447,26 +718,42 @@
             </div>
         </div>
 
-        <img id="floor" src="assets/pol.png" alt="floor">
-        
-        <div id="miner-wrapper">
-            <div id="stars-container">
-                <div class="orbit"><div class="star">⭐</div></div>
-                <div class="orbit"><div class="star">⭐</div></div>
-                <div class="orbit"><div class="star">⭐</div></div>
-            </div>
+        <!-- ===== ЭКРАН: ЛЕДНИК ===== -->
+        <div id="screen-glacier" class="screen">
+            <img id="floor" src="assets/pol.png" alt="floor">
 
-            <div id="progress-container">
-                <div id="progress-bar"></div>
-            </div>
+            <div id="miner-wrapper">
+                <div id="stars-container">
+                    <div class="orbit"><div class="star">⭐</div></div>
+                    <div class="orbit"><div class="star">⭐</div></div>
+                    <div class="orbit"><div class="star">⭐</div></div>
+                </div>
 
-            <img id="miner" src="assets/minerOFF.png" alt="miner">
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+
+                <img id="miner" src="assets/minerOFF.png" alt="miner">
+            </div>
         </div>
-        
+
+        <!-- ===== ЭКРАН: ДОБЫЧА ===== -->
+        <div id="screen-mining" class="screen hidden">
+            <div id="map-area">
+                <div id="map">
+                    <img id="map-img" src="assets/pole.png" alt="map" draggable="false">
+                    <div id="piles-layer"></div>
+                    <!-- слоты пушек, прораб и замки создаются из JS -->
+                </div>
+            </div>
+        </div>
+
         <div id="particles-layer"></div>
 
+        <div id="toast"></div>
+
         <div id="bottom-nav">
-            <div class="nav-btn">
+            <div class="nav-btn" data-tab="bourse">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4 16L10 10L14 14L20 6" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M20 6H15" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -474,7 +761,7 @@
                 </svg>
                 <span>Биржа</span>
             </div>
-            <div class="nav-btn">
+            <div class="nav-btn" data-tab="mining">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 4L20 10L17 13L11 7L14 4Z" fill="#FFF"/>
                     <path d="M11.5 7.5L4 15C3 16 3 17.5 4 18.5C5 19.5 6.5 19.5 7.5 18.5L15 11" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -482,14 +769,14 @@
                 </svg>
                 <span>Добыча</span>
             </div>
-            <div class="nav-btn active">
+            <div class="nav-btn active" data-tab="glacier">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="#93C5FD" stroke="#FFF" stroke-width="2" stroke-linejoin="round"/>
                     <path d="M12 22V12M3 7L12 12L21 7" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <span>Ледник</span>
             </div>
-            <div class="nav-btn">
+            <div class="nav-btn" data-tab="den">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="8" fill="#FFF"/>
                     <circle cx="7" cy="7" r="3" fill="#FFF"/>
@@ -500,7 +787,7 @@
                 </svg>
                 <span>Берлога</span>
             </div>
-            <div class="nav-btn">
+            <div class="nav-btn" data-tab="shop">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 3H5L7 15H19L21 7H6" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                     <circle cx="7" cy="19" r="2" fill="#FFF"/>
@@ -516,8 +803,9 @@
         // 1. ЛОГИКА ЗАГРУЗКИ (МИНИМУМ 2 СЕКУНДЫ)
         // ==========================================
         const assetsToLoad = [
-            'assets/fon.png', 'assets/pol.png', 'assets/minerOFF.png', 
-            'assets/minerON.png', 'assets/ice.png', 'assets/profile.png', 'assets/loading.png'
+            'assets/fon.png', 'assets/pol.png', 'assets/minerOFF.png',
+            'assets/minerON.png', 'assets/ice.png', 'assets/profile.png', 'assets/loading.png',
+            'assets/pole.png', 'assets/pushka.png', 'assets/prorab.png', 'assets/snow.png'
         ];
 
         let loadedCount = 0;
@@ -526,17 +814,17 @@
         const loadingText = document.getElementById('loading-text');
         const loadingScreen = document.getElementById('loading-screen');
 
-        const MIN_LOADING_TIME = 2000; // 2 секунды
+        const MIN_LOADING_TIME = 2000;
         const startTime = Date.now();
         let allAssetsReady = false;
 
         function checkLoadingStatus() {
             const elapsedTime = Date.now() - startTime;
-            
+
             if (allAssetsReady && elapsedTime >= MIN_LOADING_TIME) {
                 loadingBar.style.width = '100%';
                 loadingText.innerText = '100%';
-                
+
                 setTimeout(() => {
                     loadingScreen.classList.add('hidden');
                     lastFrameTime = 0;
@@ -553,7 +841,7 @@
         function assetLoaded() {
             loadedCount++;
             const percent = Math.floor((loadedCount / totalAssets) * 100);
-            
+
             if (!allAssetsReady) {
                 loadingBar.style.width = percent + '%';
                 loadingText.innerText = percent + '%';
@@ -568,7 +856,7 @@
         assetsToLoad.forEach(src => {
             const img = new Image();
             img.onload = assetLoaded;
-            img.onerror = assetLoaded; 
+            img.onerror = assetLoaded;
             img.src = src;
         });
 
@@ -581,28 +869,170 @@
 
 
         // ==========================================
-        // 2. ИГРОВАЯ ЛОГИКА
+        // 2. ОБЩЕЕ СОСТОЯНИЕ (ресурсы, сохранение)
         // ==========================================
-        const miner = document.getElementById('miner');
+        const SAVE_KEY = 'iceMiner_v1';
+        const START_DOLLARS = 15000;
+
+        const CANNON_PRICES = [1000, 7000, 25000, 70000];
+        const FOREMAN_PRICE = 5000;
+        const PILES_PER_MIN_PER_CANNON = 5;
+        const CANNON_INTERVAL = 60000 / PILES_PER_MIN_PER_CANNON; // 12 сек
+        const HOLD_TIME = 1500;      // удержание на куче, мс
+        const ICE_PER_PILE = 10;
+
+        let iceCount = 0;
+        let dollarCount = START_DOLLARS;
+        let cannonsOwned = [false, false, false, false];
+        let foremanOwned = false;
+
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (raw) {
+                const s = JSON.parse(raw);
+                iceCount = s.ice || 0;
+                dollarCount = (typeof s.dollars === 'number') ? s.dollars : START_DOLLARS;
+                if (Array.isArray(s.cannons)) cannonsOwned = [0, 1, 2, 3].map(i => !!s.cannons[i]);
+                foremanOwned = !!s.foreman;
+            }
+        } catch (e) {}
+
+        function saveState() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify({
+                    ice: iceCount, dollars: dollarCount, cannons: cannonsOwned, foreman: foremanOwned
+                }));
+            } catch (e) {}
+        }
+        setInterval(saveState, 2000);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+
+        const fmt = n => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
         const gameContainer = document.getElementById('game-container');
         const particlesLayer = document.getElementById('particles-layer');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const starsContainer = document.getElementById('stars-container');
-        
         const iceCountEl = document.getElementById('ice-count');
         const dollarCountEl = document.getElementById('dollar-count');
         const uiIceBox = document.getElementById('ui-ice-box');
+        const uiDollarBox = document.getElementById('ui-dollar-box');
+        const toastEl = document.getElementById('toast');
 
-        let iceCount = 0;
-        let dollarCount = 0;
+        function renderResources() {
+            iceCountEl.innerText = fmt(iceCount);
+            dollarCountEl.innerText = fmt(dollarCount);
+        }
+
+        function addIce(n = 1) {
+            iceCount += n;
+            iceCountEl.innerText = fmt(iceCount);
+            uiIceBox.classList.add('pop');
+            setTimeout(() => uiIceBox.classList.remove('pop'), 100);
+        }
+
+        function spendDollars(n) {
+            dollarCount -= n;
+            renderResources();
+            uiDollarBox.classList.add('pop');
+            setTimeout(() => uiDollarBox.classList.remove('pop'), 120);
+            updatePriceColors();
+            saveState();
+        }
+
+        function denyFlash(el) {
+            el.classList.remove('deny');
+            void el.offsetWidth;
+            el.classList.add('deny');
+            setTimeout(() => el.classList.remove('deny'), 450);
+        }
+
+        let toastTimer = null;
+        function toast(msg) {
+            toastEl.innerText = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1400);
+        }
+
+        renderResources();
+
+        // Полёт льда (частицы) к счётчику льда
+        function flyIce(startX, startY, onDone, spread) {
+            const ice = document.createElement('div');
+            ice.classList.add('ice-particle');
+
+            const containerRect = gameContainer.getBoundingClientRect();
+            const targetRect = uiIceBox.getBoundingClientRect();
+
+            const endX = (targetRect.left - containerRect.left) + (targetRect.width / 2);
+            const endY = (targetRect.top - containerRect.top) + (targetRect.height / 2);
+
+            ice.style.left = startX + 'px';
+            ice.style.top = startY + 'px';
+            particlesLayer.appendChild(ice);
+
+            const sp = spread || 100;
+            const midX = startX + (Math.random() - 0.5) * sp;
+            const midY = startY - (50 + Math.random() * sp);
+
+            const animation = ice.animate([
+                { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${midX - startX}px), calc(-50% + ${midY - startY}px)) scale(1) rotate(${Math.random() * 360}deg)`, opacity: 1, offset: 0.4 },
+                { transform: `translate(calc(-50% + ${endX - startX}px), calc(-50% + ${endY - startY}px)) scale(0.2) rotate(${Math.random() * 720}deg)`, opacity: 0.5 }
+            ], {
+                duration: 400,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                fill: 'forwards'
+            });
+
+            animation.onfinish = () => {
+                ice.remove();
+                if (onDone) onDone();
+            };
+        }
+
+
+        // ==========================================
+        // 3. ВКЛАДКИ
+        // ==========================================
+        const screens = {
+            glacier: document.getElementById('screen-glacier'),
+            mining: document.getElementById('screen-mining')
+        };
+        let currentTab = 'glacier';
+
+        function setTab(name) {
+            if (!screens[name]) { toast('Скоро'); return; }
+            if (name === currentTab) return;
+            if (currentTab === 'glacier') stopMining();
+
+            currentTab = name;
+            Object.keys(screens).forEach(k => screens[k].classList.toggle('hidden', k !== name));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+
+            if (name === 'mining') fitMap();
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(b => {
+            b.addEventListener('click', () => setTab(b.dataset.tab));
+        });
+
+        const isMiningVisible = () => currentTab === 'mining';
+
+
+        // ==========================================
+        // 4. ЭКРАН «ЛЕДНИК» (ручная добыча)
+        // ==========================================
+        const miner = document.getElementById('miner');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const starsContainer = document.getElementById('stars-container');
 
         let isMining = false;
         let isOverheated = false;
-        
-        let progress = 0; 
+
+        let progress = 0;
         let lastFrameTime = 0;
-        let accumulatedProgress = 0; 
+        let accumulatedProgress = 0;
 
         function getSpawnRate(progressPercent) {
             if (progressPercent < 20) return 2;
@@ -612,49 +1042,12 @@
             return 24;
         }
 
-        function addIce() {
-            iceCount++;
-            iceCountEl.innerText = iceCount;
-            uiIceBox.classList.add('pop');
-            setTimeout(() => uiIceBox.classList.remove('pop'), 100);
-        }
-
         function spawnIce() {
-            const ice = document.createElement('div');
-            ice.classList.add('ice-particle');
-            
             const minerRect = miner.getBoundingClientRect();
             const containerRect = gameContainer.getBoundingClientRect();
-            const targetRect = uiIceBox.getBoundingClientRect();
-
             const startX = (minerRect.left - containerRect.left) + (minerRect.width / 2);
-            const startY = (minerRect.top - containerRect.top) + minerRect.height * 0.85; 
-
-            const endX = (targetRect.left - containerRect.left) + (targetRect.width / 2);
-            const endY = (targetRect.top - containerRect.top) + (targetRect.height / 2);
-
-            ice.style.left = startX + 'px';
-            ice.style.top = startY + 'px';
-
-            particlesLayer.appendChild(ice);
-
-            const midX = startX + (Math.random() - 0.5) * 100;
-            const midY = startY - (50 + Math.random() * 100);
-
-            const animation = ice.animate([
-                { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: 1 },
-                { transform: `translate(calc(-50% + ${midX - startX}px), calc(-50% + ${midY - startY}px)) scale(1) rotate(${Math.random() * 360}deg)`, opacity: 1, offset: 0.4 },
-                { transform: `translate(calc(-50% + ${endX - startX}px), calc(-50% + ${endY - startY}px)) scale(0.2) rotate(${Math.random() * 720}deg)`, opacity: 0.5 }
-            ], {
-                duration: 400, 
-                easing: 'cubic-bezier(0.25, 1, 0.5, 1)', 
-                fill: 'forwards'
-            });
-
-            animation.onfinish = () => {
-                ice.remove();
-                addIce(); 
-            };
+            const startY = (minerRect.top - containerRect.top) + minerRect.height * 0.85;
+            flyIce(startX, startY, () => addIce(1), 100);
         }
 
         function gameLoop(timestamp) {
@@ -669,9 +1062,9 @@
 
                 const currentRate = getSpawnRate(progress);
                 const ratePerMs = currentRate / 1000;
-                
+
                 accumulatedProgress += deltaTime * ratePerMs;
-                
+
                 while (accumulatedProgress >= 1) {
                     spawnIce();
                     accumulatedProgress -= 1;
@@ -683,7 +1076,7 @@
 
             } else if (!isMining && !isOverheated) {
                 if (progress > 0) {
-                    progress -= deltaTime * 0.05; 
+                    progress -= deltaTime * 0.05;
                     if (progress < 0) progress = 0;
                     progressBar.style.width = progress + '%';
                     if (progress === 0) progressContainer.style.opacity = 0;
@@ -695,24 +1088,20 @@
 
         function startMining(e) {
             if (e.cancelable) e.preventDefault();
-            if (isOverheated || isMining) return; 
+            if (currentTab !== 'glacier') return;
+            if (isOverheated || isMining) return;
 
-            const target = e.target;
-            if (target.closest('#bottom-nav') || target.closest('#top-ui')) {
-                return; 
-            }
-            
             isMining = true;
             miner.src = 'assets/minerON.png';
             miner.classList.add('shake');
             progressContainer.style.opacity = 1;
-            lastFrameTime = 0; 
+            lastFrameTime = 0;
         }
 
         function stopMining(e) {
             if (e && e.cancelable) e.preventDefault();
             if (isOverheated || !isMining) return;
-            
+
             isMining = false;
             miner.src = 'assets/minerOFF.png';
             miner.classList.remove('shake');
@@ -721,7 +1110,7 @@
         function triggerOverheat() {
             isOverheated = true;
             isMining = false;
-            
+
             miner.src = 'assets/minerOFF.png';
             miner.classList.remove('shake');
             starsContainer.style.display = 'flex';
@@ -733,20 +1122,476 @@
                     clearInterval(cooldownTimer);
                     isOverheated = false;
                     starsContainer.style.display = 'none';
-                    progressContainer.style.opacity = 0; 
+                    progressContainer.style.opacity = 0;
                     progressBar.style.width = '0%';
                 }
                 progressBar.style.width = progress + '%';
             }, 50);
         }
 
-        gameContainer.addEventListener('touchstart', startMining, { passive: false });
-        gameContainer.addEventListener('touchend', stopMining);
-        gameContainer.addEventListener('touchcancel', stopMining);
+        // Ручная добыча — только на экране «Ледник»
+        const glacierScreen = screens.glacier;
+        glacierScreen.addEventListener('touchstart', startMining, { passive: false });
+        glacierScreen.addEventListener('touchend', stopMining);
+        glacierScreen.addEventListener('touchcancel', stopMining);
 
-        gameContainer.addEventListener('mousedown', startMining);
-        gameContainer.addEventListener('mouseup', stopMining);
-        gameContainer.addEventListener('mouseleave', stopMining); 
+        glacierScreen.addEventListener('mousedown', startMining);
+        glacierScreen.addEventListener('mouseup', stopMining);
+        glacierScreen.addEventListener('mouseleave', stopMining);
+
+
+        // ==========================================
+        // 5. ЭКРАН «ДОБЫЧА»: карта, пушки, кучи, прораб
+        // ==========================================
+        const mapArea = document.getElementById('map-area');
+        const map = document.getElementById('map');
+        const mapImg = document.getElementById('map-img');
+        const pilesLayer = document.getElementById('piles-layer');
+
+        let mapRatio = 1088 / 1428; // ширина / высота картинки (уточняется после загрузки)
+        let mapW = 1, mapH = 1, U = 1;
+
+        // Сетка внутри карты (в % от размеров карты)
+        const COLS = 6, ROWS = 9;
+        const GRID = { l: 18.0, r: 83.2, t: 20.0, b: 83.5 };
+        // клетки в правом нижнем углу заняты площадкой прораба
+        const isBlockedCell = (c, r) => c >= 4 && r >= 7;
+
+        function cellCenter(c, r) {
+            return {
+                x: GRID.l + (c + 0.5) * (GRID.r - GRID.l) / COLS,
+                y: GRID.t + (r + 0.5) * (GRID.b - GRID.t) / ROWS
+            };
+        }
+
+        // Адаптивная подгонка карты: всегда целиком в области, с сохранением пропорций
+        function fitMap() {
+            const w = mapArea.clientWidth;
+            const h = mapArea.clientHeight;
+            if (!w || !h) return;
+            let mw = w, mh = w / mapRatio;
+            if (mh > h) { mh = h; mw = h * mapRatio; }
+            map.style.width = mw + 'px';
+            map.style.height = mh + 'px';
+            mapW = mw; mapH = mh; U = mw / 100;
+            map.style.setProperty('--u', U + 'px');
+        }
+
+        mapImg.addEventListener('load', () => {
+            if (mapImg.naturalWidth && mapImg.naturalHeight) {
+                mapRatio = mapImg.naturalWidth / mapImg.naturalHeight;
+            }
+            fitMap();
+        });
+        window.addEventListener('resize', fitMap);
+        window.addEventListener('orientationchange', () => setTimeout(fitMap, 200));
+
+        // --- Слоты пушек ---
+        // позиции площадок (% от карты); side: куда смотрит пушка (+1 вправо, -1 влево)
+        const SLOT_DEFS = [
+            { x: 10.8, y: 33.8, side: 1 },   // 1 — слева сверху
+            { x: 89.2, y: 33.8, side: -1 },  // 2 — справа сверху
+            { x: 10.6, y: 60.1, side: 1 },   // 3 — слева снизу
+            { x: 89.6, y: 60.1, side: -1 }   // 4 — справа снизу
+        ];
+
+        const LOCK_SVG = `
+            <svg class="lock-icon" viewBox="0 0 24 24">
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="#e5e7eb" stroke-width="2.6" stroke-linecap="round"/>
+                <rect x="5" y="10" width="14" height="11" rx="2.5" fill="#fbbf24" stroke="#92400e" stroke-width="1.5"/>
+                <circle cx="12" cy="15.2" r="1.6" fill="#92400e"/>
+                <rect x="11.2" y="15.5" width="1.6" height="3" rx="0.8" fill="#92400e"/>
+            </svg>`;
+
+        const cannons = SLOT_DEFS.map((def, i) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            slot.style.left = def.x + '%';
+            slot.style.top = def.y + '%';
+
+            const cannonEl = document.createElement('div');
+            cannonEl.className = 'cannon' + (def.side === -1 ? ' flip' : '');
+            const img = document.createElement('img');
+            img.src = 'assets/pushka.png';
+            img.draggable = false;
+            cannonEl.appendChild(img);
+
+            const lockBox = document.createElement('div');
+            lockBox.className = 'lock-box';
+            lockBox.innerHTML = LOCK_SVG + '<div class="price">$' + fmt(CANNON_PRICES[i]) + '</div>';
+
+            slot.appendChild(cannonEl);
+            slot.appendChild(lockBox);
+            map.appendChild(slot);
+
+            const c = {
+                index: i, def, slot, cannonEl, img, lockBox,
+                priceEl: lockBox.querySelector('.price'),
+                owned: cannonsOwned[i],
+                nextAt: 0,
+                blocked: false
+            };
+
+            lockBox.addEventListener('click', () => buyCannon(c));
+            if (c.owned) activateCannon(c, false);
+            return c;
+        });
+
+        function activateCannon(c, fresh) {
+            c.owned = true;
+            c.slot.classList.add('unlocked');
+            c.nextAt = Date.now() + CANNON_INTERVAL;
+            c.blocked = false;
+            if (fresh) {
+                c.cannonEl.animate(
+                    [{ opacity: 0, transform: c.cannonEl.classList.contains('flip') ? 'translate(-50%, -80%) scaleX(-1)' : 'translate(-50%, -80%)' },
+                     { opacity: 1, transform: c.cannonEl.classList.contains('flip') ? 'translate(-50%, -56%) scaleX(-1)' : 'translate(-50%, -56%)' }],
+                    { duration: 300, easing: 'ease-out' }
+                );
+            }
+        }
+
+        function buyCannon(c) {
+            if (c.owned) return;
+            const price = CANNON_PRICES[c.index];
+            if (dollarCount < price) {
+                denyFlash(c.lockBox);
+                denyFlash(uiDollarBox);
+                return;
+            }
+            spendDollars(price);
+            cannonsOwned[c.index] = true;
+            activateCannon(c, true);
+            updateForemanRate();
+            saveState();
+        }
+
+        // --- Прораб ---
+        const foremanEl = document.createElement('div');
+        foremanEl.id = 'foreman';
+        foremanEl.className = foremanOwned ? '' : 'locked';
+        foremanEl.innerHTML = '<img id="foreman-img" src="assets/prorab.png" alt="foreman" draggable="false">';
+        map.appendChild(foremanEl);
+
+        const foremanLock = document.createElement('div');
+        foremanLock.id = 'foreman-lock';
+        foremanLock.innerHTML = LOCK_SVG + '<div class="price">$' + fmt(FOREMAN_PRICE) + '</div>';
+        if (!foremanOwned) foremanLock.classList.add('show');
+        map.appendChild(foremanLock);
+
+        const foremanRateEl = document.createElement('div');
+        foremanRateEl.id = 'foreman-rate';
+        foremanRateEl.innerHTML = '<div class="ico"></div><div class="txt">0/ч</div>';
+        map.appendChild(foremanRateEl);
+        const foremanRateTxt = foremanRateEl.querySelector('.txt');
+
+        // Прораб убирает кучу за HOLD_TIME => максимум куч в час = 3600000 / HOLD_TIME
+        const FOREMAN_MAX_PER_HOUR = (3600000 / HOLD_TIME) * ICE_PER_PILE;
+
+        function updateForemanRate() {
+            if (!foremanOwned) return;
+            const owned = cannons.filter(c => c.owned).length;
+            const supply = owned * PILES_PER_MIN_PER_CANNON * 60 * ICE_PER_PILE; // лёд/час, который дают пушки
+            const rate = Math.min(supply, FOREMAN_MAX_PER_HOUR);
+            foremanRateTxt.innerText = fmt(rate) + '/ч';
+            foremanRateEl.classList.add('show');
+        }
+
+        function buyForeman() {
+            if (foremanOwned) return;
+            if (dollarCount < FOREMAN_PRICE) {
+                denyFlash(foremanLock);
+                denyFlash(uiDollarBox);
+                return;
+            }
+            spendDollars(FOREMAN_PRICE);
+            foremanOwned = true;
+            foremanEl.classList.remove('locked');
+            foremanLock.classList.remove('show');
+            updateForemanRate();
+            saveState();
+        }
+        foremanLock.addEventListener('click', buyForeman);
+        updateForemanRate();
+
+        function updatePriceColors() {
+            cannons.forEach(c => {
+                if (!c.owned) c.priceEl.classList.toggle('poor', dollarCount < CANNON_PRICES[c.index]);
+            });
+            if (!foremanOwned) foremanLock.querySelector('.price').classList.toggle('poor', dollarCount < FOREMAN_PRICE);
+        }
+        updatePriceColors();
+
+        // --- Кучи снега ---
+        const piles = [];
+        const cellKey = (c, r) => c + ',' + r;
+
+        function freeCells() {
+            const used = new Set(piles.map(p => p.key));
+            const res = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (isBlockedCell(c, r)) continue;
+                    if (used.has(cellKey(c, r))) continue;
+                    res.push({ c, r });
+                }
+            }
+            return res;
+        }
+
+        function makePileReady(p) {
+            p.ready = true;
+            p.el.classList.add('in');
+        }
+
+        function releasePile(p) {
+            if (p.holder === 'player') {
+                p.holder = null;
+                p.pointerId = null;
+                p.el.classList.remove('active');
+            }
+        }
+
+        function createPile(cell, fromCannon) {
+            const pos = cellCenter(cell.c, cell.r);
+            const jx = (Math.random() - 0.5) * 1.6;
+            const jy = (Math.random() - 0.5) * 1.2;
+
+            const el = document.createElement('div');
+            el.className = 'pile';
+            el.style.left = (pos.x + jx) + '%';
+            el.style.top = (pos.y + jy) + '%';
+            el.innerHTML = '<div class="pile-bar"><div></div></div><img src="assets/snow.png" draggable="false" alt="">';
+            pilesLayer.appendChild(el);
+
+            const p = {
+                key: cellKey(cell.c, cell.r), el,
+                bar: el.querySelector('.pile-bar > div'),
+                x: pos.x + jx, y: pos.y + jy,
+                ready: false, holder: null, startAt: 0, pointerId: null
+            };
+            piles.push(p);
+
+            // Игрок: зажать и держать 1.5 сек
+            el.addEventListener('pointerdown', (e) => {
+                if (!p.ready || p.holder) return;
+                e.preventDefault();
+                p.holder = 'player';
+                p.startAt = Date.now();
+                p.pointerId = e.pointerId;
+                el.classList.add('active');
+                try { el.setPointerCapture(e.pointerId); } catch (err) {}
+            });
+            const end = (e) => {
+                if (p.holder === 'player' && p.pointerId === e.pointerId) releasePile(p);
+            };
+            el.addEventListener('pointerup', end);
+            el.addEventListener('pointercancel', end);
+            el.addEventListener('lostpointercapture', end);
+            el.addEventListener('contextmenu', e => e.preventDefault());
+
+            // Анимация выстрела пушки (если экран открыт) или мгновенное появление
+            if (isMiningVisible() && fromCannon) {
+                fireSnow(fromCannon, p.x, p.y, () => makePileReady(p));
+            } else {
+                makePileReady(p);
+            }
+        }
+
+        function muzzlePx(c) {
+            const d = c.def;
+            return {
+                x: d.x * mapW / 100 + d.side * U * 4.4,
+                y: d.y * mapH / 100 - U * 4.2
+            };
+        }
+
+        // Снежок вылетает из пушки в клетку; onLand вызывается по приземлении
+        function fireSnow(c, targetXPct, targetYPct, onLand) {
+            const m = muzzlePx(c);
+            const tx = targetXPct * mapW / 100;
+            const ty = targetYPct * mapH / 100;
+
+            // отдача пушки
+            c.img.animate(
+                [{ transform: 'scale(1)' }, { transform: 'scale(0.94, 1.06)' }, { transform: 'scale(1)' }],
+                { duration: 220, easing: 'ease-out' }
+            );
+
+            const fly = document.createElement('img');
+            fly.src = 'assets/snow.png';
+            fly.className = 'snow-fly';
+            fly.draggable = false;
+            fly.style.width = (U * 4.5) + 'px';
+            fly.style.left = m.x + 'px';
+            fly.style.top = m.y + 'px';
+            map.appendChild(fly);
+
+            const dx = tx - m.x, dy = ty - m.y;
+            const peak = -Math.max(U * 8, Math.abs(dy) * 0.3);
+            const a = fly.animate([
+                { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${dx * 0.5}px), calc(-50% + ${dy * 0.5 + peak}px)) scale(1)`, opacity: 1, offset: 0.5 },
+                { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.3)`, opacity: 1 }
+            ], { duration: 650, easing: 'ease-in-out', fill: 'forwards' });
+            a.onfinish = () => { fly.remove(); onLand(); };
+        }
+
+        // Постоянно идущий из пушек снег (визуальные снежинки, пока есть место)
+        function puffSnow(c) {
+            const m = muzzlePx(c);
+            const dir = c.def.side;
+            const dist = U * (8 + Math.random() * 16);
+            const dx = dir * dist;
+            const dy = U * (-3 + Math.random() * 12);
+
+            const f = document.createElement('img');
+            f.src = 'assets/snow.png';
+            f.className = 'snow-fly';
+            f.draggable = false;
+            f.style.width = (U * (1.6 + Math.random() * 1.2)) + 'px';
+            f.style.left = m.x + 'px';
+            f.style.top = m.y + 'px';
+            map.appendChild(f);
+
+            const a = f.animate([
+                { transform: 'translate(-50%, -50%) scale(0.6)', opacity: 0.95 },
+                { transform: `translate(calc(-50% + ${dx * 0.55}px), calc(-50% + ${-U * 5}px)) scale(1)`, opacity: 0.9, offset: 0.45 },
+                { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.7)`, opacity: 0 }
+            ], { duration: 900 + Math.random() * 400, easing: 'ease-out', fill: 'forwards' });
+            a.onfinish = () => f.remove();
+        }
+
+        setInterval(() => {
+            if (!isMiningVisible() || document.hidden) return;
+            cannons.forEach(c => {
+                if (c.owned && !c.blocked) puffSnow(c);
+            });
+        }, 450);
+
+        // --- Сбор кучи (игроком или прорабом) ---
+        function collectPile(p) {
+            const idx = piles.indexOf(p);
+            if (idx < 0) return;
+            piles.splice(idx, 1);
+
+            const visible = isMiningVisible();
+            let sx = 0, sy = 0;
+            if (visible) {
+                const rect = p.el.getBoundingClientRect();
+                const cr = gameContainer.getBoundingClientRect();
+                sx = rect.left - cr.left + rect.width / 2;
+                sy = rect.top - cr.top + rect.height / 2;
+            }
+            p.el.remove();
+
+            if (visible) {
+                for (let i = 0; i < ICE_PER_PILE; i++) {
+                    setTimeout(() => flyIce(sx, sy, () => addIce(1), 70), i * 45);
+                }
+            } else {
+                addIce(ICE_PER_PILE);
+            }
+        }
+
+        // --- Основной тик: пушки, прораб, сбор ---
+        let fTask = null;     // текущая куча, которую убирает прораб
+        let fLast = 0;        // время окончания предыдущей задачи прораба (для догоняющего расчёта в фоне)
+
+        function updateCannons(now) {
+            cannons.forEach(c => {
+                if (!c.owned) return;
+                let guard = 0;
+                while (now >= c.nextAt && guard++ < 60) {
+                    const free = freeCells();
+                    if (!free.length) {
+                        // мест нет — пушка простаивает
+                        c.blocked = true;
+                        c.nextAt = now + CANNON_INTERVAL;
+                        break;
+                    }
+                    c.blocked = false;
+                    createPile(free[Math.floor(Math.random() * free.length)], c);
+                    c.nextAt += CANNON_INTERVAL;
+                }
+                c.cannonEl.classList.toggle('idle', c.blocked);
+            });
+        }
+
+        function updateForeman(now) {
+            if (!foremanOwned) return;
+            let guard = 0;
+            while (guard++ < 200) {
+                if (!fTask) {
+                    const cand = piles.filter(p => p.ready && !p.holder);
+                    if (!cand.length) {
+                        fLast = 0;
+                        foremanEl.classList.remove('working');
+                        return;
+                    }
+                    const p = cand[Math.floor(Math.random() * cand.length)];
+                    p.holder = 'foreman';
+                    p.startAt = fLast || now;
+                    p.el.classList.add('active');
+                    fLast = 0;
+                    fTask = p;
+                    foremanEl.classList.add('working');
+                }
+                if (now - fTask.startAt >= HOLD_TIME) {
+                    const finishAt = fTask.startAt + HOLD_TIME;
+                    const p = fTask;
+                    fTask = null;
+                    fLast = finishAt;
+                    collectPile(p);
+                    continue;
+                }
+                return;
+            }
+        }
+
+        function updatePlayerHolds(now) {
+            for (let i = piles.length - 1; i >= 0; i--) {
+                const p = piles[i];
+                if (p.holder === 'player' && now - p.startAt >= HOLD_TIME) {
+                    collectPile(p);
+                }
+            }
+        }
+
+        function tick() {
+            const now = Date.now();
+            updateCannons(now);
+            updatePlayerHolds(now);
+            updateForeman(now);
+        }
+
+        function renderBars() {
+            if (isMiningVisible()) {
+                const now = Date.now();
+                for (const p of piles) {
+                    if (p.holder) {
+                        const k = Math.max(0, Math.min(1, (now - p.startAt) / HOLD_TIME));
+                        p.bar.style.width = (k * 100) + '%';
+                    }
+                }
+            }
+            tick();
+            requestAnimationFrame(renderBars);
+        }
+        requestAnimationFrame(renderBars);
+        // запасной таймер: кучи появляются и убираются, даже когда вкладка браузера в фоне
+        setInterval(tick, 500);
+
+        // Ловим отпускание пальца/мыши вне кучи
+        window.addEventListener('pointerup', (e) => {
+            piles.forEach(p => { if (p.holder === 'player' && p.pointerId === e.pointerId) releasePile(p); });
+        });
+        window.addEventListener('pointercancel', (e) => {
+            piles.forEach(p => { if (p.holder === 'player' && p.pointerId === e.pointerId) releasePile(p); });
+        });
+
+        // Запрет контекстного меню (долгое нажатие на телефоне)
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
