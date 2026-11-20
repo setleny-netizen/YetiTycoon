@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ice Miner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: #87CEEB;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: none;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        img { -webkit-user-drag: none; user-select: none; }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/fon.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* ---------------- ЭКРАН ЗАГРУЗКИ ---------------- */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+            overflow: hidden;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #loading-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .loading-ui {
+            width: 100%;
+            padding: 20px 20px 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+            z-index: 1;
+        }
+
+        #loading-bar-container {
+            width: 85vw;
+            max-width: 400px;
+            height: 32px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 3px solid #93c5fd;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        #loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #93c5fd);
+            transition: width 0.1s linear;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        #loading-text {
+            margin-top: 15px;
+            color: #fff;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.9);
+            text-transform: uppercase;
+        }
+
+        /* ---------------- ВЕРХНЯЯ ПАНЕЛЬ ---------------- */
+        #top-ui {
+            position: absolute;
+            top: 15px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .profile-box {
+            width: 55px;
+            height: 55px;
+            background: #fff;
+            border: 3px solid #4A90E2;
+            border-radius: 50%;
+            box-shadow: 0 4px 0 #2C5F9E, 0 6px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-shrink: 0;
+            background-image: url('assets/profile.png');
+            background-size: cover;
+            background-position: center;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .resources {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .resource-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 3px 10px 3px 4px;
+            box-shadow: 0 3px 0 #1e40af, 0 4px 8px rgba(0,0,0,0.25);
+            min-width: 80px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .pop {
+            transform: scale(1.1);
+            background: #ffffff;
+        }
+
+        .resource-box.deny {
+            animation: denyAnim 0.4s;
+        }
+
+        @keyframes denyAnim {
+            0%, 100% { background: rgba(255,255,255,0.9); transform: translateX(0); }
+            20% { background: #fecaca; transform: translateX(-4px); }
+            40% { background: #fecaca; transform: translateX(4px); }
+            60% { background: #fecaca; transform: translateX(-3px); }
+            80% { background: #fecaca; transform: translateX(3px); }
+        }
+
+        .resource-icon {
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-right: 6px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+            flex-shrink: 0;
+        }
+
+        .icon-ice { background-image: url('assets/ice.png'); }
+
+        .icon-dollar {
+            background: #4caf50;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #2e7d32;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+        .icon-dollar::after {
+            content: '$';
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+            text-shadow: 1px 1px 0 #1b5e20;
+        }
+
+        .resource-value {
+            font-weight: 900;
+            font-size: 14px;
+            color: #1e3a8a;
+            text-shadow: 0 1px 0 #fff;
+        }
+
+        /* ---------------- НИЖНЕЕ МЕНЮ ---------------- */
+        #bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 75px;
+            background: linear-gradient(to top, #1e3a8a, #3b82f6);
+            border-top: 3px solid #93c5fd;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #bfdbfe;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            flex: 1;
+            height: 100%;
+            opacity: 0.7;
+            transition: opacity 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+            transition: transform 0.2s;
+        }
+
+        .nav-btn.active {
+            opacity: 1;
+            color: #ffffff;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+            border-top: 3px solid #fbbf24;
+            position: relative;
+        }
+        .nav-btn.active::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            width: 30px;
+            height: 3px;
+            background: #fbbf24;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+
+        .nav-btn.active .nav-icon {
+            transform: scale(1.1) translateY(-2px);
+            filter: drop-shadow(0 0 8px #fbbf24);
+        }
+
+        .nav-btn:active .nav-icon {
+            transform: scale(0.9);
+        }
+
+        /* ---------------- ЭКРАНЫ ---------------- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .screen.hidden { display: none; }
+
+        /* ---------------- ЭКРАН «ЛЕДНИК» ---------------- */
+        #floor {
+            position: absolute;
+            bottom: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;
+            max-width: 800px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #miner-wrapper {
+            position: absolute;
+            bottom: calc(18vh + 75px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75vw;
+            max-width: 400px;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #progress-container {
+            width: 70%;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+            background-size: 280px 100%;
+            background-position: left;
+        }
+
+        #miner {
+            width: 100%;
+            height: auto;
+            transition: transform 0.05s;
+            transform-origin: center bottom;
+        }
+
+        .shake { animation: shakeAnim 0.08s infinite; }
+
+        @keyframes shakeAnim {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            25% { transform: translate(-2px, -1px) rotate(-1.5deg); }
+            50% { transform: translate(-1px, 2px) rotate(1.5deg); }
+            75% { transform: translate(2px, -1px) rotate(0deg); }
+            100% { transform: translate(1px, 1px) rotate(0deg); }
+        }
+
+        #particles-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .ice-particle {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background-image: url('assets/ice.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0px 4px 3px rgba(0,0,0,0.6));
+            mix-blend-mode: normal;
+        }
+
+        #stars-container {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        .orbit {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .star {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 23px;
+            text-shadow: 0 0 5px #fff, 0 0 10px #FFD700, 0 0 20px #FFA500;
+            animation: pulse 0.4s infinite alternate;
+        }
+
+        .orbit:nth-child(2) {
+            animation-duration: 2s;
+            animation-direction: reverse;
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+        }
+        .orbit:nth-child(2) .star {
+            font-size: 16px;
+            text-shadow: 0 0 5px #fff, 0 0 15px #00FFFF;
+        }
+
+        .orbit:nth-child(3) {
+            animation-duration: 1.2s;
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+        }
+        .orbit:nth-child(3) .star {
+            font-size: 13px;
+            text-shadow: 0 0 5px #fff, 0 0 15px #fff;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(0.9); }
+            100% { transform: translateX(-50%) scale(1.2); }
+        }
+
+        /* ---------------- ЭКРАН «ДОБЫЧА» ---------------- */
+        #screen-mining {
+            background: #274b73; /* однотонный фон */
+            z-index: 50;
+            touch-action: none;
+        }
+
+        /* Область под карту: между верхней панелью и нижним меню, с отступами от краёв */
+        #map-area {
+            position: absolute;
+            top: 124px;
+            bottom: 83px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --u = 1% ширины карты (задаётся из JS), все размеры внутри карты считаются от неё */
+        #map {
+            position: relative;
+            flex-shrink: 0;
+            --u: 4px;
+        }
+
+        #map-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Пушки и замки */
+        .slot {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .cannon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: calc(var(--u) * 16);
+            transform: translate(-50%, -56%);
+            pointer-events: none;
+            display: none;
+        }
+        .cannon.flip { transform: translate(-50%, -56%) scaleX(-1); }
+        .cannon img { width: 100%; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35)); }
+        .slot.unlocked .cannon { display: block; }
+        .cannon.idle img { filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35)) grayscale(0.5) brightness(0.85); }
+
+        .lock-box {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(var(--u) * 0.6);
+            cursor: pointer;
+            z-index: 5;
+            padding: calc(var(--u) * 1);
+        }
+        .slot.unlocked .lock-box { display: none; }
+
+        .lock-icon {
+            width: calc(var(--u) * 6);
+            height: calc(var(--u) * 6);
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+        }
+
+        .price {
+            background: rgba(0, 0, 0, 0.78);
+            color: #86efac;
+            border: 2px solid #4caf50;
+            border-radius: calc(var(--u) * 1.4);
+            font-weight: 900;
+            font-size: calc(var(--u) * 2.6);
+            line-height: 1.1;
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+            white-space: nowrap;
+            text-shadow: 0 1px 0 #000;
+        }
+        .price.poor { color: #fca5a5; border-color: #ef4444; }
+
+        .lock-box.deny { animation: lockDeny 0.4s; }
+        @keyframes lockDeny {
+            0%, 100% { transform: translate(-50%, -50%); }
+            20% { transform: translate(calc(-50% - 5px), -50%); }
+            40% { transform: translate(calc(-50% + 5px), -50%); }
+            60% { transform: translate(calc(-50% - 4px), -50%); }
+            80% { transform: translate(calc(-50% + 4px), -50%); }
+        }
+
+        /* Прораб */
+        #foreman {
+            position: absolute;
+            left: 81%;
+            top: 88%;
+            width: calc(var(--u) * 25);
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+        }
+        #foreman-img {
+            width: 100%;
+            display: block;
+            transform-origin: center bottom;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35));
+        }
+        #foreman.locked #foreman-img { filter: brightness(0.22) contrast(0.9); }
+        #foreman.working #foreman-img { animation: foremanBob 0.5s ease-in-out infinite alternate; }
+        @keyframes foremanBob {
+            from { transform: scale(1, 1); }
+            to { transform: scale(1.02, 0.98); }
+        }
+
+        #foreman-lock {
+            position: absolute;
+            left: 81%;
+            top: 78%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(var(--u) * 0.6);
+            cursor: pointer;
+            z-index: 6;
+            padding: calc(var(--u) * 1);
+        }
+        #foreman-lock.show { display: flex; }
+        #foreman-lock .lock-icon { width: calc(var(--u) * 8); height: calc(var(--u) * 8); }
+        #foreman-lock .price { font-size: calc(var(--u) * 3); }
+        #foreman-lock.deny { animation: lockDeny 0.4s; }
+
+        /* Счётчик «льда в час» от прораба */
+        #foreman-rate {
+            position: absolute;
+            left: 81%;
+            top: 89%;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.92);
+            border: 2px solid #3b82f6;
+            border-radius: calc(var(--u) * 1.6);
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1.2) calc(var(--u) * 0.3) calc(var(--u) * 0.6);
+            box-shadow: 0 3px 0 #1e40af;
+            white-space: nowrap;
+            z-index: 6;
+            pointer-events: none;
+        }
+        #foreman-rate.show { display: flex; }
+        #foreman-rate .ico {
+            width: calc(var(--u) * 3.2);
+            height: calc(var(--u) * 3.2);
+            background: url('assets/ice.png') center/contain no-repeat;
+            margin-right: calc(var(--u) * 0.6);
+        }
+        #foreman-rate .txt {
+            font-weight: 900;
+            font-size: calc(var(--u) * 2.5);
+            color: #1e3a8a;
+        }
+
+        /* Кучи снега */
+        #piles-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .pile {
+            position: absolute;
+            width: calc(var(--u) * 9.5);
+            transform: translate(-50%, -50%);
+            pointer-events: none;   /* пока куча растёт, её нельзя взять */
+            touch-action: none;
+            padding: calc(var(--u) * 0.6);
+        }
+        .pile.ready { pointer-events: auto; cursor: pointer; }
+        .pile-body { transform-origin: 50% 90%; will-change: transform, opacity; }
+        .pile img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+        }
+        .pile.active img { transform: scale(0.96); }
+
+
+        .pile-bar {
+            position: absolute;
+            left: 12%;
+            width: 76%;
+            top: calc(var(--u) * -1.6);
+            height: calc(var(--u) * 1.4);
+            background: rgba(0, 0, 0, 0.55);
+            border: 2px solid #fff;
+            border-radius: calc(var(--u) * 1);
+            overflow: hidden;
+            display: none;
+            pointer-events: none;
+        }
+        .pile.active .pile-bar { display: block; }
+        .pile-bar > div {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffeb3b);
+        }
+
+        /* Слой частиц снега (струя из пушек) */
+        #fx {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 8;
+        }
+
+        /* ---------- Хаб «Добыча»: список ферм ---------- */
+        .mine-view {
+            position: absolute;
+            top: 78px;
+            bottom: 83px;
+            left: 0;
+            right: 0;
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 4px 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1.2vh, 12px);
+        }
+        .mine-view.hidden, #mine-farm.hidden { display: none; }
+        #mine-farm { position: absolute; inset: 0; }
+
+        .hub-card {
+            flex: none;
+            background: rgba(255,255,255,0.93);
+            border: 3px solid #3b82f6;
+            border-radius: 18px;
+            box-shadow: 0 4px 0 #1e40af, 0 6px 14px rgba(0,0,0,0.3);
+            padding: clamp(8px, 1.5vh, 14px);
+            color: #1e3a8a;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1.2vh, 10px);
+        }
+        .hub-top { display: flex; align-items: center; gap: 10px; }
+        .hub-top .b-ico { width: clamp(30px, 5vh, 44px); height: clamp(30px, 5vh, 44px); }
+        .hub-rate { font-weight: 900; font-size: clamp(22px, 4.4vh, 34px); line-height: 1; white-space: nowrap; }
+        .hub-rate small { font-size: 0.5em; opacity: 0.7; }
+        .hub-label { font-weight: 800; font-size: clamp(11px, 1.8vh, 14px); color: #16a34a; margin-top: 2px; }
+        #hub-build {
+            font-family: inherit; font-weight: 900; border: none; cursor: pointer; border-radius: 12px;
+            padding: clamp(8px, 1.6vh, 13px) 0; font-size: clamp(15px, 2.6vh, 19px);
+            text-transform: uppercase; letter-spacing: 1px; color: #fff;
+            background: linear-gradient(to bottom, #60a5fa, #2563eb); box-shadow: 0 4px 0 #1e40af;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+        }
+        #hub-build:active { transform: translateY(3px); box-shadow: 0 1px 0 #1e40af; }
+        #hub-build.disabled { background: linear-gradient(to bottom, #9ca3af, #6b7280); box-shadow: 0 4px 0 #4b5563; }
+        .hub-title {
+            flex: none; display: flex; justify-content: space-between; align-items: baseline;
+            color: #fff; font-weight: 900; font-size: clamp(15px, 2.6vh, 20px);
+            padding: 0 4px; text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+        }
+        #hub-count { opacity: 0.75; font-size: 0.85em; }
+        #hub-list {
+            flex: 1 1 0; min-height: 0; display: flex; flex-direction: column;
+            gap: clamp(5px, 1vh, 10px); padding-bottom: 6px;
+        }
+
+        .slot-card {
+            flex: 1 1 0; min-height: 0; max-height: 92px;
+            display: flex; align-items: center; gap: clamp(8px, 1.6vh, 12px);
+            padding: 0 clamp(8px, 1.6vh, 14px);
+            background: rgba(255,255,255,0.93);
+            border: 2px solid #3b82f6; border-radius: 16px; box-shadow: 0 3px 0 #1e40af;
+            color: #1e3a8a; cursor: pointer; overflow: hidden;
+        }
+        .slot-card:active { transform: translateY(2px); box-shadow: 0 1px 0 #1e40af; }
+        .slot-ico {
+            flex: none; width: clamp(30px, 5.2vh, 46px); height: clamp(30px, 5.2vh, 46px);
+            border-radius: 50%; border: 2px solid #3b82f6;
+            background: #dbeafe url('assets/ice.png') center/60% no-repeat;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .slot-main { flex: 1; min-width: 0; }
+        .slot-name { font-weight: 900; font-size: clamp(13px, 2.3vh, 17px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+        .slot-sub { font-weight: 800; font-size: clamp(10px, 1.7vh, 13px); opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .slot-right { flex: none; }
+        .slot-rate { font-weight: 900; font-size: clamp(13px, 2.3vh, 17px); white-space: nowrap; color: #16a34a; }
+        .slot-rate.dim { color: #6b7280; font-size: clamp(11px, 1.9vh, 14px); }
+        .slot-arrow { flex: none; font-weight: 900; font-size: clamp(22px, 4vh, 30px); color: #3b82f6; line-height: 1; }
+        .slot-card.empty { background: rgba(255,255,255,0.14); border: 2px dashed #93c5fd; box-shadow: none; color: #dbeafe; }
+        .slot-card.empty .slot-ico { background: rgba(255,255,255,0.15); border-color: #93c5fd; color: #dbeafe; font-weight: 900; font-size: clamp(18px, 3.4vh, 26px); }
+        .slot-card.locked { background: rgba(10,24,48,0.5); border: 2px solid #3b82f6; box-shadow: none; color: #bfdbfe; }
+        .slot-card.locked .slot-ico { background: rgba(255,255,255,0.1); border-color: #3b82f6; }
+        .slot-card.locked .slot-ico svg { width: 70%; height: 70%; }
+
+        .cost {
+            flex: none; background: rgba(0,0,0,0.78); color: #86efac; border: 2px solid #4caf50;
+            border-radius: 12px; font-weight: 900; font-size: clamp(12px, 2.1vh, 16px);
+            padding: 3px 10px; white-space: nowrap;
+        }
+        .cost.poor { color: #fca5a5; border-color: #ef4444; }
+
+        @keyframes cardDeny {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        .slot-card.deny, .type-card.deny, #hub-build.deny { animation: cardDeny 0.4s; }
+
+        /* Верхняя строка «Назад» + заголовок */
+        .sub-head { flex: none; display: flex; align-items: center; gap: 10px; height: 38px; }
+        .farm-head { position: absolute; top: 78px; left: 12px; right: 12px; z-index: 3; }
+        .back-btn {
+            font-family: inherit; font-weight: 900; border: none; cursor: pointer; border-radius: 12px;
+            padding: 0 14px; height: 100%; background: #93c5fd; color: #1e3a8a; box-shadow: 0 3px 0 #3b82f6;
+            font-size: 15px; white-space: nowrap;
+        }
+        .back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3b82f6; }
+        .sub-title {
+            color: #fff; font-weight: 900; font-size: clamp(16px, 2.8vh, 21px);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Выбор вида фермы */
+        #build-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+        .type-card {
+            flex: none; background: rgba(255,255,255,0.93); border: 3px solid #3b82f6; border-radius: 18px;
+            box-shadow: 0 4px 0 #1e40af, 0 6px 14px rgba(0,0,0,0.3);
+            padding: clamp(10px, 1.8vh, 16px); color: #1e3a8a;
+            display: flex; flex-direction: column; gap: clamp(6px, 1.2vh, 10px);
+        }
+        .type-top { display: flex; align-items: center; gap: 10px; }
+        .type-name { font-weight: 900; font-size: clamp(17px, 3vh, 22px); }
+        .type-desc { font-weight: 800; font-size: clamp(12px, 2vh, 15px); opacity: 0.75; line-height: 1.3; }
+        .type-bottom { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .type-btn {
+            font-family: inherit; font-weight: 900; border: none; cursor: pointer; border-radius: 12px;
+            padding: clamp(8px, 1.6vh, 12px) 22px; font-size: clamp(14px, 2.4vh, 18px);
+            text-transform: uppercase; color: #fff;
+            background: linear-gradient(to bottom, #4ade80, #16a34a); box-shadow: 0 4px 0 #166534;
+        }
+        .type-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
+
+        /* ---------------- ЭКРАН «БИРЖА» ---------------- */
+        #screen-bourse {
+            background: linear-gradient(to bottom, #1e3a5f, #274b73);
+            z-index: 50;
+        }
+        #bourse-wrap {
+            position: absolute;
+            top: 80px;
+            bottom: 83px;
+            left: 0;
+            right: 0;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: center;
+        }
+        .bourse-card {
+            width: min(100%, 560px);
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1.4vh, 12px);
+            background: rgba(255,255,255,0.93);
+            border: 3px solid #3b82f6;
+            border-radius: 20px;
+            box-shadow: 0 5px 0 #1e40af, 0 8px 18px rgba(0,0,0,0.35);
+            padding: clamp(8px, 1.6vh, 16px);
+            color: #1e3a8a;
+            overflow: hidden;
+        }
+        .b-head {
+            flex: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .b-head-left { min-width: 0; }
+        .b-title {
+            font-weight: 900;
+            font-size: clamp(18px, 3.4vh, 26px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        .b-sub {
+            font-weight: 800;
+            font-size: clamp(10px, 1.6vh, 13px);
+            opacity: 0.7;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .b-price {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #dbeafe;
+            border-radius: 12px;
+            padding: 6px 10px;
+        }
+        .b-ico { width: clamp(22px, 3.6vh, 30px); height: clamp(22px, 3.6vh, 30px); flex-shrink: 0; }
+        .b-ice { background: url('assets/ice.png') center/contain no-repeat; }
+        .b-price-val { font-weight: 900; font-size: clamp(16px, 2.9vh, 22px); line-height: 1.05; white-space: nowrap; }
+        .b-change { font-weight: 900; font-size: clamp(10px, 1.6vh, 13px); white-space: nowrap; line-height: 1.1; }
+        .b-change.up { color: #16a34a; }
+        .b-change.down { color: #dc2626; }
+
+        .b-chart-box {
+            flex: 1 1 0;
+            min-height: 90px;
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #12304f, #0b1f36);
+            box-shadow: inset 0 0 0 2px #3b82f6, inset 0 4px 14px rgba(0,0,0,0.4);
+        }
+        #b-chart {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            display: block;
+        }
+
+        .b-trade {
+            flex: none;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(4px, 1vh, 10px);
+        }
+        .b-mode {
+            display: flex;
+            gap: 3px;
+            background: #dbeafe;
+            border-radius: 12px;
+            padding: 3px;
+        }
+        .b-mode button {
+            flex: 1;
+            font-family: inherit;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            border-radius: 9px;
+            background: transparent;
+            color: #1e3a8a;
+            padding: clamp(5px, 1vh, 8px) 0;
+            font-size: clamp(13px, 2.2vh, 16px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .b-mode button.active {
+            background: #3b82f6;
+            color: #fff;
+            box-shadow: 0 2px 0 #1e40af;
+        }
+        .b-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: clamp(13px, 2.2vh, 17px);
+        }
+        .b-row > div { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .b-row b { font-weight: 900; }
+        #b-slider { width: 100%; height: clamp(24px, 4vh, 34px); margin: 0; accent-color: #3b82f6; touch-action: auto; }
+        .bourse-quick { display: flex; gap: 8px; }
+        .bourse-quick button, #b-sell, #reset-btn {
+            font-family: inherit; font-weight: 900; border: none; cursor: pointer; border-radius: 12px;
+        }
+        .bourse-quick button {
+            flex: 1; padding: clamp(6px, 1.2vh, 10px) 0; font-size: clamp(13px, 2.2vh, 16px);
+            background: #93c5fd; color: #1e3a8a; box-shadow: 0 3px 0 #3b82f6;
+        }
+        .bourse-quick button:active { transform: translateY(2px); box-shadow: 0 1px 0 #3b82f6; }
+        .b-sellrow { align-items: stretch; }
+        .b-get {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.15;
+            font-size: clamp(11px, 1.8vh, 14px);
+        }
+        .b-get b { font-size: clamp(15px, 2.6vh, 20px); }
+        #b-sell {
+            flex: 1.3;
+            padding: clamp(8px, 1.8vh, 14px) 0;
+            font-size: clamp(15px, 2.6vh, 20px);
+            text-transform: uppercase; letter-spacing: 1px;
+            background: linear-gradient(to bottom, #4ade80, #16a34a); color: #fff;
+            box-shadow: 0 4px 0 #166534; text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+        }
+        #b-sell.buy { background: linear-gradient(to bottom, #60a5fa, #2563eb); box-shadow: 0 4px 0 #1e40af; }
+        #b-sell:active { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
+        #b-sell:disabled { background: #9ca3af; box-shadow: 0 4px 0 #6b7280; cursor: default; }
+
+        /* Широкий экран: график слева, торговля справа */
+        @media (min-aspect-ratio: 11/10) {
+            .bourse-card {
+                width: min(100%, 920px);
+                display: grid;
+                grid-template-columns: 1.5fr 1fr;
+                grid-template-rows: auto minmax(0, 1fr);
+                column-gap: 16px;
+            }
+            .b-head { grid-column: 1 / 3; }
+            .b-chart-box { min-height: 0; }
+            .b-trade { justify-content: center; }
+        }
+
+        /* ---------------- ОКНО «С ВОЗВРАЩЕНИЕМ» ---------------- */
+        #offline-popup {
+            position: absolute;
+            inset: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.55);
+            z-index: 700;
+            padding: 20px;
+        }
+        #offline-popup.show { display: flex; }
+        .offline-card {
+            width: min(100%, 360px);
+            background: #fff;
+            border: 3px solid #3b82f6;
+            border-radius: 20px;
+            box-shadow: 0 5px 0 #1e40af, 0 10px 24px rgba(0,0,0,0.45);
+            padding: 20px;
+            text-align: center;
+            color: #1e3a8a;
+        }
+        .offline-title { font-weight: 900; font-size: 24px; margin-bottom: 6px; }
+        .offline-time { font-weight: 800; font-size: 15px; opacity: 0.8; margin-bottom: 12px; }
+        .offline-lines { font-weight: 800; font-size: 17px; line-height: 1.5; margin-bottom: 16px; }
+        #offline-ok {
+            font-family: inherit; font-weight: 900; font-size: 20px; border: none; cursor: pointer;
+            border-radius: 12px; padding: 12px 40px; color: #fff; text-transform: uppercase;
+            background: linear-gradient(to bottom, #4ade80, #16a34a); box-shadow: 0 4px 0 #166534;
+        }
+        #offline-ok:active { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
+
+        /* ---------------- МЕНЮ ПРОФИЛЯ ---------------- */
+        #profile-menu {
+            position: absolute;
+            top: 80px;
+            left: 10px;
+            display: none;
+            z-index: 600;
+            background: rgba(255,255,255,0.97);
+            border: 2px solid #3b82f6;
+            border-radius: 14px;
+            padding: 10px;
+            box-shadow: 0 4px 0 #1e40af, 0 6px 14px rgba(0,0,0,0.35);
+        }
+        #profile-menu.show { display: block; }
+        #reset-btn {
+            padding: 12px 18px; font-size: 15px;
+            background: linear-gradient(to bottom, #f87171, #dc2626); color: #fff;
+            box-shadow: 0 3px 0 #991b1b; white-space: nowrap;
+        }
+        #reset-btn.armed { background: linear-gradient(to bottom, #fbbf24, #d97706); box-shadow: 0 3px 0 #92400e; }
+
+        /* Подсказка */
+        #toast {
+            position: absolute;
+            left: 50%;
+            bottom: 100px;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН ЗАГРУЗКИ -->
+    <div id="loading-screen">
+        <img id="loading-img" src="assets/loading.png" alt="Loading...">
+
+        <div class="loading-ui">
+            <div id="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+            <div id="loading-text">0%</div>
+        </div>
+    </div>
+
+    <div id="game-container">
+
+        <div id="top-ui">
+            <div class="profile-box"></div>
+            <div class="resources">
+                <div class="resource-box" id="ui-ice-box">
+                    <div class="resource-icon icon-ice"></div>
+                    <div class="resource-value" id="ice-count">0</div>
+                </div>
+                <div class="resource-box" id="ui-dollar-box">
+                    <div class="resource-icon icon-dollar"></div>
+                    <div class="resource-value" id="dollar-count">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: ЛЕДНИК ===== -->
+        <div id="screen-glacier" class="screen">
+            <img id="floor" src="assets/pol.png" alt="floor">
+
+            <div id="miner-wrapper">
+                <div id="stars-container">
+                    <div class="orbit"><div class="star">⭐</div></div>
+                    <div class="orbit"><div class="star">⭐</div></div>
+                    <div class="orbit"><div class="star">⭐</div></div>
+                </div>
+
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+
+                <img id="miner" src="assets/minerOFF.png" alt="miner">
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: БИРЖА ===== -->
+        <div id="screen-bourse" class="screen hidden">
+            <div id="bourse-wrap">
+                <div class="bourse-card">
+                    <div class="b-head">
+                        <div class="b-head-left">
+                            <div class="b-title">Биржа</div>
+                            <div class="b-sub">Курс 1 льда · график 3 часа</div>
+                        </div>
+                        <div class="b-price">
+                            <div class="b-ico b-ice"></div>
+                            <div class="b-price-col">
+                                <div class="b-price-val" id="b-price">$0,000</div>
+                                <div class="b-change" id="b-change">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="b-chart-box">
+                        <canvas id="b-chart"></canvas>
+                    </div>
+
+                    <div class="b-trade">
+                        <div class="b-mode">
+                            <button id="b-mode-sell" class="active">Продать</button>
+                            <button id="b-mode-buy">Купить</button>
+                        </div>
+                        <div class="b-row">
+                            <div><span id="b-have-lbl">Лёд:</span> <b id="b-have">0</b></div>
+                            <div><span id="b-amt-lbl">Продать:</span> <b id="b-amount">0</b></div>
+                        </div>
+                        <input type="range" id="b-slider" min="0" max="0" step="1" value="0">
+                        <div class="bourse-quick">
+                            <button data-p="0.25">25%</button>
+                            <button data-p="0.5">50%</button>
+                            <button data-p="1">Всё</button>
+                        </div>
+                        <div class="b-row b-sellrow">
+                            <div class="b-get"><span id="b-get-lbl">Получите</span><b id="b-get">$0</b></div>
+                            <button id="b-sell" disabled>Продать</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: ДОБЫЧА ===== -->
+        <div id="screen-mining" class="screen hidden">
+
+            <!-- Хаб: общая добыча, кнопка, список ферм (5 слотов без прокрутки) -->
+            <div id="mine-hub" class="mine-view">
+                <div class="hub-card">
+                    <div class="hub-top">
+                        <div class="b-ico b-ice"></div>
+                        <div>
+                            <div class="hub-rate"><span id="hub-rate">0</span> <small>/ч</small></div>
+                            <div class="hub-label">Суммарная добыча льда в час</div>
+                        </div>
+                    </div>
+                    <button id="hub-build">Построить ферму</button>
+                </div>
+                <div class="hub-title"><span>Мои фермы</span><span id="hub-count">0/3</span></div>
+                <div id="hub-list"></div>
+            </div>
+
+            <!-- Выбор вида фермы -->
+            <div id="mine-build" class="mine-view hidden">
+                <div class="sub-head">
+                    <button class="back-btn" id="build-back">‹ Назад</button>
+                    <div class="sub-title">Выберите ферму</div>
+                </div>
+                <div id="build-list"></div>
+            </div>
+
+            <!-- Экран фермы: карта с пушками и прорабом -->
+            <div id="mine-farm" class="hidden">
+                <div class="sub-head farm-head">
+                    <button class="back-btn" id="farm-back">‹ Фермы</button>
+                    <div class="sub-title" id="farm-title"></div>
+                </div>
+                <div id="map-area">
+                    <div id="map">
+                        <img id="map-img" src="assets/pole.png" alt="map" draggable="false">
+                        <div id="piles-layer"></div>
+                        <canvas id="fx"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="particles-layer"></div>
+
+        <div id="profile-menu">
+            <button id="reset-btn">Сбросить прогресс</button>
+        </div>
+
+        <div id="offline-popup">
+            <div class="offline-card">
+                <div class="offline-title">С возвращением!</div>
+                <div class="offline-time" id="offline-time"></div>
+                <div class="offline-lines" id="offline-lines"></div>
+                <button id="offline-ok">Отлично</button>
+            </div>
+        </div>
+
+        <div id="toast"></div>
+
+        <div id="bottom-nav">
+            <div class="nav-btn" data-tab="bourse">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 16L10 10L14 14L20 6" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6H15" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6V11" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Биржа</span>
+            </div>
+            <div class="nav-btn" data-tab="mining">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 4L20 10L17 13L11 7L14 4Z" fill="#FFF"/>
+                    <path d="M11.5 7.5L4 15C3 16 3 17.5 4 18.5C5 19.5 6.5 19.5 7.5 18.5L15 11" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 20L2 22" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span>Добыча</span>
+            </div>
+            <div class="nav-btn active" data-tab="glacier">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="#93C5FD" stroke="#FFF" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M12 22V12M3 7L12 12L21 7" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Ледник</span>
+            </div>
+            <div class="nav-btn" data-tab="den">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="8" fill="#FFF"/>
+                    <circle cx="7" cy="7" r="3" fill="#FFF"/>
+                    <circle cx="17" cy="7" r="3" fill="#FFF"/>
+                    <circle cx="9" cy="11" r="1.5" fill="#1e3a8a"/>
+                    <circle cx="15" cy="11" r="1.5" fill="#1e3a8a"/>
+                    <path d="M10 15C10 15 11 17 12 17C13 17 14 15 14 15" stroke="#1e3a8a" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>Берлога</span>
+            </div>
+            <div class="nav-btn" data-tab="shop">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3H5L7 15H19L21 7H6" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="7" cy="19" r="2" fill="#FFF"/>
+                    <circle cx="17" cy="19" r="2" fill="#FFF"/>
+                </svg>
+                <span>Магазин</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. ЛОГИКА ЗАГРУЗКИ (МИНИМУМ 2 СЕКУНДЫ)
+        // ==========================================
+        const assetsToLoad = [
+            'assets/fon.png', 'assets/pol.png', 'assets/minerOFF.png',
+            'assets/minerON.png', 'assets/ice.png', 'assets/profile.png', 'assets/loading.png',
+            'assets/pole.png', 'assets/pushka.png', 'assets/prorab.png', 'assets/snow.png'
+        ];
+
+        let loadedCount = 0;
+        const totalAssets = assetsToLoad.length;
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingText = document.getElementById('loading-text');
+        const loadingScreen = document.getElementById('loading-screen');
+
+        const MIN_LOADING_TIME = 2000;
+        const startTime = Date.now();
+        let allAssetsReady = false;
+
+        function checkLoadingStatus() {
+            const elapsedTime = Date.now() - startTime;
+
+            if (allAssetsReady && elapsedTime >= MIN_LOADING_TIME) {
+                loadingBar.style.width = '100%';
+                loadingText.innerText = '100%';
+
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    lastFrameTime = 0;
+                    requestAnimationFrame(gameLoop);
+                }, 300);
+            } else {
+                if (allAssetsReady) {
+                    loadingBar.style.width = '99%';
+                    loadingText.innerText = '99%';
+                }
+            }
+        }
+
+        function assetLoaded() {
+            loadedCount++;
+            const percent = Math.floor((loadedCount / totalAssets) * 100);
+
+            if (!allAssetsReady) {
+                loadingBar.style.width = percent + '%';
+                loadingText.innerText = percent + '%';
+            }
+
+            if (loadedCount === totalAssets) {
+                allAssetsReady = true;
+            }
+            checkLoadingStatus();
+        }
+
+        assetsToLoad.forEach(src => {
+            const img = new Image();
+            img.onload = assetLoaded;
+            img.onerror = assetLoaded;
+            img.src = src;
+        });
+
+        const loadingInterval = setInterval(() => {
+            checkLoadingStatus();
+            if (allAssetsReady && Date.now() - startTime >= MIN_LOADING_TIME) {
+                clearInterval(loadingInterval);
+            }
+        }, 100);
+
+
+        // ==========================================
+        // 2. ОБЩЕЕ СОСТОЯНИЕ (ресурсы, сохранение)
+        // ==========================================
+        const SAVE_KEY = 'iceMiner_v1';
+        const START_DOLLARS = 15000;  // стартовый баланс при первом запуске
+        const RESET_DOLLARS = 0;      // баланс после «Сбросить прогресс»
+        const PRICE_MIN = 0.1;        // курс 1 льда колеблется от 0.1 $
+        const PRICE_MAX = 0.3;        // до 0.3 $
+        const BOURSE_WINDOW = 3 * 3600 * 1000; // окно графика — 3 часа
+
+        const CANNON_PRICES = [1000, 7000, 25000, 70000];
+        const FOREMAN_PRICE = 5000;
+        const SLOT_BASE = 3;                              // слотов под фермы по умолчанию
+        const SLOT_MAX = 5;                               // максимум слотов
+        const SLOT_PRICES = { 4: 300000, 5: 7000000 };    // цена открытия 4-го и 5-го слота
+        const PILES_PER_MIN_PER_CANNON = 5;
+        const CANNON_INTERVAL = 60000 / PILES_PER_MIN_PER_CANNON; // 12 сек
+        const HOLD_TIME = 1500;      // удержание на куче, мс
+        const ICE_PER_PILE = 10;
+
+        let iceCount = 0;
+        let dollarCount = START_DOLLARS;
+        let slotsOwned = SLOT_BASE;
+        let loadedFarms = [];      // фермы из сохранения (создаются в разделе «Добыча»)
+        let savedAtLoaded = 0;     // для оффлайн-прогресса
+
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (raw) {
+                const s = JSON.parse(raw);
+                iceCount = s.ice || 0;
+                dollarCount = (typeof s.dollars === 'number') ? s.dollars : START_DOLLARS;
+                slotsOwned = Math.max(SLOT_BASE, Math.min(SLOT_MAX, s.slots || SLOT_BASE));
+                if (Array.isArray(s.farms)) {
+                    loadedFarms = s.farms;
+                } else if (Array.isArray(s.cannons)) {
+                    // старое сохранение (одна ферма) переносим в первый слот
+                    loadedFarms = [{ type: 'snow', cannons: s.cannons, foreman: !!s.foreman, piles: s.piles || 0 }];
+                }
+                savedAtLoaded = s.savedAt || 0;
+            }
+        } catch (e) {}
+
+        let resetting = false;
+        function saveState() {
+            if (resetting) return;
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify({
+                    ice: iceCount, dollars: dollarCount, slots: slotsOwned, farms: serializeFarms(),
+                    savedAt: Date.now()
+                }));
+            } catch (e) {}
+        }
+        setInterval(saveState, 2000);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+        window.addEventListener('pagehide', saveState);
+
+        const fmt = n => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const round2 = n => Math.round(n * 100) / 100;
+        const fmtMoney = n => {
+            const v = round2(n);
+            if (Number.isInteger(v)) return fmt(v);
+            return fmt(Math.floor(v)) + ',' + String(Math.round(v * 100) % 100).padStart(2, '0');
+        };
+        const hooks = { res: null }; // обновление вкладки «Биржа» при смене ресурсов
+
+        const gameContainer = document.getElementById('game-container');
+        const particlesLayer = document.getElementById('particles-layer');
+        const iceCountEl = document.getElementById('ice-count');
+        const dollarCountEl = document.getElementById('dollar-count');
+        const uiIceBox = document.getElementById('ui-ice-box');
+        const uiDollarBox = document.getElementById('ui-dollar-box');
+        const toastEl = document.getElementById('toast');
+
+        function renderResources() {
+            iceCountEl.innerText = fmt(iceCount);
+            dollarCountEl.innerText = fmtMoney(dollarCount);
+            if (hooks.res) hooks.res();
+        }
+
+        function addIce(n = 1) {
+            iceCount += n;
+            iceCountEl.innerText = fmt(iceCount);
+            uiIceBox.classList.add('pop');
+            setTimeout(() => uiIceBox.classList.remove('pop'), 100);
+            if (hooks.res) hooks.res();
+        }
+
+        function spendDollars(n) {
+            dollarCount = round2(dollarCount - n);
+            renderResources();
+            uiDollarBox.classList.add('pop');
+            setTimeout(() => uiDollarBox.classList.remove('pop'), 120);
+            updatePriceColors();
+            saveState();
+        }
+
+        function denyFlash(el) {
+            el.classList.remove('deny');
+            void el.offsetWidth;
+            el.classList.add('deny');
+            setTimeout(() => el.classList.remove('deny'), 450);
+        }
+
+        let toastTimer = null;
+        function toast(msg) {
+            toastEl.innerText = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1400);
+        }
+
+        renderResources();
+
+        // Полёт льда (частицы) к счётчику льда
+        function flyIce(startX, startY, onDone, spread) {
+            const ice = document.createElement('div');
+            ice.classList.add('ice-particle');
+
+            const containerRect = gameContainer.getBoundingClientRect();
+            const targetRect = uiIceBox.getBoundingClientRect();
+
+            const endX = (targetRect.left - containerRect.left) + (targetRect.width / 2);
+            const endY = (targetRect.top - containerRect.top) + (targetRect.height / 2);
+
+            ice.style.left = startX + 'px';
+            ice.style.top = startY + 'px';
+            particlesLayer.appendChild(ice);
+
+            const sp = spread || 100;
+            const midX = startX + (Math.random() - 0.5) * sp;
+            const midY = startY - (50 + Math.random() * sp);
+
+            const animation = ice.animate([
+                { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${midX - startX}px), calc(-50% + ${midY - startY}px)) scale(1) rotate(${Math.random() * 360}deg)`, opacity: 1, offset: 0.4 },
+                { transform: `translate(calc(-50% + ${endX - startX}px), calc(-50% + ${endY - startY}px)) scale(0.2) rotate(${Math.random() * 720}deg)`, opacity: 0.5 }
+            ], {
+                duration: 400,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                fill: 'forwards'
+            });
+
+            animation.onfinish = () => {
+                ice.remove();
+                if (onDone) onDone();
+            };
+        }
+
+
+        // ==========================================
+        // 3. ВКЛАДКИ
+        // ==========================================
+        const screens = {
+            bourse: document.getElementById('screen-bourse'),
+            glacier: document.getElementById('screen-glacier'),
+            mining: document.getElementById('screen-mining')
+        };
+        let currentTab = 'glacier';
+
+        function setTab(name) {
+            if (!screens[name]) { toast('Скоро'); return; }
+            if (name === currentTab) return;
+            if (currentTab === 'glacier') stopMining();
+
+            currentTab = name;
+            Object.keys(screens).forEach(k => screens[k].classList.toggle('hidden', k !== name));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+
+            refreshMine();
+            if (name === 'bourse') renderBourse();
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                // повторное нажатие на «Добыча» возвращает к списку ферм
+                if (b.dataset.tab === 'mining' && currentTab === 'mining' && mineView !== 'hub') showMineView('hub');
+                else setTab(b.dataset.tab);
+            });
+        });
+
+        const isMiningVisible = () => currentTab === 'mining';
+
+
+        // ==========================================
+        // 4. ЭКРАН «ЛЕДНИК» (ручная добыча)
+        // ==========================================
+        const miner = document.getElementById('miner');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const starsContainer = document.getElementById('stars-container');
+
+        let isMining = false;
+        let isOverheated = false;
+
+        let progress = 0;
+        let lastFrameTime = 0;
+        let accumulatedProgress = 0;
+
+        function getSpawnRate(progressPercent) {
+            if (progressPercent < 20) return 2;
+            if (progressPercent < 40) return 4;
+            if (progressPercent < 60) return 6;
+            if (progressPercent < 80) return 12;
+            return 24;
+        }
+
+        function spawnIce() {
+            const minerRect = miner.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            const startX = (minerRect.left - containerRect.left) + (minerRect.width / 2);
+            const startY = (minerRect.top - containerRect.top) + minerRect.height * 0.85;
+            flyIce(startX, startY, () => addIce(1), 100);
+        }
+
+        function gameLoop(timestamp) {
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const deltaTime = timestamp - lastFrameTime;
+            lastFrameTime = timestamp;
+
+            if (isMining && !isOverheated) {
+                progress += deltaTime * 0.02;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = progress + '%';
+
+                const currentRate = getSpawnRate(progress);
+                const ratePerMs = currentRate / 1000;
+
+                accumulatedProgress += deltaTime * ratePerMs;
+
+                while (accumulatedProgress >= 1) {
+                    spawnIce();
+                    accumulatedProgress -= 1;
+                }
+
+                if (progress >= 100) {
+                    triggerOverheat();
+                }
+
+            } else if (!isMining && !isOverheated) {
+                if (progress > 0) {
+                    progress -= deltaTime * 0.05;
+                    if (progress < 0) progress = 0;
+                    progressBar.style.width = progress + '%';
+                    if (progress === 0) progressContainer.style.opacity = 0;
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startMining(e) {
+            if (e.cancelable) e.preventDefault();
+            if (currentTab !== 'glacier') return;
+            if (isOverheated || isMining) return;
+
+            isMining = true;
+            miner.src = 'assets/minerON.png';
+            miner.classList.add('shake');
+            progressContainer.style.opacity = 1;
+            lastFrameTime = 0;
+        }
+
+        function stopMining(e) {
+            if (e && e.cancelable) e.preventDefault();
+            if (isOverheated || !isMining) return;
+
+            isMining = false;
+            miner.src = 'assets/minerOFF.png';
+            miner.classList.remove('shake');
+        }
+
+        function triggerOverheat() {
+            isOverheated = true;
+            isMining = false;
+
+            miner.src = 'assets/minerOFF.png';
+            miner.classList.remove('shake');
+            starsContainer.style.display = 'flex';
+
+            let cooldownTimer = setInterval(() => {
+                progress -= 2;
+                if (progress <= 0) {
+                    progress = 0;
+                    clearInterval(cooldownTimer);
+                    isOverheated = false;
+                    starsContainer.style.display = 'none';
+                    progressContainer.style.opacity = 0;
+                    progressBar.style.width = '0%';
+                }
+                progressBar.style.width = progress + '%';
+            }, 50);
+        }
+
+        // Ручная добыча — только на экране «Ледник»
+        const glacierScreen = screens.glacier;
+        glacierScreen.addEventListener('touchstart', startMining, { passive: false });
+        glacierScreen.addEventListener('touchend', stopMining);
+        glacierScreen.addEventListener('touchcancel', stopMining);
+
+        glacierScreen.addEventListener('mousedown', startMining);
+        glacierScreen.addEventListener('mouseup', stopMining);
+        glacierScreen.addEventListener('mouseleave', stopMining);
+
+
+        // ==========================================
+        // 4.5 ЭКРАН «БИРЖА»: курс льда 0.1–0.3 $, график за 3 часа
+        // ==========================================
+        // Курс — детерминированная функция от времени: одинаков на всех устройствах,
+        // история графика всегда восстанавливается, в том числе после оффлайна.
+        function hash01(n) {
+            let x = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b);
+            x ^= x >>> 13;
+            x = Math.imul(x, 0xc2b2ae35);
+            x ^= x >>> 16;
+            return (x >>> 0) / 4294967296;
+        }
+        function smooth01(t) { return t * t * (3 - 2 * t); }
+        function noise1(ms, period, seed) {
+            const k = ms / period;
+            const i = Math.floor(k);
+            const f = k - i;
+            const a = hash01((i * 7919 + seed) | 0);
+            const b = hash01(((i + 1) * 7919 + seed) | 0);
+            return a + (b - a) * smooth01(f);
+        }
+        // Курс меняется раз в минуту: значение берётся на начало минуты, цена в сотых
+        function priceAt(ms) {
+            const m = Math.floor(ms / 60000) * 60000;
+            const v = 0.50 * noise1(m, 45 * 60000, 11) + 0.28 * noise1(m, 12 * 60000, 23)
+                    + 0.14 * noise1(m, 3 * 60000, 37) + 0.08 * noise1(m, 60000, 53);
+            const x = Math.max(0, Math.min(1, (v - 0.5) * 1.7 + 0.5));
+            return Math.round((PRICE_MIN + (PRICE_MAX - PRICE_MIN) * x) * 100) / 100;
+        }
+        const fmtPrice = pr => '$' + pr.toFixed(2).replace('.', ',');
+        const fmtClock = t => new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+        const bSlider = document.getElementById('b-slider');
+        const bAmount = document.getElementById('b-amount');
+        const bGet = document.getElementById('b-get');
+        const bHave = document.getElementById('b-have');
+        const bSell = document.getElementById('b-sell');
+        const bPrice = document.getElementById('b-price');
+        const bChange = document.getElementById('b-change');
+        const bChart = document.getElementById('b-chart');
+        const bctx = bChart.getContext('2d');
+        let tradeAmount = 0;   // сколько льда продаём/покупаем
+        let bMode = 'sell';    // 'sell' | 'buy'
+        let bHover = null; // x касания/курсора на графике (css px)
+
+        const AXIS_MIN = 0.08, AXIS_MAX = 0.32;
+
+        function drawChart() {
+            const box = bChart.parentElement;
+            const w = box.clientWidth, h = box.clientHeight;
+            if (!w || !h) return;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const cw = Math.round(w * dpr), ch = Math.round(h * dpr);
+            if (bChart.width !== cw || bChart.height !== ch) { bChart.width = cw; bChart.height = ch; }
+
+            const ctx = bctx;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, w, h);
+
+            const fs = Math.max(9, Math.min(12, h * 0.065));
+            ctx.font = '800 ' + fs + 'px Nunito, sans-serif';
+            const padL = ctx.measureText('0,30').width + 14;
+            const padR = 12, padT = 12, padB = fs + 12;
+            const pw = w - padL - padR, ph = h - padT - padB;
+            if (pw < 20 || ph < 20) return;
+
+            const now = Date.now();
+            const t0 = now - BOURSE_WINDOW;
+            const xOf = t => padL + (t - t0) / BOURSE_WINDOW * pw;
+            const yOf = pr => padT + (1 - (pr - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * ph;
+
+            // горизонтальная сетка и подписи цены
+            ctx.lineWidth = 1;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'right';
+            [0.10, 0.15, 0.20, 0.25, 0.30].forEach(v => {
+                const y = Math.round(yOf(v)) + 0.5;
+                ctx.strokeStyle = 'rgba(147,197,253,0.18)';
+                ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + pw, y); ctx.stroke();
+                ctx.fillStyle = 'rgba(191,219,254,0.85)';
+                ctx.fillText(v.toFixed(2).replace('.', ','), padL - 6, y);
+            });
+
+            // вертикальная сетка по часам и подписи времени
+            ctx.textBaseline = 'alphabetic';
+            for (let k = 0; k <= 3; k++) {
+                const x = Math.round(xOf(t0 + k * 3600000)) + 0.5;
+                ctx.strokeStyle = 'rgba(147,197,253,0.12)';
+                ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + ph); ctx.stroke();
+                ctx.fillStyle = 'rgba(191,219,254,0.85)';
+                ctx.textAlign = k === 0 ? 'left' : (k === 3 ? 'right' : 'center');
+                const lx = k === 0 ? padL : (k === 3 ? padL + pw : x);
+                ctx.fillText(k === 3 ? 'сейчас' : '-' + (3 - k) + ' ч', lx, h - 5);
+            }
+
+            // линия курса
+            // курс держится минуту и меняется скачком — рисуем ступенями
+            const STEP = 60000;
+            const pts = [];
+            const first = Math.floor(t0 / STEP) * STEP;
+            let prevY = yOf(priceAt(first));
+            pts.push([xOf(t0), prevY]);
+            for (let t = first + STEP; t <= now; t += STEP) {
+                const x = xOf(t), y = yOf(priceAt(t));
+                pts.push([x, prevY]);
+                pts.push([x, y]);
+                prevY = y;
+            }
+            pts.push([xOf(now), prevY]);
+
+            const grad = ctx.createLinearGradient(0, padT, 0, padT + ph);
+            grad.addColorStop(0, 'rgba(96,165,250,0.45)');
+            grad.addColorStop(1, 'rgba(96,165,250,0)');
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], padT + ph);
+            pts.forEach(q => ctx.lineTo(q[0], q[1]));
+            ctx.lineTo(pts[pts.length - 1][0], padT + ph);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.beginPath();
+            pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]));
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#bfdbfe';
+            ctx.shadowColor = 'rgba(96,165,250,0.9)';
+            ctx.shadowBlur = 8;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // текущая цена: пунктир и точка
+            const last = pts[pts.length - 1];
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(padL, last[1]); ctx.lineTo(last[0], last[1]); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath(); ctx.arc(last[0], last[1], 5.5, 0, 6.2832);
+            ctx.fillStyle = 'rgba(96,165,250,0.5)'; ctx.fill();
+            ctx.beginPath(); ctx.arc(last[0], last[1], 3.5, 0, 6.2832);
+            ctx.fillStyle = '#fff'; ctx.fill();
+
+            // подсказка при касании графика
+            if (bHover !== null) {
+                const hx = Math.max(padL, Math.min(padL + pw, bHover));
+                const ht = t0 + (hx - padL) / pw * BOURSE_WINDOW;
+                const hp = priceAt(ht);
+                const hy = yOf(hp);
+                ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, padT + ph); ctx.stroke();
+                ctx.beginPath(); ctx.arc(hx, hy, 4, 0, 6.2832);
+                ctx.fillStyle = '#fbbf24'; ctx.fill();
+
+                const label = fmtClock(ht) + ' · ' + fmtPrice(hp);
+                ctx.font = '900 ' + fs + 'px Nunito, sans-serif';
+                const tw = ctx.measureText(label).width + 14;
+                const th = fs + 10;
+                let bx = hx - tw / 2;
+                bx = Math.max(4, Math.min(w - tw - 4, bx));
+                const by = hy < padT + ph / 2 ? hy + 12 : hy - th - 12;
+                ctx.fillStyle = 'rgba(15,23,42,0.9)';
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(bx, by, tw, th, 6); else ctx.rect(bx, by, tw, th);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, bx + tw / 2, by + th / 2 + 0.5);
+            }
+        }
+
+        const maxAmount = pr => bMode === 'sell' ? Math.floor(iceCount) : Math.floor(dollarCount / pr + 1e-9);
+
+        function updateTradeInfo(price) {
+            const sell = bMode === 'sell';
+            const max = maxAmount(price);
+            if (tradeAmount > max) tradeAmount = max;
+            bSlider.max = max;
+            if (parseInt(bSlider.value, 10) !== tradeAmount) bSlider.value = tradeAmount;
+            bSlider.disabled = max <= 0;
+
+            document.getElementById('b-have-lbl').innerText = sell ? 'Лёд:' : 'Баланс:';
+            document.getElementById('b-amt-lbl').innerText = sell ? 'Продать:' : 'Купить:';
+            document.getElementById('b-get-lbl').innerText = sell ? 'Получите' : 'Заплатите';
+            bHave.innerText = sell ? fmt(iceCount) : '$' + fmtMoney(dollarCount);
+            bAmount.innerText = fmt(tradeAmount);
+            bGet.innerText = '$' + fmtMoney(tradeAmount * price);
+            bSell.innerText = sell ? 'Продать' : 'Купить';
+            bSell.classList.toggle('buy', !sell);
+            bSell.disabled = tradeAmount <= 0;
+            document.getElementById('b-mode-sell').classList.toggle('active', sell);
+            document.getElementById('b-mode-buy').classList.toggle('active', !sell);
+        }
+
+        function liveBourse() {
+            const now = Date.now();
+            const price = priceAt(now);
+            const prev = priceAt(now - BOURSE_WINDOW);
+            const pct = (price / prev - 1) * 100;
+            bPrice.innerText = fmtPrice(price);
+            bChange.innerText = (pct >= 0 ? '▲ +' : '▼ ') + pct.toFixed(1).replace('.', ',') + '% / 3ч';
+            bChange.classList.toggle('up', pct >= 0);
+            bChange.classList.toggle('down', pct < 0);
+            updateTradeInfo(price);
+            drawChart();
+        }
+
+        function renderBourse() { liveBourse(); }
+
+        bSlider.addEventListener('input', () => {
+            tradeAmount = parseInt(bSlider.value, 10) || 0;
+            updateTradeInfo(priceAt(Date.now()));
+        });
+
+        document.querySelectorAll('.bourse-quick button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                tradeAmount = Math.floor(maxAmount(priceAt(Date.now())) * parseFloat(btn.dataset.p));
+                updateTradeInfo(priceAt(Date.now()));
+            });
+        });
+
+        ['sell', 'buy'].forEach(mode => {
+            document.getElementById('b-mode-' + mode).addEventListener('click', () => {
+                bMode = mode;
+                tradeAmount = 0;
+                renderBourse();
+            });
+        });
+
+        bSell.addEventListener('click', () => {
+            const price = priceAt(Date.now());
+            const amount = Math.min(tradeAmount, maxAmount(price));
+            if (amount <= 0) return;
+            const total = round2(amount * price);
+            if (bMode === 'sell') {
+                iceCount -= amount;
+                dollarCount = round2(dollarCount + total);
+                toast('+$' + fmtMoney(total));
+            } else {
+                if (total > dollarCount) return;
+                iceCount += amount;
+                dollarCount = round2(dollarCount - total);
+                toast('+' + fmt(amount) + ' льда · −$' + fmtMoney(total));
+                uiIceBox.classList.add('pop');
+                setTimeout(() => uiIceBox.classList.remove('pop'), 150);
+            }
+            tradeAmount = 0;
+            renderResources();
+            updatePriceColors();
+            uiDollarBox.classList.add('pop');
+            setTimeout(() => uiDollarBox.classList.remove('pop'), 150);
+            saveState();
+        });
+
+        // Касание графика показывает цену в выбранный момент
+        function setHover(e) {
+            const rect = bChart.getBoundingClientRect();
+            bHover = e.clientX - rect.left;
+            drawChart();
+        }
+        bChart.addEventListener('pointerdown', setHover);
+        bChart.addEventListener('pointermove', (e) => { if (e.buttons || e.pointerType === 'touch') setHover(e); });
+        const clearHover = () => { bHover = null; drawChart(); };
+        bChart.addEventListener('pointerup', clearHover);
+        bChart.addEventListener('pointercancel', clearHover);
+        bChart.addEventListener('pointerleave', clearHover);
+
+        hooks.res = () => { if (currentTab === 'bourse') renderBourse(); };
+        setInterval(() => { if (currentTab === 'bourse' && !document.hidden) liveBourse(); }, 1000);
+        window.addEventListener('resize', () => { if (currentTab === 'bourse') drawChart(); });
+
+        // ==========================================
+        // 4.6 ПРОФИЛЬ: кнопка «Сбросить прогресс»
+        // ==========================================
+        const profileBox = document.querySelector('.profile-box');
+        const profileMenu = document.getElementById('profile-menu');
+        const resetBtn = document.getElementById('reset-btn');
+        let resetArmed = false, armTimer = null;
+
+        function disarmReset() {
+            resetArmed = false;
+            clearTimeout(armTimer);
+            resetBtn.classList.remove('armed');
+            resetBtn.innerText = 'Сбросить прогресс';
+        }
+
+        profileBox.addEventListener('click', () => {
+            profileMenu.classList.toggle('show');
+            disarmReset();
+        });
+
+        document.addEventListener('pointerdown', (e) => {
+            if (profileMenu.contains(e.target) || profileBox.contains(e.target)) return;
+            profileMenu.classList.remove('show');
+            disarmReset();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (!resetArmed) {
+                resetArmed = true;
+                resetBtn.classList.add('armed');
+                resetBtn.innerText = 'Нажмите ещё раз';
+                armTimer = setTimeout(disarmReset, 3000);
+                return;
+            }
+            resetting = true; // не даём автосохранению перезаписать сброс
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify({
+                    ice: 0, dollars: RESET_DOLLARS, slots: SLOT_BASE, farms: []
+                }));
+            } catch (e) {}
+            location.reload();
+        });
+
+
+        // ==========================================
+        // 5. ВКЛАДКА «ДОБЫЧА»: хаб ферм, выбор вида, экран фермы
+        // ==========================================
+        // Каждая ферма — это набор данных (пушки, прораб, кучи, таймеры). Считаются все фермы сразу,
+        // а на экране рисуется только та, что открыта.
+        const $ = id => document.getElementById(id);
+        const mapArea = $('map-area');
+        const map = $('map');
+        const mapImg = $('map-img');
+        const pilesLayer = $('piles-layer');
+
+        let mapRatio = 1088 / 1428; // ширина / высота картинки (уточняется после загрузки)
+        let mapW = 1, mapH = 1, U = 1;
+
+        // Сетка внутри карты (в % от размеров карты)
+        const COLS = 6, ROWS = 9;
+        const GRID = { l: 18.0, r: 83.2, t: 20.0, b: 83.5 };
+        // клетки в правом нижнем углу заняты площадкой прораба
+        const isBlockedCell = (c, r) => c >= 4 && r >= 7;
+        const MAX_PILES = COLS * ROWS - 4;
+
+        function cellCenter(c, r) {
+            return {
+                x: GRID.l + (c + 0.5) * (GRID.r - GRID.l) / COLS,
+                y: GRID.t + (r + 0.5) * (GRID.b - GRID.t) / ROWS
+            };
+        }
+
+        // Адаптивная подгонка карты: всегда целиком в области, с сохранением пропорций
+        function fitMap() {
+            const w = mapArea.clientWidth;
+            const h = mapArea.clientHeight;
+            if (!w || !h) return;
+            let mw = w, mh = w / mapRatio;
+            if (mh > h) { mh = h; mw = h * mapRatio; }
+            map.style.width = mw + 'px';
+            map.style.height = mh + 'px';
+            mapW = mw; mapH = mh; U = mw / 100;
+            map.style.setProperty('--u', U + 'px');
+            sizeFx();
+        }
+
+        mapImg.addEventListener('load', () => {
+            if (mapImg.naturalWidth && mapImg.naturalHeight) {
+                mapRatio = mapImg.naturalWidth / mapImg.naturalHeight;
+            }
+            fitMap();
+        });
+        window.addEventListener('resize', fitMap);
+        window.addEventListener('orientationchange', () => setTimeout(fitMap, 200));
+
+        // ---------- Виды ферм ----------
+        const FARM_TYPES = [
+            { id: 'snow', name: 'Снежная ферма', price: 10000,
+              desc: 'Пушки насыпают кучи снега. Убирайте их вручную или наймите прораба — он делает это сам.' }
+        ];
+        const farmType = id => FARM_TYPES.find(t => t.id === id) || FARM_TYPES[0];
+        const FOREMAN_MAX_PER_HOUR = (3600000 / HOLD_TIME) * ICE_PER_PILE;
+
+        let farmIdSeq = 0;
+        function newFarm(type, saved) {
+            const sv = saved || {};
+            const now = Date.now();
+            return {
+                id: ++farmIdSeq, type: type || 'snow',
+                foreman: !!sv.foreman,
+                piles: [], fTask: null, fLast: 0,
+                savedPiles: sv.piles || 0,
+                cannons: [0, 1, 2, 3].map(i => ({
+                    index: i, owned: !!(sv.cannons && sv.cannons[i]),
+                    nextAt: now + CANNON_INTERVAL, blocked: false, mistAcc: 0
+                }))
+            };
+        }
+
+        const farms = loadedFarms.slice(0, SLOT_MAX).map(sf => newFarm(sf.type, sf));
+        slotsOwned = Math.max(slotsOwned, farms.length);
+
+        function serializeFarms() {
+            try {
+                return farms.map(f => ({
+                    type: f.type, cannons: f.cannons.map(c => c.owned),
+                    foreman: f.foreman, piles: f.piles.length
+                }));
+            } catch (e) { return loadedFarms; }
+        }
+
+        let mineView = 'hub';          // 'hub' | 'build' | 'farm'
+        let viewFarm = null;           // открытая ферма
+        let farmDomAttached = false;   // карта фермы сейчас на экране
+        const farmVisible = f => farmDomAttached && f === viewFarm;
+        const farmIndex = f => farms.indexOf(f) + 1;
+        const ownedCannons = f => f.cannons.filter(c => c.owned).length;
+
+        // Лёд/час: только пассивный способ (с прорабом), его ограничивают пушки и скорость прораба
+        function farmRate(f) {
+            if (!f.foreman) return 0;
+            const supply = ownedCannons(f) * PILES_PER_MIN_PER_CANNON * 60 * ICE_PER_PILE;
+            return Math.min(supply, FOREMAN_MAX_PER_HOUR);
+        }
+        const totalRate = () => farms.reduce((sum, f) => sum + farmRate(f), 0);
+
+        // ---------- Слоты пушек на карте ----------
+        // позиции площадок (% от карты); side: куда смотрит пушка (+1 вправо, -1 влево)
+        const SLOT_DEFS = [
+            { x: 10.8, y: 33.8, side: 1 },   // 1 — слева сверху
+            { x: 89.2, y: 33.8, side: -1 },  // 2 — справа сверху
+            { x: 10.6, y: 60.1, side: 1 },   // 3 — слева снизу
+            { x: 89.6, y: 60.1, side: -1 }   // 4 — справа снизу
+        ];
+
+        const LOCK_SVG = `
+            <svg class="lock-icon" viewBox="0 0 24 24">
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="#e5e7eb" stroke-width="2.6" stroke-linecap="round"/>
+                <rect x="5" y="10" width="14" height="11" rx="2.5" fill="#fbbf24" stroke="#92400e" stroke-width="1.5"/>
+                <circle cx="12" cy="15.2" r="1.6" fill="#92400e"/>
+                <rect x="11.2" y="15.5" width="1.6" height="3" rx="0.8" fill="#92400e"/>
+            </svg>`;
+
+        // Вид (DOM) пушек — один на всех, показывает состояние открытой фермы
+        const cannonViews = SLOT_DEFS.map((def, i) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            slot.style.left = def.x + '%';
+            slot.style.top = def.y + '%';
+
+            const cannonEl = document.createElement('div');
+            cannonEl.className = 'cannon' + (def.side === -1 ? ' flip' : '');
+            const img = document.createElement('img');
+            img.src = 'assets/pushka.png';
+            img.draggable = false;
+            cannonEl.appendChild(img);
+
+            const lockBox = document.createElement('div');
+            lockBox.className = 'lock-box';
+            lockBox.innerHTML = LOCK_SVG + '<div class="price">$' + fmt(CANNON_PRICES[i]) + '</div>';
+
+            slot.appendChild(cannonEl);
+            slot.appendChild(lockBox);
+            map.appendChild(slot);
+
+            const v = { index: i, def, slot, cannonEl, img, lockBox, priceEl: lockBox.querySelector('.price') };
+            lockBox.addEventListener('click', () => { if (viewFarm) buyCannon(viewFarm, i); });
+            return v;
+        });
+
+        function buyCannon(f, i) {
+            const c = f.cannons[i];
+            if (c.owned) return;
+            const v = cannonViews[i];
+            const price = CANNON_PRICES[i];
+            if (dollarCount < price) {
+                denyFlash(v.lockBox);
+                denyFlash(uiDollarBox);
+                return;
+            }
+            spendDollars(price);
+            c.owned = true;
+            c.nextAt = Date.now() + CANNON_INTERVAL;
+            c.blocked = false;
+            v.slot.classList.add('unlocked');
+            const flip = v.cannonEl.classList.contains('flip');
+            v.cannonEl.animate(
+                [{ opacity: 0, transform: 'translate(-50%, -80%)' + (flip ? ' scaleX(-1)' : '') },
+                 { opacity: 1, transform: 'translate(-50%, -56%)' + (flip ? ' scaleX(-1)' : '') }],
+                { duration: 300, easing: 'ease-out' }
+            );
+            updateForemanRate();
+            saveState();
+        }
+
+        // ---------- Прораб ----------
+        const foremanEl = document.createElement('div');
+        foremanEl.id = 'foreman';
+        foremanEl.className = 'locked';
+        foremanEl.innerHTML = '<img id="foreman-img" src="assets/prorab.png" alt="foreman" draggable="false">';
+        map.appendChild(foremanEl);
+
+        const foremanLock = document.createElement('div');
+        foremanLock.id = 'foreman-lock';
+        foremanLock.innerHTML = LOCK_SVG + '<div class="price">$' + fmt(FOREMAN_PRICE) + '</div>';
+        map.appendChild(foremanLock);
+
+        const foremanRateEl = document.createElement('div');
+        foremanRateEl.id = 'foreman-rate';
+        foremanRateEl.innerHTML = '<div class="ico"></div><div class="txt">0/ч</div>';
+        map.appendChild(foremanRateEl);
+        const foremanRateTxt = foremanRateEl.querySelector('.txt');
+
+        function updateForemanRate() {
+            if (farmDomAttached && viewFarm && viewFarm.foreman) {
+                foremanRateTxt.innerText = fmt(farmRate(viewFarm)) + '/ч';
+                foremanRateEl.classList.add('show');
+            } else {
+                foremanRateEl.classList.remove('show');
+            }
+        }
+
+        function buyForeman(f) {
+            if (f.foreman) return;
+            if (dollarCount < FOREMAN_PRICE) {
+                denyFlash(foremanLock);
+                denyFlash(uiDollarBox);
+                return;
+            }
+            spendDollars(FOREMAN_PRICE);
+            f.foreman = true;
+            foremanEl.classList.remove('locked');
+            foremanLock.classList.remove('show');
+            updateForemanRate();
+            saveState();
+        }
+        foremanLock.addEventListener('click', () => { if (viewFarm) buyForeman(viewFarm); });
+
+        // Цены краснеют, если не хватает денег; хаб и выбор вида перерисовываются
+        function updatePriceColors() {
+            if (farmDomAttached && viewFarm) {
+                cannonViews.forEach((v, i) => {
+                    if (!viewFarm.cannons[i].owned) v.priceEl.classList.toggle('poor', dollarCount < CANNON_PRICES[i]);
+                });
+                if (!viewFarm.foreman) foremanLock.querySelector('.price').classList.toggle('poor', dollarCount < FOREMAN_PRICE);
+            }
+            if (currentTab === 'mining') {
+                if (mineView === 'hub') renderHub();
+                else if (mineView === 'build') renderBuild();
+            }
+        }
+
+        // ---------- Хаб: общая добыча и список слотов ----------
+        const hubRateVal = $('hub-rate');
+        const hubCount = $('hub-count');
+        const hubList = $('hub-list');
+        const hubBuild = $('hub-build');
+
+        function renderHub() {
+            hubRateVal.innerText = fmt(totalRate());
+            hubCount.innerText = farms.length + '/' + slotsOwned;
+            hubBuild.classList.toggle('disabled', farms.length >= slotsOwned);
+            hubList.innerHTML = '';
+
+            for (let i = 0; i < SLOT_MAX; i++) {
+                const card = document.createElement('div');
+                if (i < farms.length) {
+                    const f = farms[i];
+                    card.className = 'slot-card';
+                    card.innerHTML =
+                        '<div class="slot-ico"></div>' +
+                        '<div class="slot-main"><div class="slot-name">' + farmType(f.type).name + ' №' + (i + 1) + '</div>' +
+                        '<div class="slot-sub">Пушки ' + ownedCannons(f) + '/4 · ' + (f.foreman ? 'прораб нанят' : 'без прораба') + '</div></div>' +
+                        '<div class="slot-right"><div class="slot-rate' + (f.foreman ? '' : ' dim') + '">' +
+                        (f.foreman ? fmt(farmRate(f)) + '/ч' : 'вручную') + '</div></div>' +
+                        '<div class="slot-arrow">›</div>';
+                    card.addEventListener('click', () => showMineView('farm', f));
+                } else if (i < slotsOwned) {
+                    card.className = 'slot-card empty';
+                    card.innerHTML =
+                        '<div class="slot-ico">+</div>' +
+                        '<div class="slot-main"><div class="slot-name">Свободный слот</div>' +
+                        '<div class="slot-sub">Нажмите, чтобы построить ферму</div></div>';
+                    card.addEventListener('click', () => showMineView('build'));
+                } else {
+                    const n = i + 1;
+                    const price = SLOT_PRICES[n];
+                    card.className = 'slot-card locked';
+                    card.innerHTML =
+                        '<div class="slot-ico">' + LOCK_SVG.replace('class="lock-icon"', '') + '</div>' +
+                        '<div class="slot-main"><div class="slot-name">Слот ' + n + '</div>' +
+                        '<div class="slot-sub">Закрыт</div></div>' +
+                        '<div class="cost' + (dollarCount < price ? ' poor' : '') + '">$' + fmt(price) + '</div>';
+                    card.addEventListener('click', () => buySlot(n, card));
+                }
+                hubList.appendChild(card);
+            }
+        }
+
+        function buySlot(n, card) {
+            if (n !== slotsOwned + 1) { toast('Сначала откройте слот ' + (slotsOwned + 1)); return; }
+            const price = SLOT_PRICES[n];
+            if (dollarCount < price) {
+                denyFlash(card);
+                denyFlash(uiDollarBox);
+                return;
+            }
+            spendDollars(price);
+            slotsOwned = n;
+            renderHub();
+            toast('Слот ' + n + ' открыт');
+            saveState();
+        }
+
+        hubBuild.addEventListener('click', () => {
+            if (farms.length >= slotsOwned) {
+                denyFlash(hubBuild);
+                toast(slotsOwned < SLOT_MAX ? 'Нет свободных слотов — откройте новый' : 'Нет свободных слотов');
+                return;
+            }
+            showMineView('build');
+        });
+
+        // ---------- Выбор вида фермы ----------
+        const buildList = $('build-list');
+
+        function renderBuild() {
+            buildList.innerHTML = '';
+            FARM_TYPES.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'type-card';
+                card.innerHTML =
+                    '<div class="type-top"><div class="slot-ico"></div><div class="type-name">' + t.name + '</div></div>' +
+                    '<div class="type-desc">' + t.desc + '</div>' +
+                    '<div class="type-bottom"><div class="cost' + (dollarCount < t.price ? ' poor' : '') + '">$' + fmt(t.price) + '</div>' +
+                    '<button class="type-btn">Построить</button></div>';
+                card.querySelector('.type-btn').addEventListener('click', () => buildFarm(t, card));
+                buildList.appendChild(card);
+            });
+        }
+
+        function buildFarm(t, card) {
+            if (farms.length >= slotsOwned) { toast('Нет свободных слотов'); return; }
+            if (dollarCount < t.price) {
+                denyFlash(card);
+                denyFlash(uiDollarBox);
+                return;
+            }
+            spendDollars(t.price);
+            const f = newFarm(t.id, null);
+            farms.push(f);
+            saveState();
+            showMineView('farm', f);
+        }
+
+        $('build-back').addEventListener('click', () => showMineView('hub'));
+        $('farm-back').addEventListener('click', () => showMineView('hub'));
+
+        // ---------- Переключение видов вкладки «Добыча» ----------
+        const mineViews = { hub: $('mine-hub'), build: $('mine-build'), farm: $('mine-farm') };
+
+        function showMineView(view, farm) {
+            if (farmDomAttached) detachFarmDom();
+            mineView = view;
+            viewFarm = view === 'farm' ? (farm || viewFarm) : null;
+            Object.keys(mineViews).forEach(k => mineViews[k].classList.toggle('hidden', k !== view));
+            refreshMine();
+        }
+
+        // Показывает/прячет карту фермы в зависимости от текущей вкладки и вида
+        function refreshMine() {
+            const should = currentTab === 'mining' && mineView === 'farm' && !!viewFarm;
+            if (should && !farmDomAttached) attachFarmDom();
+            else if (!should && farmDomAttached) detachFarmDom();
+            if (currentTab === 'mining') {
+                if (mineView === 'hub') renderHub();
+                else if (mineView === 'build') renderBuild();
+            }
+        }
+
+        function attachFarmDom() {
+            fitMap();
+            farmDomAttached = true;
+            const f = viewFarm;
+            $('farm-title').innerText = farmType(f.type).name + ' №' + farmIndex(f);
+            cannonViews.forEach((v, i) => {
+                const c = f.cannons[i];
+                v.slot.classList.toggle('unlocked', c.owned);
+                v.cannonEl.classList.toggle('idle', c.blocked);
+            });
+            foremanEl.classList.toggle('locked', !f.foreman);
+            foremanEl.classList.toggle('working', !!f.fTask);
+            foremanLock.classList.toggle('show', !f.foreman);
+            updateForemanRate();
+            f.piles.forEach(attachPileView);
+            updatePriceColors();
+        }
+
+        function detachFarmDom() {
+            if (viewFarm) viewFarm.piles.forEach(p => { releasePile(p); p.el = null; p.body = null; p.bar = null; });
+            pilesLayer.innerHTML = '';
+            parts.length = 0;
+            streams.length = 0;
+            farmDomAttached = false;
+        }
+
+        // ---------- Кучи снега ----------
+        const cellKey = (c, r) => c + ',' + r;
+        const GROW_MS = 1300; // за это время куча вырастает (пока на неё сыплется снег)
+        const clamp01 = v => Math.max(0, Math.min(1, v));
+        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+        function freeCells(f) {
+            const used = new Set(f.piles.map(p => p.key));
+            const res = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (isBlockedCell(c, r)) continue;
+                    if (used.has(cellKey(c, r))) continue;
+                    res.push({ c, r });
+                }
+            }
+            return res;
+        }
+
+        // Рост кучи t: 0..1 — поднимается снизу, в конце мягко «оседает»
+        function applyGrow(p, t) {
+            if (!p.body) return;
+            const e = easeOutCubic(t);
+            let sc = 0.15 + 0.85 * e;
+            if (t > 0.85) sc *= 1 + 0.05 * Math.sin((t - 0.85) / 0.15 * Math.PI);
+            p.body.style.opacity = Math.min(1, t / 0.15);
+            p.body.style.transform = 'scale(' + sc + ')';
+            p.body.style.clipPath = 'inset(' + ((1 - e) * 30) + '% 0 0 0)';
+        }
+
+        function makePileReady(p) {
+            if (p.ready) return;
+            p.ready = true;
+            if (p.el) {
+                p.body.style.opacity = '';
+                p.body.style.transform = '';
+                p.body.style.clipPath = '';
+                p.el.classList.add('ready'); // только теперь кучу можно убирать
+            }
+        }
+
+        function releasePile(p) {
+            if (p.holder === 'player') {
+                p.holder = null;
+                p.pointerId = null;
+                if (p.el) p.el.classList.remove('active');
+            }
+        }
+
+        // Создаёт DOM кучи (только для открытой фермы)
+        function attachPileView(p) {
+            const el = document.createElement('div');
+            el.className = 'pile' + (p.ready ? ' ready' : '') + (p.holder ? ' active' : '');
+            el.style.left = p.x + '%';
+            el.style.top = p.y + '%';
+            el.innerHTML = '<div class="pile-bar"><div></div></div><div class="pile-body"><img src="assets/snow.png" draggable="false" alt=""></div>';
+            pilesLayer.appendChild(el);
+            p.el = el;
+            p.body = el.querySelector('.pile-body');
+            p.bar = el.querySelector('.pile-bar > div');
+
+            // Игрок: зажать и держать 1.5 сек (только на выросшей куче)
+            el.addEventListener('pointerdown', (e) => {
+                if (!p.ready || p.holder) return;
+                e.preventDefault();
+                p.holder = 'player';
+                p.startAt = Date.now();
+                p.pointerId = e.pointerId;
+                el.classList.add('active');
+                try { el.setPointerCapture(e.pointerId); } catch (err) {}
+            });
+            const end = (e) => {
+                if (p.holder === 'player' && p.pointerId === e.pointerId) releasePile(p);
+            };
+            el.addEventListener('pointerup', end);
+            el.addEventListener('pointercancel', end);
+            el.addEventListener('lostpointercapture', end);
+            el.addEventListener('contextmenu', e => e.preventDefault());
+
+            if (!p.ready) applyGrow(p, clamp01((Date.now() - p.growStart) / GROW_MS));
+        }
+
+        function createPile(f, cell, fromIdx) {
+            const pos = cellCenter(cell.c, cell.r);
+            const p = {
+                farm: f, key: cellKey(cell.c, cell.r),
+                x: pos.x + (Math.random() - 0.5) * 1.6,
+                y: pos.y + (Math.random() - 0.5) * 1.2,
+                ready: false, growStart: Date.now(),
+                holder: null, startAt: 0, pointerId: null,
+                el: null, body: null, bar: null
+            };
+            f.piles.push(p);
+
+            if (farmVisible(f)) {
+                attachPileView(p);
+                if (fromIdx !== null && fromIdx !== undefined) {
+                    applyGrow(p, 0);
+                    startStream(f, fromIdx, p);   // струя + рост
+                } else {
+                    makePileReady(p);
+                }
+            } else {
+                makePileReady(p);                 // ферма не на экране — куча сразу готова
+            }
+            return p;
+        }
+
+        // ---------- Струя снега из пушек (canvas) ----------
+        const fx = $('fx');
+        const fctx = fx.getContext('2d');
+        let dpr = 1;
+        const parts = [];    // частицы: 0 — снежинка в полёте, 1 — туман у дула, 2 — снежная пыль
+        const streams = [];  // активные струи в клетки
+
+        function sizeFx() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            fx.width = Math.max(1, Math.round(mapW * dpr));
+            fx.height = Math.max(1, Math.round(mapH * dpr));
+        }
+
+        function muzzlePx(def) {
+            return {
+                x: def.x * mapW / 100 + def.side * U * 4.4,
+                y: def.y * mapH / 100 - U * 4.2
+            };
+        }
+
+        function startStream(f, ci, p) {
+            streams.push({
+                ci, tx: p.x * mapW / 100, ty: p.y * mapH / 100,
+                start: Date.now(), dur: GROW_MS * 0.8, acc: 0
+            });
+            // отдача пушки
+            cannonViews[ci].img.animate(
+                [{ transform: 'scale(1)' }, { transform: 'scale(0.95, 1.05)' }, { transform: 'scale(1)' }],
+                { duration: 260, easing: 'ease-out', iterations: 3 }
+            );
+        }
+
+        function emitSnow(s, now) {
+            const m = muzzlePx(cannonViews[s.ci].def);
+            parts.push({
+                k: 0, born: now, T: 0.45 + Math.random() * 0.25,
+                sx: m.x + (Math.random() - 0.5) * U * 1.2,
+                sy: m.y + (Math.random() - 0.5) * U * 1.2,
+                ex: s.tx + (Math.random() - 0.5) * U * 5.5,
+                ey: s.ty + (Math.random() - 0.3) * U * 3,
+                h: U * (5 + Math.random() * 5),
+                size: U * (0.45 + Math.random() * 0.9)
+            });
+        }
+
+        function emitMist(ci, now, strong) {
+            const def = cannonViews[ci].def;
+            const m = muzzlePx(def);
+            parts.push({
+                k: 1, born: now, life: 0.5 + Math.random() * 0.4,
+                x: m.x, y: m.y,
+                vx: def.side * U * (3 + Math.random() * 5),
+                vy: -U * (1 + Math.random() * 3),
+                r: U * (0.8 + Math.random() * 0.8),
+                a: strong ? 0.4 : 0.22
+            });
+        }
+
+        function renderFx(now, dt) {
+            fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            fctx.clearRect(0, 0, mapW, mapH);
+            if (!farmDomAttached || !viewFarm) { parts.length = 0; streams.length = 0; return; }
+
+            // эмиссия струй
+            for (let i = streams.length - 1; i >= 0; i--) {
+                const s = streams[i];
+                if (now > s.start + s.dur) { streams.splice(i, 1); continue; }
+                s.acc += dt * 0.11; // ~110 частиц в секунду
+                while (s.acc >= 1) { s.acc -= 1; emitSnow(s, now); }
+                if (Math.random() < dt / 50) emitMist(s.ci, now, true);
+            }
+            // лёгкий туман у дула, пока пушка работает
+            viewFarm.cannons.forEach((c, i) => {
+                if (c.owned && !c.blocked) {
+                    c.mistAcc = (c.mistAcc || 0) + dt * 0.006;
+                    while (c.mistAcc >= 1) { c.mistAcc -= 1; emitMist(i, now, false); }
+                }
+            });
+
+            // отрисовка
+            for (let i = parts.length - 1; i >= 0; i--) {
+                const q = parts[i];
+                const age = (now - q.born) / 1000;
+                if (q.k === 0) {
+                    const t = age / q.T;
+                    if (t >= 1) {
+                        parts.splice(i, 1);
+                        if (Math.random() < 0.3) {
+                            parts.push({ k: 2, born: now, life: 0.45, x: q.ex, y: q.ey, r: U * (1 + Math.random() * 0.8), a: 0.4 });
+                        }
+                        continue;
+                    }
+                    const x = q.sx + (q.ex - q.sx) * t;
+                    const y = q.sy + (q.ey - q.sy) * t - 4 * q.h * t * (1 - t);
+                    fctx.globalAlpha = t > 0.85 ? (1 - t) / 0.15 : 1;
+                    fctx.fillStyle = '#f4f9ff';
+                    fctx.beginPath();
+                    fctx.arc(x, y, q.size * (1 - 0.3 * t), 0, 6.2832);
+                    fctx.fill();
+                } else {
+                    const t = age / q.life;
+                    if (t >= 1) { parts.splice(i, 1); continue; }
+                    let x, y, r;
+                    if (q.k === 1) { x = q.x + q.vx * age; y = q.y + q.vy * age; r = q.r * (1 + 1.8 * t); }
+                    else { x = q.x; y = q.y - U * 3 * age; r = q.r * (1 + 1.5 * t); }
+                    fctx.globalAlpha = q.a * (1 - t);
+                    fctx.fillStyle = '#ffffff';
+                    fctx.beginPath();
+                    fctx.arc(x, y, r, 0, 6.2832);
+                    fctx.fill();
+                }
+            }
+            fctx.globalAlpha = 1;
+        }
+
+        // ---------- Сбор кучи (игроком или прорабом) ----------
+        function collectPile(p) {
+            const f = p.farm;
+            const idx = f.piles.indexOf(p);
+            if (idx < 0) return;
+            f.piles.splice(idx, 1);
+
+            if (farmVisible(f) && p.el) {
+                const rect = p.el.getBoundingClientRect();
+                const cr = gameContainer.getBoundingClientRect();
+                const sx = rect.left - cr.left + rect.width / 2;
+                const sy = rect.top - cr.top + rect.height / 2;
+                const el = p.el;
+                el.classList.remove('ready', 'active');
+                const a = p.body.animate(
+                    [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(0.1)', opacity: 0 }],
+                    { duration: 240, easing: 'ease-in', fill: 'forwards' }
+                );
+                a.onfinish = () => el.remove(); // куча сжимается вниз
+                for (let i = 0; i < ICE_PER_PILE; i++) {
+                    setTimeout(() => flyIce(sx, sy, () => addIce(1), 70), i * 45);
+                }
+            } else {
+                if (p.el) p.el.remove();
+                addIce(ICE_PER_PILE);
+            }
+            p.el = null;
+        }
+
+        // ---------- Симуляция фермы: пушки, рост, прораб ----------
+        function updateCannons(f, now) {
+            f.cannons.forEach(c => {
+                if (!c.owned) return;
+                let guard = 0;
+                while (now >= c.nextAt && guard++ < 60) {
+                    const free = freeCells(f);
+                    if (!free.length) {
+                        // мест нет — пушка простаивает
+                        c.blocked = true;
+                        c.nextAt = now + CANNON_INTERVAL;
+                        break;
+                    }
+                    c.blocked = false;
+                    createPile(f, free[Math.floor(Math.random() * free.length)], c.index);
+                    c.nextAt += CANNON_INTERVAL;
+                }
+                if (farmVisible(f)) cannonViews[c.index].cannonEl.classList.toggle('idle', c.blocked);
+            });
+        }
+
+        function updateGrowth(f, now) {
+            for (const p of f.piles) {
+                if (p.ready) continue;
+                const t = clamp01((now - p.growStart) / GROW_MS);
+                if (t >= 1) makePileReady(p);
+                else applyGrow(p, t);
+            }
+        }
+
+        function updatePlayerHolds(f, now) {
+            for (let i = f.piles.length - 1; i >= 0; i--) {
+                const p = f.piles[i];
+                if (p.holder === 'player' && now - p.startAt >= HOLD_TIME) collectPile(p);
+            }
+        }
+
+        function updateForeman(f, now) {
+            if (!f.foreman) return;
+            let guard = 0;
+            while (guard++ < 200) {
+                if (!f.fTask) {
+                    const cand = f.piles.filter(p => p.ready && !p.holder);
+                    if (!cand.length) {
+                        f.fLast = 0;
+                        if (farmVisible(f)) foremanEl.classList.remove('working');
+                        return;
+                    }
+                    const p = cand[Math.floor(Math.random() * cand.length)];
+                    p.holder = 'foreman';
+                    p.startAt = f.fLast || now;
+                    if (p.el) p.el.classList.add('active');
+                    f.fLast = 0;
+                    f.fTask = p;
+                    if (farmVisible(f)) foremanEl.classList.add('working');
+                }
+                if (now - f.fTask.startAt >= HOLD_TIME) {
+                    const finishAt = f.fTask.startAt + HOLD_TIME;
+                    const p = f.fTask;
+                    f.fTask = null;
+                    f.fLast = finishAt;
+                    collectPile(p);
+                    continue;
+                }
+                return;
+            }
+        }
+
+        // ---------- Оффлайн-прогресс (без ограничения по времени) ----------
+        let lastTickAt = Date.now();
+
+        function fmtDuration(ms) {
+            const m = Math.floor(ms / 60000);
+            const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
+            const out = [];
+            if (d) out.push(d + ' д');
+            if (h) out.push(h + ' ч');
+            if (mm || !out.length) out.push(mm + ' мин');
+            return out.join(' ');
+        }
+
+        // Считает все фермы за прошедшее время. fromLoad — запуск игры (кучи берутся из сохранения)
+        function applyOfflineAll(elapsed, fromLoad) {
+            const now = Date.now();
+            let collectedTotal = 0, manualProduced = 0, manualOnMap = 0;
+            let anyCannon = false, anyForeman = false, anyManual = false;
+
+            farms.forEach(f => {
+                const p0 = fromLoad ? f.savedPiles : f.piles.length;
+                f.piles.forEach(p => { if (p.el) p.el.remove(); p.el = null; });
+                f.piles.length = 0;
+                f.fTask = null;
+                f.fLast = 0;
+                f.savedPiles = 0;
+                if (farmVisible(f)) pilesLayer.innerHTML = '';
+
+                const active = f.cannons.filter(c => c.owned);
+                const n = active.length;
+                if (n) anyCannon = true;
+                const produced = Math.floor(n * elapsed / CANNON_INTERVAL);
+
+                let collected = 0, remaining;
+                if (f.foreman) {
+                    const capacity = Math.floor(elapsed / HOLD_TIME); // прораб убирает кучу за 1.5 сек
+                    collected = Math.min(p0 + produced, capacity);
+                    remaining = Math.min(MAX_PILES, p0 + produced - collected);
+                    if (n) anyForeman = true;
+                } else {
+                    remaining = Math.min(MAX_PILES, p0 + produced); // карта заполнилась — пушки простаивают
+                    if (n) { anyManual = true; manualProduced += produced; manualOnMap += remaining; }
+                }
+
+                for (let i = 0; i < remaining; i++) {
+                    const free = freeCells(f);
+                    if (!free.length) break;
+                    createPile(f, free[Math.floor(Math.random() * free.length)], null);
+                }
+
+                // таймеры пушек начинаются заново, чтобы не было двойного счёта
+                active.forEach(c => { c.nextAt = now + CANNON_INTERVAL; c.blocked = false; });
+                collectedTotal += collected;
+            });
+
+            if (collectedTotal > 0) addIce(collectedTotal * ICE_PER_PILE);
+            saveState();
+
+            if (elapsed >= 60000 && anyCannon) {
+                const lines = [];
+                if (anyForeman) {
+                    lines.push('Прорабы собрали куч: ' + fmt(collectedTotal));
+                    lines.push('Лёд: +' + fmt(collectedTotal * ICE_PER_PILE));
+                }
+                if (anyManual) {
+                    lines.push('Пушки без прораба насыпали куч: ' + fmt(manualProduced));
+                    lines.push('Ждут сбора на фермах: ' + fmt(manualOnMap));
+                }
+                showOfflinePopup(elapsed, lines);
+            }
+        }
+
+        const offlinePopup = $('offline-popup');
+        $('offline-ok').addEventListener('click', () => offlinePopup.classList.remove('show'));
+
+        function showOfflinePopup(elapsed, lines) {
+            $('offline-time').innerText = 'Вас не было: ' + fmtDuration(elapsed);
+            $('offline-lines').innerHTML = lines.join('<br>');
+            offlinePopup.classList.add('show');
+        }
+
+        // ---------- Главный цикл ----------
+        function tick() {
+            const now = Date.now();
+            // Если страницу «заморозили» (свернули приложение, фон) — досчитываем пропущенное время
+            if (now - lastTickAt > 5000) {
+                const gap = now - lastTickAt;
+                lastTickAt = now;
+                applyOfflineAll(gap, false);
+                return;
+            }
+            lastTickAt = now;
+            farms.forEach(f => {
+                updateCannons(f, now);
+                updateGrowth(f, now);
+                updatePlayerHolds(f, now);
+                updateForeman(f, now);
+            });
+        }
+
+        let lastFx = Date.now();
+        function renderBars() {
+            const now = Date.now();
+            const dt = Math.min(100, now - lastFx);
+            lastFx = now;
+            if (farmDomAttached && viewFarm) {
+                for (const p of viewFarm.piles) {
+                    if (p.holder && p.bar) {
+                        const k = clamp01((now - p.startAt) / HOLD_TIME);
+                        p.bar.style.width = (k * 100) + '%';
+                    }
+                }
+            }
+            tick();
+            renderFx(now, dt);
+            requestAnimationFrame(renderBars);
+        }
+        requestAnimationFrame(renderBars);
+        // запасной таймер: фермы работают, даже когда вкладка браузера в фоне
+        setInterval(tick, 500);
+
+        // Оффлайн-прогресс после закрытия игры
+        if (savedAtLoaded) applyOfflineAll(Math.max(0, Date.now() - savedAtLoaded), true);
+        lastTickAt = Date.now();
+        updatePriceColors();
+
+        // Ловим отпускание пальца/мыши вне кучи
+        const releaseHeld = (e) => {
+            if (farmDomAttached && viewFarm) {
+                viewFarm.piles.forEach(p => { if (p.holder === 'player' && p.pointerId === e.pointerId) releasePile(p); });
+            }
+        };
+        window.addEventListener('pointerup', releaseHeld);
+        window.addEventListener('pointercancel', releaseHeld);
+
+        // Запрет контекстного меню (долгое нажатие на телефоне)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>
