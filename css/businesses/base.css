@@ -1,0 +1,224 @@
+        /* ---------------- ЭКРАН «ДОБЫЧА» ---------------- */
+        #screen-mining {
+            background: #274b73; /* однотонный фон */
+            z-index: 50;
+            touch-action: none;
+        }
+
+        /* Область под карту: между верхней панелью и нижним меню, с отступами от краёв */
+        #map-area {
+            position: absolute;
+            top: 124px;
+            bottom: 83px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --u = 1% ширины карты (задаётся из JS), все размеры внутри карты считаются от неё */
+        #map {
+            position: relative;
+            flex-shrink: 0;
+            --u: 4px;
+        }
+
+        #map-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Пушки и замки */
+        .slot {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .cannon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: calc(var(--u) * 16);
+            transform: translate(-50%, -56%);
+            pointer-events: none;
+            display: none;
+        }
+        .cannon.flip { transform: translate(-50%, -56%) scaleX(-1); }
+        .cannon img { width: 100%; display: block; }
+        .slot.unlocked .cannon { display: block; }
+        .cannon.idle img { filter: grayscale(0.5) brightness(0.85); }
+
+        .lock-box {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(var(--u) * 0.6);
+            cursor: pointer;
+            z-index: 5;
+            padding: calc(var(--u) * 1);
+        }
+        .slot.unlocked .lock-box { display: none; }
+
+        .lock-icon {
+            width: calc(var(--u) * 6);
+            height: calc(var(--u) * 6);
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+        }
+
+        .price {
+            background: rgba(0, 0, 0, 0.78);
+            color: #86efac;
+            border: 2px solid #4caf50;
+            border-radius: calc(var(--u) * 1.4);
+            font-weight: 900;
+            font-size: calc(var(--u) * 2.6);
+            line-height: 1.1;
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+            white-space: nowrap;
+            text-shadow: 0 1px 0 #000;
+        }
+        .price.poor { color: #fca5a5; border-color: #ef4444; }
+
+        .lock-box.deny { animation: lockDeny 0.4s; }
+        @keyframes lockDeny {
+            0%, 100% { transform: translate(-50%, -50%); }
+            20% { transform: translate(calc(-50% - 5px), -50%); }
+            40% { transform: translate(calc(-50% + 5px), -50%); }
+            60% { transform: translate(calc(-50% - 4px), -50%); }
+            80% { transform: translate(calc(-50% + 4px), -50%); }
+        }
+
+        /* Прораб */
+        #foreman {
+            position: absolute;
+            left: 81%;
+            top: 88%;
+            width: calc(var(--u) * 25);
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+        }
+        #foreman-img {
+            width: 100%;
+            display: block;
+            transform-origin: center bottom;
+        }
+        #foreman.locked #foreman-img { filter: brightness(0.22) contrast(0.9); }
+        #foreman.working #foreman-img { animation: foremanBob 0.5s ease-in-out infinite alternate; }
+        @keyframes foremanBob {
+            from { transform: scale(1, 1); }
+            to { transform: scale(1.02, 0.98); }
+        }
+
+        #foreman-lock {
+            position: absolute;
+            left: 81%;
+            top: 78%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(var(--u) * 0.6);
+            cursor: pointer;
+            z-index: 6;
+            padding: calc(var(--u) * 1);
+        }
+        #foreman-lock.show { display: flex; }
+        #foreman-lock .lock-icon { width: calc(var(--u) * 8); height: calc(var(--u) * 8); }
+        #foreman-lock .price { font-size: calc(var(--u) * 3); }
+        #foreman-lock.deny { animation: lockDeny 0.4s; }
+
+        /* Счётчик «льда в час» от прораба */
+        #foreman-rate {
+            position: absolute;
+            left: 81%;
+            top: 89%;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.92);
+            border: 2px solid #3b82f6;
+            border-radius: calc(var(--u) * 1.6);
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1.2) calc(var(--u) * 0.3) calc(var(--u) * 0.6);
+            box-shadow: 0 3px 0 #1e40af;
+            white-space: nowrap;
+            z-index: 6;
+            pointer-events: none;
+        }
+        #foreman-rate.show { display: flex; }
+        #foreman-rate .ico {
+            width: calc(var(--u) * 3.2);
+            height: calc(var(--u) * 3.2);
+            background: var(--img-ice) center/contain no-repeat;
+            margin-right: calc(var(--u) * 0.6);
+        }
+        #foreman-rate .txt {
+            font-weight: 900;
+            font-size: calc(var(--u) * 2.5);
+            color: #1e3a8a;
+        }
+
+        /* Кучи снега */
+        #piles-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .pile {
+            position: absolute;
+            width: calc(var(--u) * 9.5);
+            transform: translate(-50%, -50%);
+            pointer-events: none;   /* пока куча растёт, её нельзя взять */
+            touch-action: none;
+            padding: calc(var(--u) * 0.6);
+        }
+        .pile.ready { pointer-events: auto; cursor: pointer; }
+        .pile-body { transform-origin: 50% 90%; }
+        .pile img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+        }
+        .pile.active img { transform: scale(0.96); }
+
+
+        .pile-bar {
+            position: absolute;
+            left: 12%;
+            width: 76%;
+            top: calc(var(--u) * -1.6);
+            height: calc(var(--u) * 1.4);
+            background: rgba(0, 0, 0, 0.55);
+            border: 2px solid #fff;
+            border-radius: calc(var(--u) * 1);
+            overflow: hidden;
+            display: none;
+            pointer-events: none;
+        }
+        .pile.active .pile-bar { display: block; }
+        .pile-bar > div {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffeb3b);
+        }
+
+        /* Слой частиц снега (струя из пушек) */
+        #fx {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 8;
+        }

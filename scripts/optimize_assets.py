@@ -26,8 +26,8 @@ MAX_SIDE = {
 def main() -> None:
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
     assets = root / "assets"
-    game_js = root / "js" / "game.js"
-    styles_css = root / "css" / "styles.css"
+    assets_js = root / "js" / "core" / "assets-loading.js"
+    base_css = root / "css" / "core" / "base.css"
     if not assets.is_dir():
         sys.exit(f"Не найдена папка assets: {assets}")
 
@@ -53,23 +53,23 @@ def main() -> None:
         total_after += after
         print(f"{png.stem}: {before / 1024:.0f} KB -> {after / 1024:.0f} KB")
 
-    if not game_js.is_file():
-        sys.exit(f"Не найден файл игровой логики: {game_js}")
-    source = game_js.read_text(encoding="utf-8")
+    if not assets_js.is_file():
+        sys.exit(f"Не найден файл загрузки изображений: {assets_js}")
+    source = assets_js.read_text(encoding="utf-8")
     updated, count = re.subn(r"const ASSET_EXT = '(?:png|webp)';", "const ASSET_EXT = 'webp';", source)
     if count != 1:
-        sys.exit("Не удалось однозначно найти ASSET_EXT в js/game.js; файлы WebP созданы, код не изменён")
-    game_js.write_text(updated, encoding="utf-8")
-    if not styles_css.is_file():
-        sys.exit(f"Не найден файл стилей: {styles_css}")
-    css_source = styles_css.read_text(encoding="utf-8")
-    css_updated, css_count = re.subn(r"(\.\./assets/(?:fon|ice|profile))\.png", r"\1.webp", css_source)
+        sys.exit("Не удалось однозначно найти ASSET_EXT в js/core/assets-loading.js; файлы WebP созданы, код не изменён")
+    assets_js.write_text(updated, encoding="utf-8")
+    if not base_css.is_file():
+        sys.exit(f"Не найден файл базовых стилей: {base_css}")
+    css_source = base_css.read_text(encoding="utf-8")
+    css_updated, css_count = re.subn(r"(\.\./\.\./assets/(?:fon|ice|profile))\.png", r"\1.webp", css_source)
     if css_count != 3:
-        sys.exit("Не удалось обновить все 3 CSS-пути изображений; проверь css/styles.css")
-    styles_css.write_text(css_updated, encoding="utf-8")
+        sys.exit("Не удалось обновить все 3 CSS-пути изображений; проверь css/core/base.css")
+    base_css.write_text(css_updated, encoding="utf-8")
     ratio = total_before / max(total_after, 1)
     print(f"Итого: {total_before / 1024:.0f} KB -> {total_after / 1024:.0f} KB (примерно в {ratio:.1f} раза меньше)")
-    print("js/game.js переключён на WebP; исходные PNG сохранены")
+    print("js/core/assets-loading.js переключён на WebP; исходные PNG сохранены")
 
 
 if __name__ == "__main__":

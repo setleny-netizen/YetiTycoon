@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ice Miner</title>
-        <link rel="stylesheet" href="css/styles.css">
+    <title>Shaggy Tycoon</title>
+        <link rel="stylesheet" href="css/core/base.css">
+        <link rel="stylesheet" href="css/businesses/base.css">
+        <link rel="stylesheet" href="css/businesses/cutter.css">
+        <link rel="stylesheet" href="css/businesses/factory.css">
+        <link rel="stylesheet" href="css/businesses/hub.css">
+        <link rel="stylesheet" href="css/features/shop.css">
+        <link rel="stylesheet" href="css/features/glacier.css">
+        <link rel="stylesheet" href="css/features/exchange.css">
+        <link rel="stylesheet" href="css/features/overlays.css">
+        <link rel="stylesheet" href="css/features/den.css">
 </head>
 <body>
 
@@ -23,7 +32,7 @@
     <div id="game-container">
 
         <div id="top-ui">
-            <div class="profile-box"></div>
+            <div class="profile-box"><span class="profile-vip" id="profile-vip"></span></div>
             <div class="resources">
                 <div class="resource-box" id="ui-ice-box">
                     <div class="resource-icon icon-ice"></div>
@@ -38,6 +47,25 @@
 
         <!-- ===== ЭКРАН: ЛЕДНИК ===== -->
         <div id="screen-glacier" class="screen">
+            <button id="leaderboard-open" class="leaderboard-trophy" type="button" aria-label="Топ игроков" title="Топ игроков">
+                <span class="glacier-shortcut-icon"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <path d="M9 5h14v5c0 6-3 10-7 10S9 16 9 10V5Z" fill="#ffd45c" stroke="#fff4c2" stroke-width="1.5"/>
+                    <path d="M9 8H5v3c0 4 2 6 6 6M23 8h4v3c0 4-2 6-6 6" fill="none" stroke="#ffd45c" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M16 20v5m-5 2h10m-8-2h6" fill="none" stroke="#fff4c2" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="m16 8 1.1 2.2 2.4.3-1.8 1.7.4 2.4-2.1-1.2-2.1 1.2.4-2.4-1.8-1.7 2.4-.3L16 8Z" fill="#fff"/>
+                </svg></span>
+                <span class="glacier-shortcut-label">Топ</span>
+            </button>
+            <button id="clan-entry" class="clan-entry" type="button" aria-label="Кланы" title="Кланы">
+                <span class="glacier-shortcut-icon clan-pennant-frame"><svg class="clan-pennant-placeholder" viewBox="0 0 44 48" aria-hidden="true" focusable="false">
+                    <path d="M8 4h28v27l-7 13-7-8-7 8-7-13V4Z" fill="#2578bd" stroke="#d8f3ff" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M11 7h22v22l-5 10-6-7-6 7-5-10V7Z" fill="url(#clanPennantFill)"/>
+                    <defs><linearGradient id="clanPennantFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a9ecff"/><stop offset="1" stop-color="#287ac4"/></linearGradient></defs>
+                </svg>
+                <span id="clan-entry-question" class="clan-entry-question" aria-hidden="true">?</span>
+                <img id="clan-entry-emblem" class="clan-entry-emblem" alt="Эмблема клана" hidden draggable="false"></span>
+                <span class="glacier-shortcut-label">Кланы</span>
+            </button>
             <img id="floor" data-src="pol" alt="">
 
             <div id="miner-wrapper">
@@ -52,6 +80,7 @@
                 </div>
 
                 <img id="miner" data-src="miner" alt="">
+                <button id="auto-miner-toggle" type="button" class="hidden" aria-pressed="false">Стоп</button>
             </div>
         </div>
 
@@ -104,7 +133,7 @@
         <!-- ===== ЭКРАН: ДОБЫЧА ===== -->
         <div id="screen-mining" class="screen hidden">
 
-            <!-- Хаб: общая добыча, кнопка, список ферм (5 слотов без прокрутки) -->
+            <!-- Хаб: общая добыча, две страницы по четыре бизнес-слота -->
             <div id="mine-hub" class="mine-view">
                 <div class="hub-card">
                     <div class="hub-top">
@@ -118,6 +147,11 @@
                 </div>
                 <div class="hub-title"><span>Мои фермы</span><span id="hub-count">0/3</span></div>
                 <div id="hub-list"></div>
+                <div class="hub-pagination">
+                    <button id="hub-page-prev" type="button" aria-label="Предыдущая страница слотов">‹</button>
+                    <span id="hub-page-label">Страница 1 из 2</span>
+                    <button id="hub-page-next" type="button" aria-label="Следующая страница слотов">›</button>
+                </div>
             </div>
 
             <!-- Выбор вида фермы -->
@@ -172,20 +206,10 @@
                         <span class="shop-category-copy"><b>Автомайнер</b><small>Йети добывает лёд сам, даже пока игра закрыта</small></span>
                         <span class="shop-category-arrow">›</span>
                     </button>
-                    <button class="shop-category" data-shop-category="time" type="button">
-                        <span class="shop-category-icon">⏱️</span>
-                        <span class="shop-category-copy"><b>Ускорение времени</b><small>Мгновенно рассчитай работу предприятий</small></span>
-                        <span class="shop-category-arrow">›</span>
-                    </button>
-                    <button class="shop-category" data-shop-category="boost" type="button">
-                        <span class="shop-category-icon">❄️</span>
-                        <span class="shop-category-copy"><b>Ускорение добычи</b><small>Увеличь скорость добычи льда</small></span>
-                        <span class="shop-category-arrow">›</span>
-                    </button>
                     <button class="shop-category shop-category-vip" data-shop-category="vip" type="button">
                         <span class="shop-category-icon">👑</span>
-                        <span class="shop-category-copy"><b>VIP</b><small>Особые возможности появятся позже</small></span>
-                        <span class="shop-category-badge">СКОРО</span>
+                        <span class="shop-category-copy"><b>VIP</b><small>Пять уровней привилегий и бонусов</small></span>
+                        <span class="shop-category-arrow">›</span>
                     </button>
                 </div>
             </div>
@@ -214,6 +238,9 @@
                 <button class="den-hotspot den-stats" data-section="stats" aria-label="Статистика"></button>
                 <button class="den-hotspot den-promo" data-section="promo" aria-label="Промокоды"></button>
                 <button class="den-hotspot den-mail" data-section="mail" aria-label="Почта"></button>
+                <button id="den-admin-entry" class="den-admin-entry" type="button" aria-label="Открыть панель администратора" title="Панель администратора">
+                    <img src="assets/admin.png" alt="Админ-панель" draggable="false">
+                </button>
             </div>
         </div>
 
@@ -227,7 +254,6 @@
                     <button id="money-btn">Начислить</button>
                 </div>
             </div>
-            <button id="leaderboard-open" class="fm-btn profile-top-button" type="button">Топ игроков</button>
             <button id="reset-btn">Сбросить прогресс</button>
         </div>
 
@@ -268,6 +294,100 @@
             </section>
         </div>
 
+        <div id="admin-modal" class="den-modal admin-modal">
+            <section class="den-modal-card admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+                <header class="den-modal-head">
+                    <div><div class="admin-kicker">SHAGGY TYCOON · DEV TOOLS</div><h2 id="admin-title" class="den-modal-title">Панель администратора</h2></div>
+                    <button id="admin-close" class="den-close" type="button" aria-label="Закрыть">✕</button>
+                </header>
+                <div class="admin-preview-note"><b>Макет интерфейса</b><span>Действия включим после подключения сервера и проверки прав разработчика.</span></div>
+                <nav class="admin-tabs" aria-label="Разделы панели администратора">
+                    <button class="admin-tab active" type="button" data-admin-tab="overview">Обзор</button>
+                    <button class="admin-tab" type="button" data-admin-tab="promo">Промокоды</button>
+                    <button class="admin-tab" type="button" data-admin-tab="messages">Рассылка</button>
+                    <button class="admin-tab" type="button" data-admin-tab="rewards">Выдача</button>
+                    <button class="admin-tab" type="button" data-admin-tab="history">Журнал</button>
+                    <button class="admin-tab" type="button" data-admin-tab="moderation">Модерация</button>
+                </nav>
+                <div class="admin-panel-content">
+                    <section class="admin-panel active" data-admin-panel="overview">
+                        <div class="admin-welcome"><div class="admin-crown">♛</div><div><b>Привет, разработчик</b><span>Управление игровым миром Shaggy Tycoon</span></div></div>
+                        <div class="admin-stat-cards">
+                            <article><span>Игроки</span><b>—</b><small>Подключим сервер</small></article>
+                            <article><span>Промокоды</span><b>—</b><small>Ожидают настройки</small></article>
+                            <article><span>Сообщения</span><b>—</b><small>История рассылок</small></article>
+                        </div>
+                        <div class="admin-section-title">Быстрые действия</div>
+                        <div class="admin-shortcuts">
+                            <button type="button" data-admin-jump="promo"><span>🎟️</span>Создать промокод</button>
+                            <button type="button" data-admin-jump="messages"><span>📣</span>Написать игрокам</button>
+                            <button type="button" data-admin-jump="rewards"><span>🎁</span>Выдать награду</button>
+                            <button type="button" data-admin-jump="moderation"><span>🛡️</span>Модерация игроков</button>
+                        </div>
+                        <button class="admin-activity admin-activity-link" type="button" data-admin-jump="history"><b>История действий</b><span>Кто, кому и что выдал — откройте журнал</span></button>
+                    </section>
+                    <section class="admin-panel" data-admin-panel="promo">
+                        <div class="admin-section-title">Новый промокод</div>
+                        <label class="admin-field">Код промокода<input type="text" placeholder="Например, YETI2026" autocomplete="off"></label>
+                        <div class="admin-fields-row">
+                            <label class="admin-field">Награда<select><option>Лёд</option><option>Доллары</option><option>Автомайнер</option><option>VIP</option></select></label>
+                            <label class="admin-field">Количество<input type="number" min="1" placeholder="1000"></label>
+                        </div>
+                        <div class="admin-fields-row">
+                            <label class="admin-field">Лимит активаций<input type="number" min="1" placeholder="Без лимита"></label>
+                            <label class="admin-field">Срок действия<input type="date"></label>
+                        </div>
+                        <button class="admin-primary" type="button" disabled>Создать промокод</button>
+                        <div class="admin-form-hint">Создание и проверка кодов будут выполняться сервером.</div>
+                    </section>
+                    <section class="admin-panel" data-admin-panel="messages">
+                        <div class="admin-section-title">Сообщение игрокам</div>
+                        <label class="admin-field">Аудитория<select><option>Все игроки</option><option>Активные за сутки</option><option>Выбранные игроки</option></select></label>
+                        <label class="admin-field">Текст сообщения<textarea rows="5" placeholder="Напишите объявление для игроков…"></textarea></label>
+                        <div class="admin-message-preview"><b>Предпросмотр</b><span>Текст сообщения появится здесь.</span></div>
+                        <button class="admin-primary" type="button" disabled>Отправить сообщение</button>
+                        <div class="admin-form-hint">Рассылка будет доступна после подключения Telegram-бота.</div>
+                    </section>
+                    <section class="admin-panel" data-admin-panel="rewards">
+                        <div class="admin-section-title">Выдать предмет игроку</div>
+                        <label class="admin-field">ID игрока<input type="text" placeholder="Telegram ID или игровой ID" autocomplete="off"></label>
+                        <div class="admin-fields-row">
+                            <label class="admin-field">Что выдать<select><option>Лёд</option><option>Доллары</option><option>Автомайнер</option><option>VIP</option></select></label>
+                            <label class="admin-field">Количество / уровень<input type="text" placeholder="Например, VIP III"></label>
+                        </div>
+                        <label class="admin-field">Комментарий к выдаче<input type="text" placeholder="Причина или заметка в журнале"></label>
+                        <button class="admin-primary" type="button" disabled>Выдать награду</button>
+                        <div class="admin-form-hint">Выдачи потребуют подтверждения роли и сохранятся в журнале.</div>
+                    </section>
+                    <section class="admin-panel" data-admin-panel="history">
+                        <div class="admin-section-title">Журнал действий</div>
+                        <div class="admin-history-filters">
+                            <label class="admin-field">Тип действия<select><option>Все действия</option><option>Выдача награды</option><option>Промокод</option><option>Сообщение</option><option>Штраф или блокировка</option></select></label>
+                            <label class="admin-field">Поиск игрока<input type="search" placeholder="Имя или ID игрока"></label>
+                        </div>
+                        <div class="admin-history-table" role="table" aria-label="История действий администраторов">
+                            <div class="admin-history-head" role="row"><span>Когда</span><span>Кому</span><span>Действие</span><span>Кто выполнил</span></div>
+                            <div class="admin-history-empty">Записи появятся здесь после подключения сервера.<br>Для каждой операции сохранятся дата, администратор, игрок, предмет или санкция и причина.</div>
+                        </div>
+                        <div class="admin-form-hint">Историю нельзя будет редактировать из панели — это защитит журнал от подмены.</div>
+                    </section>
+                    <section class="admin-panel" data-admin-panel="moderation">
+                        <div class="admin-section-title">Меры к игроку</div>
+                        <label class="admin-field">Игрок<input type="search" placeholder="Найти по имени или ID"></label>
+                        <div class="admin-player-preview"><span class="admin-player-avatar">👤</span><span><b>Игрок не выбран</b><small>После подключения появятся профиль и история санкций</small></span></div>
+                        <div class="admin-fields-row">
+                            <label class="admin-field">Мера<select><option>Предупреждение</option><option>Штраф — списать доллары</option><option>Мут — запрет сообщений</option><option>Временный бан</option><option>Постоянный бан</option><option>Снять активную санкцию</option></select></label>
+                            <label class="admin-field">Срок / сумма<input type="text" placeholder="Например, 24 часа"></label>
+                        </div>
+                        <label class="admin-field">Причина<textarea rows="3" placeholder="Укажите причину меры"></textarea></label>
+                        <button class="admin-primary admin-sanction-button" type="button" disabled>Применить меру</button>
+                        <div class="admin-form-hint">Каждая мера будет записана в журнал с автором, причиной и сроком. Перед постоянной блокировкой понадобится дополнительное подтверждение.</div>
+                    </section>
+                </div>
+                <footer class="admin-modal-footer"><span class="admin-status-dot"></span>Панель в режиме просмотра</footer>
+            </section>
+        </div>
+
         <div id="offline-popup">
             <div class="offline-card">
                 <div class="offline-title">С возвращением!</div>
@@ -290,9 +410,10 @@
             </div>
             <div class="nav-btn" data-tab="mining">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 4L20 10L17 13L11 7L14 4Z" fill="#FFF"/>
-                    <path d="M11.5 7.5L4 15C3 16 3 17.5 4 18.5C5 19.5 6.5 19.5 7.5 18.5L15 11" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M4 20L2 22" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M12.1 8.4 8.7 20.7" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>
+                    <path d="m2.2 8.2 4.9-4 4.1 1.4 3.6-1.7 7 3.2-2.4 3.1-4.6-2-2.8 1.5-3.5-2.1-3.7 3.5Z" fill="#7dd3fc" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="m8.7 18.2-.7 2.5" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round"/>
+                    <path d="m6.4 5.6 1.4 1.2" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".9"/>
                 </svg>
                 <span>Добыча</span>
             </div>
@@ -305,12 +426,12 @@
             </div>
             <div class="nav-btn" data-tab="den">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="8" fill="#FFF"/>
-                    <circle cx="7" cy="7" r="3" fill="#FFF"/>
-                    <circle cx="17" cy="7" r="3" fill="#FFF"/>
-                    <circle cx="9" cy="11" r="1.5" fill="#1e3a8a"/>
-                    <circle cx="15" cy="11" r="1.5" fill="#1e3a8a"/>
-                    <path d="M10 15C10 15 11 17 12 17C13 17 14 15 14 15" stroke="#1e3a8a" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M3 20.5V13.2C3 7.5 7 3 12 3s9 4.5 9 10.2v7.3H3Z" fill="#93c5fd" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/>
+                    <path d="M7.2 20.5v-5a4.8 4.8 0 0 1 9.6 0v5" fill="#183b68" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+                    <path d="M3.7 11.6c1.7-.6 2.5-2.2 4-2.8 1.4-.5 2.3.8 3.6.3 1.4-.5 2-2.4 3.6-2.1 1.4.2 2.1 1.6 5.4 2.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="10.3" cy="16.2" r=".7" fill="#fff"/>
+                    <circle cx="13.7" cy="16.2" r=".7" fill="#fff"/>
+                    <path d="M11 18c.6.5 1.4.5 2 0" stroke="#bae6fd" stroke-width="1.1" stroke-linecap="round"/>
                 </svg>
                 <span>Берлога</span>
             </div>
@@ -325,7 +446,27 @@
         </div>
     </div>
 
-        <script src="js/game.js"></script>
-        <script src="js/berloga.js"></script>
+        <script src="js/core/assets-loading.js"></script>
+        <script src="js/core/state.js"></script>
+        <script src="js/core/navigation.js"></script>
+        <script src="js/features/glacier/index.js"></script>
+        <script src="js/features/exchange/index.js"></script>
+        <script src="js/features/profile/index.js"></script>
+        <script src="js/businesses/shared/model.js"></script>
+        <script src="js/businesses/catalog.js"></script>
+        <script src="js/features/shop/index.js"></script>
+        <script src="js/businesses/shared/map.js"></script>
+        <script src="js/businesses/shared/foreman.js"></script>
+        <script src="js/businesses/hub.js"></script>
+        <script src="js/businesses/build.js"></script>
+        <script src="js/businesses/navigation.js"></script>
+        <script src="js/businesses/snow/piles.js"></script>
+        <script src="js/businesses/snow/simulation.js"></script>
+        <script src="js/businesses/cutter/index.js"></script>
+        <script src="js/businesses/factory/index.js"></script>
+        <script src="js/businesses/shared/management.js"></script>
+        <script src="js/businesses/shared/offline.js"></script>
+        <script src="js/core/game-loop.js"></script>
+        <script src="js/features/den/index.js"></script>
 </body>
 </html>

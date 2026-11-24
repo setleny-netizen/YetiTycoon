@@ -1,0 +1,128 @@
+        /* ---------- Ледозавод ---------- */
+        #factory-area {
+            position: absolute; top: 124px; bottom: 83px; left: 10px; right: 10px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #factory-area.hidden { display: none; }
+        #factory-map { position: relative; flex-shrink: 0; --u: 4px; }
+        #factory-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+        #fac-cubes { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+        .fcube { position: absolute; width: calc(var(--u) * 3.2); pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+        .fcube svg { width: 100%; display: block; }
+
+        .fgen { position: absolute; width: 0; height: 0; z-index: 5; }
+        .fg-dim {
+            position: absolute; left: 0; top: 0; width: calc(var(--u) * 14.5); height: calc(var(--u) * 13);
+            transform: translate(-50%, -50%); background: rgba(8,18,38,0.68); border-radius: calc(var(--u) * 1.6);
+        }
+        .fgen.owned .fg-dim, .fgen.owned .lock-box { display: none; }
+        .fg-badge {
+            position: absolute; left: 0; top: calc(var(--u) * -7.4); transform: translate(-50%, -50%);
+            width: calc(var(--u) * 3.8); height: calc(var(--u) * 3.8); border-radius: 50%;
+            background: rgba(0,0,0,0.75); border: 2px solid #fff; display: none;
+            align-items: center; justify-content: center; font-size: calc(var(--u) * 2.1); line-height: 1;
+        }
+        .fgen.owned .fg-badge { display: flex; }
+        .fg-badge.run { border-color: #4ade80; }
+        .fg-badge.nowater { border-color: #60a5fa; }
+        .fg-badge.repair { border-color: #fbbf24; }
+        .fg-badge.broken { border-color: #ef4444; }
+        .fg-bar {
+            position: absolute; left: 0; top: calc(var(--u) * 6.4); transform: translateX(-50%);
+            width: calc(var(--u) * 11); height: calc(var(--u) * 1.2);
+            background: rgba(0,0,0,0.6); border: 1.5px solid #fff; border-radius: calc(var(--u) * 0.8);
+            overflow: hidden; display: none;
+        }
+        .fgen.owned.uncovered .fg-bar { display: block; }
+        .fg-bar > div { height: 100%; width: 100%; background: #4ade80; }
+        .fg-repair {
+            position: absolute; left: 0; top: calc(var(--u) * 8.1); transform: translateX(-50%);
+            display: none; background: rgba(0,0,0,0.82); color: #86efac; border: 2px solid #ef4444;
+            border-radius: calc(var(--u) * 1.6); font-weight: 900; font-size: calc(var(--u) * 2);
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1); white-space: nowrap; cursor: pointer; z-index: 6;
+        }
+        .fg-repair.poor { color: #fca5a5; }
+        .fgen.broken.uncovered .fg-repair { display: block; }
+
+        .fw-panel {
+            position: absolute; left: 37%; top: 6%; width: 46%;
+            background: rgba(10,24,48,0.84); border: 2px solid #3b82f6; border-radius: calc(var(--u) * 2);
+            padding: calc(var(--u) * 1.2); display: flex; flex-direction: column; gap: calc(var(--u) * 0.9);
+            z-index: 6; color: #fff;
+        }
+        .fw-title { display: flex; align-items: center; gap: calc(var(--u) * 0.8); font-weight: 900; font-size: calc(var(--u) * 2.6); white-space: nowrap; }
+        .fw-title.empty { color: #fca5a5; }
+        .fw-bar { height: calc(var(--u) * 1.8); background: rgba(255,255,255,0.18); border-radius: calc(var(--u) * 1); overflow: hidden; }
+        .fw-bar > div { height: 100%; width: 0; background: linear-gradient(90deg, #38bdf8, #2563eb); }
+        .fw-btns { display: flex; gap: calc(var(--u) * 0.8); }
+        .fw-btns button, .fw-up {
+            font-family: inherit; font-weight: 900; border: none; cursor: pointer; color: #fff;
+            border-radius: calc(var(--u) * 1.2); background: linear-gradient(to bottom, #60a5fa, #2563eb);
+            box-shadow: 0 2px 0 #1e40af; font-size: calc(var(--u) * 2); line-height: 1.15;
+            padding: calc(var(--u) * 0.6) calc(var(--u) * 0.4);
+        }
+        .fw-btns button { flex: 1; min-width: 0; }
+        .fw-btns span, .fw-up span { display: block; font-size: 0.9em; color: #bbf7d0; }
+        .fw-btns button.poor span, .fw-up.poor span { color: #fca5a5; }
+        .fw-up.max { display: none; }
+        .fw-btns button:disabled { opacity: 0.45; }
+
+        .fs-card {
+            position: absolute; left: 25%; top: 63.8%; width: 38%;
+            background: rgba(10,24,48,0.84); border: 2px solid #3b82f6; border-radius: calc(var(--u) * 1.6);
+            padding: calc(var(--u) * 0.9) calc(var(--u) * 1.4); z-index: 6; color: #fff; cursor: pointer;
+            font-weight: 800; font-size: calc(var(--u) * 2.1); line-height: 1.25; white-space: nowrap;
+        }
+        .fs-card b { font-weight: 900; }
+        .fs-card .bad { color: #fca5a5; }
+        .fs-card .good { color: #86efac; }
+        .fh-hit { position: absolute; left: 79.5%; top: 77%; width: calc(var(--u) * 30); height: calc(var(--u) * 20); transform: translate(-50%, -50%); z-index: 5; cursor: pointer; }
+        .fh-badge {
+            position: absolute; left: 79.5%; top: 66.5%; transform: translateX(-50%);
+            background: rgba(10,24,48,0.88); color: #fff; border: 2px solid #fbbf24; border-radius: calc(var(--u) * 1.8);
+            font-weight: 900; font-size: calc(var(--u) * 2.3); padding: calc(var(--u) * 0.4) calc(var(--u) * 1.4);
+            white-space: nowrap; z-index: 6; cursor: pointer;
+        }
+
+        #fac-modal, #biz-modal {
+            position: absolute; inset: 0; display: none; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.55); z-index: 650; padding: 16px;
+        }
+        #fac-modal.show, #biz-modal.show { display: flex; }
+        .fm-card {
+            width: min(100%, 420px); max-height: min(80%, 560px); display: flex; flex-direction: column; gap: 10px;
+            background: #fff; border: 3px solid #3b82f6; border-radius: 18px; padding: 14px; color: #1e3a8a;
+            box-shadow: 0 5px 0 #1e40af, 0 10px 24px rgba(0,0,0,0.45);
+        }
+        .fm-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .fm-title { font-weight: 900; font-size: 20px; }
+        #fm-close, #bm-close { font-family: inherit; font-weight: 900; font-size: 18px; border: none; border-radius: 10px; padding: 4px 12px; background: #dbeafe; color: #1e3a8a; cursor: pointer; }
+        #fm-body, #bm-body { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; touch-action: pan-y; }
+        .fm-line { display: flex; justify-content: space-between; gap: 10px; font-weight: 800; font-size: 15px; }
+        .fm-line b { font-weight: 900; }
+        .fm-line .bad { color: #dc2626; }
+        .fm-line .good { color: #16a34a; }
+        .fm-sub { font-weight: 800; font-size: 13px; opacity: 0.7; }
+        .fm-btn {
+            font-family: inherit; font-weight: 900; font-size: 16px; border: none; cursor: pointer; border-radius: 12px;
+            padding: 10px 14px; color: #fff; background: linear-gradient(to bottom, #4ade80, #16a34a); box-shadow: 0 3px 0 #166534;
+        }
+        .fm-btn.danger { background: linear-gradient(to bottom, #f87171, #dc2626); box-shadow: 0 3px 0 #991b1b; }
+        .fm-btn.danger.armed { background: linear-gradient(to bottom, #fbbf24, #d97706); box-shadow: 0 3px 0 #92400e; }
+        .gear-btn {
+            margin-left: auto; flex: none; width: 38px; height: 38px; padding: 0;
+            font-size: 22px; line-height: 1; border-radius: 50%; border: 2px solid #3b82f6;
+            background: #dbeafe; color: #1e3a8a; cursor: pointer; box-shadow: 0 3px 0 #3b82f6;
+        }
+        .gear-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3b82f6; }
+        .farm-head .sub-title { flex: 1; min-width: 0; }
+        .fm-btn.poor { background: linear-gradient(to bottom, #9ca3af, #6b7280); box-shadow: 0 3px 0 #4b5563; }
+        .fm-worker {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 12px; padding: 8px 10px;
+            font-weight: 800; font-size: 14px;
+        }
+        .fm-worker .fire {
+            font-family: inherit; font-weight: 900; font-size: 13px; border: none; border-radius: 9px;
+            padding: 6px 10px; background: #fecaca; color: #991b1b; cursor: pointer;
+        }

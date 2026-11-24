@@ -1,0 +1,114 @@
+        /* ---------- Ферма «Ледорез» ---------- */
+        #cutter-area {
+            position: absolute;
+            top: 124px;
+            bottom: 83px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #cutter-area.hidden, #map-area.hidden { display: none; }
+        #cutter-map { position: relative; flex-shrink: 0; --u: 4px; }
+        #cutter-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+        #stacks-layer, #cubes-layer { position: absolute; inset: 0; pointer-events: none; }
+        #stacks-layer { z-index: 3; }
+        #cubes-layer { z-index: 4; }
+
+        .cube {
+            position: absolute;
+            width: calc(var(--u) * 7);
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            touch-action: none;
+            cursor: pointer;
+            padding: calc(var(--u) * 0.8);
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+        }
+        .cube svg { width: 100%; display: block; pointer-events: none; }
+        .scube {
+            position: absolute;
+            width: calc(var(--u) * 4.8);
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+        }
+        .scube svg { width: 100%; display: block; }
+
+        .cslot { position: absolute; width: 0; height: 0; z-index: 5; }
+        .cw-yeti {
+            position: absolute; left: 0; top: 0;
+            width: calc(var(--u) * 23);
+            transform: translate(-50%, -50%);
+            cursor: pointer; touch-action: none;
+        }
+        .cw-img { width: 100%; display: block; transform-origin: 50% 80%; pointer-events: none; }
+        .cslot.locked .cw-img { filter: brightness(0.22) contrast(0.9); }
+        .cslot.locked .cw-yeti { pointer-events: none; }
+        .cw-yeti.sawing .cw-img { animation: sawShake 0.08s infinite alternate; }
+        @keyframes sawShake {
+            from { transform: translate(-1px, 0) rotate(-0.6deg); }
+            to { transform: translate(1px, 1px) rotate(0.6deg); }
+        }
+        .cslot.owned .lock-box { display: none; }
+
+        .c-tool {
+            background: rgba(0,0,0,0.78); color: #fff; border: 2px solid #fbbf24;
+            border-radius: calc(var(--u) * 1.6); font-weight: 900;
+            font-size: calc(var(--u) * 2.3); line-height: 1.15;
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+            white-space: nowrap; cursor: pointer; z-index: 6;
+        }
+        .c-tool b { color: #86efac; }
+        .c-tool.poor b { color: #fca5a5; }
+        .c-tool { position: absolute; left: 0; top: calc(var(--u) * 11.8); transform: translateX(-50%); display: none; }
+        .cslot.owned.axe .c-tool { display: block; }
+        .c-tool.deny { animation: lockDeny2 0.4s; }
+        @keyframes lockDeny2 {
+            0%, 100% { margin-left: 0; }
+            25% { margin-left: -5px; }
+            75% { margin-left: 5px; }
+        }
+
+        .c-fore {
+            position: absolute; left: 79%; top: 90%;
+            width: calc(var(--u) * 22);
+            transform: translate(-50%, -100%);
+            pointer-events: none; z-index: 5;
+        }
+        .c-fore img { width: 100%; display: block; transform-origin: center bottom; }
+        .c-fore.locked img { filter: brightness(0.22) contrast(0.9); }
+        .c-fore.working img { animation: foremanBob 0.5s ease-in-out infinite alternate; }
+        .c-fore-lock {
+            position: absolute; left: 79%; top: 79%;
+            transform: translate(-50%, -50%);
+            display: none; flex-direction: column; align-items: center;
+            gap: calc(var(--u) * 0.6); cursor: pointer; z-index: 6; padding: calc(var(--u) * 1);
+        }
+        .c-fore-lock.show { display: flex; }
+        .c-fore-lock .lock-icon { width: calc(var(--u) * 8); height: calc(var(--u) * 8); }
+        .c-fore-lock .price { font-size: calc(var(--u) * 3); }
+        .c-fore-lock.deny { animation: lockDeny 0.4s; }
+        .c-rate {
+            position: absolute; left: 79%; top: 91%; transform: translateX(-50%);
+            display: none; align-items: center;
+            background: rgba(255,255,255,0.92); border: 2px solid #3b82f6;
+            border-radius: calc(var(--u) * 1.6);
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1.2) calc(var(--u) * 0.3) calc(var(--u) * 0.6);
+            box-shadow: 0 3px 0 #1e40af; white-space: nowrap; z-index: 6; pointer-events: none;
+        }
+        .c-rate.show { display: flex; }
+        .c-rate .ico, .c-count .ico { background: var(--img-ice) center/contain no-repeat; }
+        .c-rate .ico { width: calc(var(--u) * 3.2); height: calc(var(--u) * 3.2); margin-right: calc(var(--u) * 0.6); }
+        .c-rate .txt { font-weight: 900; font-size: calc(var(--u) * 2.5); color: #1e3a8a; }
+        .c-count {
+            position: absolute; left: 72%; top: 29.5%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: calc(var(--u) * 0.8);
+            background: rgba(255,255,255,0.93); border: 2px solid #3b82f6;
+            border-radius: calc(var(--u) * 1.8);
+            padding: calc(var(--u) * 0.3) calc(var(--u) * 1.4) calc(var(--u) * 0.3) calc(var(--u) * 0.8);
+            box-shadow: 0 3px 0 #1e40af; z-index: 6; pointer-events: none; white-space: nowrap;
+        }
+        .c-count .ico { width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); }
+        .c-count .txt { font-weight: 900; font-size: calc(var(--u) * 2.8); color: #1e3a8a; }
+        .c-count.full .txt { color: #dc2626; }

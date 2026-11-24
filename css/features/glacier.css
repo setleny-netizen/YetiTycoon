@@ -1,0 +1,168 @@
+        /* ---------------- ЭКРАН «ЛЕДНИК» ---------------- */
+        .leaderboard-trophy, .clan-entry { position: absolute; z-index: 120; top: 98px; left: 15px; width: 58px; height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 2px; border: 2px solid #ffe28a; border-radius: 14px; background: linear-gradient(145deg,rgba(31,91,153,.96),rgba(14,48,92,.96)); box-shadow: 0 3px 0 #143a68, 0 5px 10px rgba(0,0,0,.25); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .glacier-shortcut-icon { display: grid; place-items: center; flex: 0 0 auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+        .leaderboard-trophy svg { width: 31px; height: 31px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+        .glacier-shortcut-label { color: #fff; font-size: 11px; font-weight: 900; line-height: 1.15; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.65); }
+        .leaderboard-trophy:active, .clan-entry:active { transform: translateY(2px) scale(.96); box-shadow: 0 1px 0 #143a68, 0 3px 7px rgba(0,0,0,.25); }
+        .leaderboard-trophy:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+        .clan-entry { left: auto; right: 15px; pointer-events: auto; }
+        .leaderboard-trophy:hover, .clan-entry:hover { filter: drop-shadow(0 0 7px rgba(132,220,255,.8)); }
+        .clan-entry:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+        .clan-pennant-frame { position: relative; width: 42px; height: 44px; padding: 1px; overflow: hidden; }
+        .clan-pennant-placeholder { position: absolute; inset: 1px; width: calc(100% - 2px); height: calc(100% - 2px); filter: drop-shadow(0 2px 1px rgba(0,0,0,.35)); }
+        .clan-entry-question { position: relative; z-index: 1; margin-top: -3px; color: #fff; font-size: 23px; font-weight: 1000; line-height: 1; text-shadow: 0 1px 3px #123b63; }
+        .clan-entry-emblem { position: absolute; z-index: 2; inset: 1px; width: calc(100% - 2px); height: calc(100% - 2px); object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,.38)); }
+        .clan-entry-emblem[hidden] { display: none; }
+        #floor {
+            position: absolute;
+            bottom: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;
+            max-width: 800px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #miner-wrapper {
+            position: absolute;
+            bottom: calc(18vh + 75px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75vw;
+            max-width: 400px;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #progress-container {
+            width: 70%;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+            background-size: 280px 100%;
+            background-position: left;
+        }
+
+        #miner {
+            width: 100%;
+            height: auto;
+            transition: transform 0.05s;
+            transform-origin: center bottom;
+        }
+        #auto-miner-toggle { pointer-events: auto; margin-top: 9px; padding: 8px 23px; border: 2px solid #eaf9ff; border-radius: 14px; color: #173d61; background: linear-gradient(#fff,#cceeff); box-shadow: 0 4px 0 #3d91c4, 0 6px 12px rgba(0,0,0,.25); font-family: inherit; font-size: 15px; font-weight: 900; cursor: pointer; }
+        #auto-miner-toggle.hidden { display: none; }
+
+        .shake { animation: shakeAnim 0.08s infinite; }
+
+        @keyframes shakeAnim {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            25% { transform: translate(-2px, -1px) rotate(-1.5deg); }
+            50% { transform: translate(-1px, 2px) rotate(1.5deg); }
+            75% { transform: translate(2px, -1px) rotate(0deg); }
+            100% { transform: translate(1px, 1px) rotate(0deg); }
+        }
+
+        #particles-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .ice-particle {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background-image: var(--img-ice);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0px 4px 3px rgba(0,0,0,0.6));
+            mix-blend-mode: normal;
+        }
+
+        #stars-container {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        .orbit {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .star {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 23px;
+            text-shadow: 0 0 5px #fff, 0 0 10px #FFD700, 0 0 20px #FFA500;
+            animation: pulse 0.4s infinite alternate;
+        }
+
+        .orbit:nth-child(2) {
+            animation-duration: 2s;
+            animation-direction: reverse;
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+        }
+        .orbit:nth-child(2) .star {
+            font-size: 16px;
+            text-shadow: 0 0 5px #fff, 0 0 15px #00FFFF;
+        }
+
+        .orbit:nth-child(3) {
+            animation-duration: 1.2s;
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+        }
+        .orbit:nth-child(3) .star {
+            font-size: 13px;
+            text-shadow: 0 0 5px #fff, 0 0 15px #fff;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(0.9); }
+            100% { transform: translateX(-50%) scale(1.2); }
+        }
