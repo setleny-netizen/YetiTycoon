@@ -4,6 +4,12 @@
         const profileBox = document.querySelector('.profile-box');
         const profileMenu = document.getElementById('profile-menu');
         const resetBtn = document.getElementById('reset-btn');
+        const telegramPhotoUrl = typeof window.yetiTelegramPhotoUrl === 'function' ? window.yetiTelegramPhotoUrl() : '';
+        if (telegramPhotoUrl) {
+            const telegramPhoto = new Image();
+            telegramPhoto.onload = () => { profileBox.style.backgroundImage = 'url("' + telegramPhotoUrl + '")'; };
+            telegramPhoto.src = telegramPhotoUrl;
+        }
         function renderVipProfile() {
             const badge = document.getElementById('profile-vip');
             const tier = activeVipTier();

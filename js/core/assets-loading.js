@@ -62,6 +62,7 @@
 
                 setTimeout(() => {
                     loadingScreen.classList.add('hidden');
+                    if (typeof window.yetiTelegramReady === 'function') window.yetiTelegramReady();
                     lastFrameTime = 0;
                     requestAnimationFrame(gameLoop);
                     startBackgroundLoad();
@@ -102,4 +103,3 @@
                 clearInterval(loadingInterval);
             }
         }, 100);
-

@@ -12,7 +12,7 @@
             background-color: #87CEEB;
             overflow: hidden;
             width: 100vw;
-            height: 100vh;
+            height: var(--tg-viewport-stable-height, 100vh);
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
@@ -38,7 +38,7 @@
             top: 0;
             left: 0;
             width: 100vw;
-            height: 100vh;
+            height: var(--tg-viewport-stable-height, 100vh);
             background-color: #0f172a;
             display: flex;
             flex-direction: column;
@@ -107,7 +107,7 @@
         /* ---------------- ВЕРХНЯЯ ПАНЕЛЬ ---------------- */
         #top-ui {
             position: absolute;
-            top: 15px;
+            top: calc(15px + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px)));
             left: 10px;
             right: 10px;
             display: flex;
@@ -223,7 +223,7 @@
             justify-content: space-around;
             align-items: center;
             z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-inset-bottom, 0px), var(--tg-content-safe-area-inset-bottom, 0px));
             box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
         }
 
