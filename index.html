@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ice Miner</title>
+        <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- ЭКРАН ЗАГРУЗКИ -->
+    <div id="loading-screen">
+        <img id="loading-img" data-src="loading" alt="">
+
+        <div class="loading-ui">
+            <div id="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+            <div id="loading-text">0%</div>
+        </div>
+    </div>
+
+    <div id="game-container">
+
+        <div id="top-ui">
+            <div class="profile-box"></div>
+            <div class="resources">
+                <div class="resource-box" id="ui-ice-box">
+                    <div class="resource-icon icon-ice"></div>
+                    <div class="resource-value" id="ice-count">0</div>
+                </div>
+                <div class="resource-box" id="ui-dollar-box">
+                    <div class="resource-icon icon-dollar"></div>
+                    <div class="resource-value" id="dollar-count">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: ЛЕДНИК ===== -->
+        <div id="screen-glacier" class="screen">
+            <img id="floor" data-src="pol" alt="">
+
+            <div id="miner-wrapper">
+                <div id="stars-container">
+                    <div class="orbit"><div class="star">⭐</div></div>
+                    <div class="orbit"><div class="star">⭐</div></div>
+                    <div class="orbit"><div class="star">⭐</div></div>
+                </div>
+
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+
+                <img id="miner" data-src="miner" alt="">
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: БИРЖА ===== -->
+        <div id="screen-bourse" class="screen hidden">
+            <div id="bourse-wrap">
+                <div class="bourse-card">
+                    <div class="b-head">
+                        <div class="b-head-left">
+                            <div class="b-title">Биржа</div>
+                            <div class="b-sub">Курс 1 льда · график 3 часа</div>
+                        </div>
+                        <div class="b-price">
+                            <div class="b-ico b-ice"></div>
+                            <div class="b-price-col">
+                                <div class="b-price-val" id="b-price">$0,000</div>
+                                <div class="b-change" id="b-change">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="b-chart-box">
+                        <canvas id="b-chart"></canvas>
+                    </div>
+
+                    <div class="b-trade">
+                        <div class="b-mode">
+                            <button id="b-mode-sell" class="active">Продать</button>
+                            <button id="b-mode-buy">Купить</button>
+                        </div>
+                        <div class="b-row">
+                            <div><span id="b-have-lbl">Лёд:</span> <b id="b-have">0</b></div>
+                            <div><span id="b-amt-lbl">Продать:</span> <b id="b-amount">0</b></div>
+                        </div>
+                        <input type="range" id="b-slider" min="0" max="0" step="1" value="0">
+                        <div class="bourse-quick">
+                            <button data-p="0.25">25%</button>
+                            <button data-p="0.5">50%</button>
+                            <button data-p="1">Всё</button>
+                        </div>
+                        <div class="b-row b-sellrow">
+                            <div class="b-get"><span id="b-get-lbl">Получите</span><b id="b-get">$0</b></div>
+                            <button id="b-sell" disabled>Продать</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: ДОБЫЧА ===== -->
+        <div id="screen-mining" class="screen hidden">
+
+            <!-- Хаб: общая добыча, кнопка, список ферм (5 слотов без прокрутки) -->
+            <div id="mine-hub" class="mine-view">
+                <div class="hub-card">
+                    <div class="hub-top">
+                        <div class="b-ico b-ice"></div>
+                        <div>
+                            <div class="hub-rate"><span id="hub-rate">0</span> <small>/ч</small></div>
+                            <div class="hub-label">Суммарная добыча льда в час</div>
+                        </div>
+                    </div>
+                    <button id="hub-build">Построить ферму</button>
+                </div>
+                <div class="hub-title"><span>Мои фермы</span><span id="hub-count">0/3</span></div>
+                <div id="hub-list"></div>
+            </div>
+
+            <!-- Выбор вида фермы -->
+            <div id="mine-build" class="mine-view hidden">
+                <div class="sub-head">
+                    <button class="back-btn" id="build-back">‹ Назад</button>
+                    <div class="sub-title">Выберите ферму</div>
+                </div>
+                <div id="build-list"></div>
+            </div>
+
+            <!-- Экран фермы: карта с пушками и прорабом -->
+            <div id="mine-farm" class="hidden">
+                <div class="sub-head farm-head">
+                    <button class="back-btn" id="farm-back">‹ Фермы</button>
+                    <div class="sub-title" id="farm-title"></div>
+                    <button class="gear-btn" id="farm-gear" aria-label="Статистика и закрытие бизнеса">⚙</button>
+                </div>
+                <div id="map-area">
+                    <div id="map">
+                        <img id="map-img" data-src="pole" alt="" draggable="false">
+                        <div id="piles-layer"></div>
+                        <canvas id="fx"></canvas>
+                    </div>
+                </div>
+                <div id="cutter-area" class="hidden">
+                    <div id="cutter-map">
+                        <img id="cutter-img" data-src="lake" alt="" draggable="false">
+                        <div id="stacks-layer"></div>
+                        <div id="cubes-layer"></div>
+                    </div>
+                </div>
+                <div id="factory-area" class="hidden">
+                    <div id="factory-map">
+                        <img id="factory-img" data-src="factory" alt="" draggable="false">
+                        <div id="fac-cubes"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ЭКРАН: МАГАЗИН ===== -->
+        <div id="screen-shop" class="screen hidden">
+            <div id="shop-category-view" class="shop-view">
+                <div class="shop-heading">
+                    <h1>Магазин</h1>
+                    <div id="shop-effects" class="shop-effects"></div>
+                </div>
+                <div class="shop-category-list">
+                    <button class="shop-category" data-shop-category="autominer" type="button">
+                        <span class="shop-category-icon">⛏️</span>
+                        <span class="shop-category-copy"><b>Автомайнер</b><small>Йети добывает лёд сам, даже пока игра закрыта</small></span>
+                        <span class="shop-category-arrow">›</span>
+                    </button>
+                    <button class="shop-category" data-shop-category="time" type="button">
+                        <span class="shop-category-icon">⏱️</span>
+                        <span class="shop-category-copy"><b>Ускорение времени</b><small>Мгновенно рассчитай работу предприятий</small></span>
+                        <span class="shop-category-arrow">›</span>
+                    </button>
+                    <button class="shop-category" data-shop-category="boost" type="button">
+                        <span class="shop-category-icon">❄️</span>
+                        <span class="shop-category-copy"><b>Ускорение добычи</b><small>Увеличь скорость добычи льда</small></span>
+                        <span class="shop-category-arrow">›</span>
+                    </button>
+                    <button class="shop-category shop-category-vip" data-shop-category="vip" type="button">
+                        <span class="shop-category-icon">👑</span>
+                        <span class="shop-category-copy"><b>VIP</b><small>Особые возможности появятся позже</small></span>
+                        <span class="shop-category-badge">СКОРО</span>
+                    </button>
+                </div>
+            </div>
+            <div id="shop-product-view" class="shop-view hidden">
+                <div class="shop-products-head">
+                    <button id="shop-back" class="shop-back" type="button">‹ Категории</button>
+                    <h2 id="shop-category-title"></h2>
+                    <div id="shop-effects-products" class="shop-effects"></div>
+                </div>
+                <div class="shop-carousel-wrap">
+                    <button id="shop-prev" class="shop-arrow" type="button" aria-label="Предыдущий товар">‹</button>
+                    <div id="shop-carousel" class="shop-carousel" aria-live="polite"></div>
+                    <button id="shop-next" class="shop-arrow" type="button" aria-label="Следующий товар">›</button>
+                </div>
+                <div id="shop-dots" class="shop-dots"></div>
+                <div class="shop-swipe-hint">Листай товары свайпом</div>
+            </div>
+        </div>
+
+        <!-- ===== КОМНАТА: БЕРЛОГА ===== -->
+        <div id="screen-den" class="screen hidden">
+            <div id="den-room" aria-label="Ледяная берлога">
+                <button class="den-hotspot den-inventory" data-section="inventory" aria-label="Инвентарь"></button>
+                <button class="den-hotspot den-quests" data-section="quests" aria-label="Задания"></button>
+                <button class="den-hotspot den-achievements" data-section="achievements" aria-label="Достижения"></button>
+                <button class="den-hotspot den-stats" data-section="stats" aria-label="Статистика"></button>
+                <button class="den-hotspot den-promo" data-section="promo" aria-label="Промокоды"></button>
+                <button class="den-hotspot den-mail" data-section="mail" aria-label="Почта"></button>
+            </div>
+        </div>
+
+        <div id="particles-layer"></div>
+
+        <div id="profile-menu">
+            <div class="pm-block">
+                <div class="pm-title">Тест: начислить деньги</div>
+                <div class="pm-row">
+                    <input id="money-input" type="text" inputmode="decimal" placeholder="Сумма, $" autocomplete="off">
+                    <button id="money-btn">Начислить</button>
+                </div>
+            </div>
+            <button id="leaderboard-open" class="fm-btn profile-top-button" type="button">Топ игроков</button>
+            <button id="reset-btn">Сбросить прогресс</button>
+        </div>
+
+        <div id="fac-modal">
+            <div class="fm-card">
+                <div class="fm-head"><div class="fm-title" id="fm-title"></div><button id="fm-close">✕</button></div>
+                <div id="fm-body"></div>
+            </div>
+        </div>
+
+        <div id="biz-modal">
+            <div class="fm-card">
+                <div class="fm-head"><div class="fm-title" id="bm-title"></div><button id="bm-close">✕</button></div>
+                <div id="bm-body"></div>
+            </div>
+        </div>
+
+        <div id="den-modal" class="den-modal" data-section="">
+            <section class="den-modal-card" role="dialog" aria-modal="true" aria-labelledby="den-modal-title">
+                <header class="den-modal-head">
+                    <h2 id="den-modal-title" class="den-modal-title"></h2>
+                    <button id="den-close" class="den-close" type="button" aria-label="Закрыть">✕</button>
+                </header>
+                <div id="den-achievement-tabs" class="den-tabs"></div>
+                <div id="den-modal-body" class="den-modal-body"></div>
+                <button id="den-back" class="den-back" type="button">Вернуться в берлогу</button>
+            </section>
+        </div>
+
+        <div id="leaderboard-modal" class="den-modal leaderboard-modal">
+            <section class="den-modal-card" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
+                <header class="den-modal-head">
+                    <h2 id="leaderboard-title" class="den-modal-title">Топ игроков</h2>
+                    <button id="leaderboard-close" class="den-close" type="button" aria-label="Закрыть">✕</button>
+                </header>
+                <div id="leaderboard-tabs" class="den-tabs"></div>
+                <div id="leaderboard-body" class="den-modal-body"></div>
+            </section>
+        </div>
+
+        <div id="offline-popup">
+            <div class="offline-card">
+                <div class="offline-title">С возвращением!</div>
+                <div class="offline-time" id="offline-time"></div>
+                <div class="offline-lines" id="offline-lines"></div>
+                <button id="offline-ok">Отлично</button>
+            </div>
+        </div>
+
+        <div id="toast"></div>
+
+        <div id="bottom-nav">
+            <div class="nav-btn" data-tab="bourse">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 16L10 10L14 14L20 6" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6H15" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6V11" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Биржа</span>
+            </div>
+            <div class="nav-btn" data-tab="mining">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 4L20 10L17 13L11 7L14 4Z" fill="#FFF"/>
+                    <path d="M11.5 7.5L4 15C3 16 3 17.5 4 18.5C5 19.5 6.5 19.5 7.5 18.5L15 11" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 20L2 22" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span>Добыча</span>
+            </div>
+            <div class="nav-btn active" data-tab="glacier">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="#93C5FD" stroke="#FFF" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M12 22V12M3 7L12 12L21 7" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Ледник</span>
+            </div>
+            <div class="nav-btn" data-tab="den">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="8" fill="#FFF"/>
+                    <circle cx="7" cy="7" r="3" fill="#FFF"/>
+                    <circle cx="17" cy="7" r="3" fill="#FFF"/>
+                    <circle cx="9" cy="11" r="1.5" fill="#1e3a8a"/>
+                    <circle cx="15" cy="11" r="1.5" fill="#1e3a8a"/>
+                    <path d="M10 15C10 15 11 17 12 17C13 17 14 15 14 15" stroke="#1e3a8a" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>Берлога</span>
+            </div>
+            <div class="nav-btn" data-tab="shop">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3H5L7 15H19L21 7H6" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="7" cy="19" r="2" fill="#FFF"/>
+                    <circle cx="17" cy="19" r="2" fill="#FFF"/>
+                </svg>
+                <span>Магазин</span>
+            </div>
+        </div>
+    </div>
+
+        <script src="js/game.js"></script>
+        <script src="js/berloga.js"></script>
+</body>
+</html>
