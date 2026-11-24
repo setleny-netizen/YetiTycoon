@@ -165,7 +165,10 @@
         if (!key) return;
         let translated = key;
         if (language === 'en') {
-            const entries = Object.entries(translations).filter(([source, value]) => !Array.isArray(value) && value && source.length > 1).sort((a, b) => b[0].length - a[0].length);
+            const entries = Object.entries(translations)
+                .flatMap(([source, value]) => Array.isArray(value) ? [[value[0], value[1]]] : value ? [[source, value]] : [])
+                .filter(([source]) => source.length > 1)
+                .sort((a, b) => b[0].length - a[0].length);
             entries.forEach(([source, target]) => { translated = translated.split(source).join(target); });
         } else {
             const pair = Object.entries(translations).find(([, value]) => Array.isArray(value) && value[1] === key);
