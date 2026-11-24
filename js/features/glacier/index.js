@@ -174,3 +174,6 @@
         glacierScreen.addEventListener('mousedown', startMining);
         glacierScreen.addEventListener('mouseup', stopMining);
         glacierScreen.addEventListener('mouseleave', stopMining);
+
+        // Восстанавливаем вид автомайнера и кнопку управления из сохранения при входе в игру.
+        syncMinerVisual();
