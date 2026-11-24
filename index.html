@@ -248,14 +248,9 @@
         <div id="particles-layer"></div>
 
         <div id="profile-menu">
-            <div class="pm-block">
-                <div class="pm-title">Тест: начислить деньги</div>
-                <div class="pm-row">
-                    <input id="money-input" type="text" inputmode="decimal" placeholder="Сумма, $" autocomplete="off">
-                    <button id="money-btn">Начислить</button>
-                </div>
-            </div>
-            <button id="reset-btn">Сбросить прогресс</button>
+            <div class="pm-profile-row"><span data-i18n="telegramId">ID Telegram</span><b id="telegram-user-id">—</b></div>
+            <div class="pm-language-row"><span data-i18n="language">Язык</span><div class="pm-language-switch" role="group" aria-label="Language"><button type="button" data-language="ru">RU</button><button type="button" data-language="en">EN</button></div></div>
+            <button id="reset-btn" data-i18n="resetProgress">Сбросить прогресс</button>
         </div>
 
         <div id="fac-modal">
@@ -407,7 +402,7 @@
                     <path d="M20 6H15" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M20 6V11" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>Биржа</span>
+                <span data-i18n="exchange">Биржа</span>
             </div>
             <div class="nav-btn" data-tab="mining">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -416,14 +411,14 @@
                     <path d="m8.7 18.2-.7 2.5" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round"/>
                     <path d="m6.4 5.6 1.4 1.2" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".9"/>
                 </svg>
-                <span>Добыча</span>
+                <span data-i18n="mining">Добыча</span>
             </div>
             <div class="nav-btn active" data-tab="glacier">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="#93C5FD" stroke="#FFF" stroke-width="2" stroke-linejoin="round"/>
                     <path d="M12 22V12M3 7L12 12L21 7" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>Ледник</span>
+                <span data-i18n="glacier">Ледник</span>
             </div>
             <div class="nav-btn" data-tab="den">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -434,7 +429,7 @@
                     <circle cx="13.7" cy="16.2" r=".7" fill="#fff"/>
                     <path d="M11 18c.6.5 1.4.5 2 0" stroke="#bae6fd" stroke-width="1.1" stroke-linecap="round"/>
                 </svg>
-                <span>Берлога</span>
+                <span data-i18n="den">Берлога</span>
             </div>
             <div class="nav-btn" data-tab="shop">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -442,12 +437,14 @@
                     <circle cx="7" cy="19" r="2" fill="#FFF"/>
                     <circle cx="17" cy="19" r="2" fill="#FFF"/>
                 </svg>
-                <span>Магазин</span>
+                <span data-i18n="shop">Магазин</span>
             </div>
         </div>
     </div>
 
         <script src="js/core/telegram.js"></script>
+        <script src="js/core/language.js"></script>
+        <script src="js/core/content-protection.js"></script>
         <script src="js/core/assets-loading.js"></script>
         <script src="js/core/state.js"></script>
         <script src="js/core/navigation.js"></script>

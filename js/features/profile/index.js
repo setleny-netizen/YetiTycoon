@@ -4,6 +4,9 @@
         const profileBox = document.querySelector('.profile-box');
         const profileMenu = document.getElementById('profile-menu');
         const resetBtn = document.getElementById('reset-btn');
+        const telegramUserId = document.getElementById('telegram-user-id');
+        const userId = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user && window.Telegram.WebApp.initDataUnsafe.user.id;
+        if (telegramUserId && userId) telegramUserId.textContent = String(userId);
         const telegramPhotoUrl = typeof window.yetiTelegramPhotoUrl === 'function' ? window.yetiTelegramPhotoUrl() : '';
         if (telegramPhotoUrl) {
             const telegramPhoto = new Image();
@@ -38,22 +41,6 @@
             profileMenu.classList.remove('show');
             disarmReset();
         });
-
-        // ВРЕМЕННО, для тестов: начислить себе любую сумму
-        const moneyInput = document.getElementById('money-input');
-        const moneyBtn = document.getElementById('money-btn');
-        function addMoney() {
-            const amount = parseFloat(String(moneyInput.value).replace(/\s/g, '').replace(',', '.'));
-            if (!isFinite(amount) || amount <= 0) { toast('Введите сумму'); return; }
-            dollarCount = round2(dollarCount + Math.min(amount, 1e12));
-            renderResources();
-            updatePriceColors();
-            saveState();
-            toast('+$' + fmtMoney(Math.min(amount, 1e12)));
-            moneyInput.value = '';
-        }
-        moneyBtn.addEventListener('click', addMoney);
-        moneyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addMoney(); });
 
         resetBtn.addEventListener('click', () => {
             if (!resetArmed) {

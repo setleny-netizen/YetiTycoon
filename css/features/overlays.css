@@ -43,22 +43,15 @@
             padding: 10px;
             box-shadow: 0 4px 0 #1e40af, 0 6px 14px rgba(0,0,0,0.35);
         }
-        #profile-menu.show { display: flex; flex-direction: column; gap: 10px; }
+        #profile-menu.show { display: flex; flex-direction: column; gap: 10px; min-width: 190px; }
+        .pm-profile-row, .pm-language-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #1e3a8a; font-size: 13px; font-weight: 900; }
+        .pm-profile-row b { max-width: 105px; overflow: hidden; text-overflow: ellipsis; direction: rtl; }
+        .pm-language-switch { display: flex; gap: 4px; padding: 3px; border-radius: 9px; background: #dbeafe; }
+        .pm-language-switch button { border: 0; border-radius: 6px; padding: 5px 8px; color: #1e3a8a; background: transparent; font: inherit; font-size: 12px; font-weight: 1000; cursor: pointer; }
+        .pm-language-switch button.active { color: #fff; background: #2563eb; }
         .pm-block { display: flex; flex-direction: column; gap: 6px; }
         .pm-title { font-weight: 900; font-size: 13px; color: #1e3a8a; }
         .pm-row { display: flex; gap: 6px; }
-        #money-input {
-            flex: 1; min-width: 0; width: 130px;
-            font-family: inherit; font-weight: 800; font-size: 16px; color: #1e3a8a;
-            padding: 8px 10px; border: 2px solid #3b82f6; border-radius: 10px; outline: none;
-            -webkit-user-select: text; user-select: text; touch-action: auto; background: #fff;
-        }
-        #money-btn {
-            font-family: inherit; font-weight: 900; font-size: 14px; border: none; cursor: pointer;
-            border-radius: 10px; padding: 0 12px; color: #fff; white-space: nowrap;
-            background: linear-gradient(to bottom, #4ade80, #16a34a); box-shadow: 0 3px 0 #166534;
-        }
-        #money-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #166534; }
         #reset-btn {
             padding: 12px 18px; font-size: 15px;
             background: linear-gradient(to bottom, #f87171, #dc2626); color: #fff;
