@@ -204,7 +204,6 @@
             </div>
             <div id="shop-product-view" class="shop-view hidden">
                 <div class="shop-products-head">
-                    <button id="shop-back" class="shop-back" type="button">‹ Категории</button>
                     <h2 id="shop-category-title"></h2>
                     <div id="shop-effects-products" class="shop-effects"></div>
                 </div>
@@ -228,7 +227,7 @@
                     <button id="leaderboard-open" class="den-menu-button" type="button" aria-label="Топ игроков" title="Топ игроков"><span class="den-menu-icon">🥇</span><span>Топ</span></button>
                     <button class="den-menu-button" data-section="promo" type="button"><span class="den-menu-icon">🎟️</span><span>Промокоды</span></button>
                     <button class="den-menu-button" data-section="mail" type="button"><span class="den-menu-icon">✉️</span><span>Почта</span></button>
-                    <button id="clan-entry" class="den-menu-button" type="button" aria-label="Кланы" title="Кланы"><span id="clan-entry-question" class="den-menu-icon den-clan-mark" aria-hidden="true">?</span><span>Клан</span><img id="clan-entry-emblem" class="den-clan-emblem" alt="Эмблема клана" hidden draggable="false"></button>
+                    <button id="clan-entry" class="den-menu-button" data-section="clan" type="button" aria-label="Кланы" title="Кланы"><span id="clan-entry-question" class="den-menu-icon den-clan-mark" aria-hidden="true">?</span><span>Клан</span><img id="clan-entry-emblem" class="den-clan-emblem" alt="Эмблема клана" hidden draggable="false"></button>
                     <button id="den-admin-entry" class="den-menu-button den-menu-admin" type="button" aria-label="Открыть панель администратора" title="Панель администратора"><span class="den-menu-icon">🛠️</span><span>Админ панель</span></button>
                 </div>
             </div>
@@ -237,14 +236,29 @@
         <div id="particles-layer"></div>
 
         <div id="profile-menu">
-            <div class="pm-name-editor">
-                <label for="player-name-input" data-i18n="playerName">Имя игрока</label>
-                <div class="pm-name-input-row"><input id="player-name-input" type="text" maxlength="22" autocomplete="off" placeholder="Введите имя"><button id="save-player-name" type="button" data-i18n="saveName">Сохранить</button></div>
+            <div class="profile-page-shell">
+                <header class="profile-page-head">
+                    <h1 class="profile-page-title" data-i18n="profileTitle">Профиль</h1>
+                    <div class="pm-language-switch" role="group" aria-label="Language"><button type="button" data-language="ru">RU</button><span aria-hidden="true">|</span><button type="button" data-language="en">EN</button></div>
+                </header>
+                <div class="profile-page-content">
+                    <section class="profile-page-card">
+                        <div class="profile-name-row">
+                            <strong id="profile-page-name">Игрок</strong>
+                            <button id="edit-player-name" type="button" aria-label="Изменить имя" title="Изменить имя">✎</button>
+                        </div>
+                        <div id="profile-name-editor" class="pm-name-editor" hidden>
+                            <div class="pm-name-input-row"><input id="player-name-input" type="text" maxlength="22" autocomplete="off" placeholder="Введите имя"><button id="save-player-name" type="button" data-i18n="saveName">Сохранить</button></div>
+                        </div>
+                        <div class="pm-profile-row"><span data-i18n="telegramId">ID Telegram</span><b id="telegram-user-id">—</b></div>
+                        <section class="profile-stats-section">
+                            <h2 data-i18n="statistics">Статистика</h2>
+                            <div id="profile-stats-body" class="den-modal-body den-stats-body profile-stats-body"></div>
+                        </section>
+                        <button id="reset-btn" data-i18n="resetProgress">Сбросить прогресс</button>
+                    </section>
+                </div>
             </div>
-            <button id="profile-stats-open" class="pm-profile-action" type="button" data-i18n="statistics">Статистика</button>
-            <div class="pm-profile-row"><span data-i18n="telegramId">ID Telegram</span><b id="telegram-user-id">—</b></div>
-            <div class="pm-language-row"><span data-i18n="language">Язык</span><div class="pm-language-switch" role="group" aria-label="Language"><button type="button" data-language="ru">RU</button><button type="button" data-language="en">EN</button></div></div>
-            <button id="reset-btn" data-i18n="resetProgress">Сбросить прогресс</button>
         </div>
 
         <div id="fac-modal">
@@ -262,22 +276,19 @@
         </div>
 
         <div id="den-modal" class="den-modal" data-section="">
-            <section class="den-modal-card" role="dialog" aria-modal="true" aria-labelledby="den-modal-title">
+            <section class="den-modal-card" aria-labelledby="den-modal-title">
                 <header class="den-modal-head">
                     <h2 id="den-modal-title" class="den-modal-title"></h2>
-                    <button id="den-close" class="den-close" type="button" aria-label="Закрыть">✕</button>
                 </header>
                 <div id="den-achievement-tabs" class="den-tabs"></div>
                 <div id="den-modal-body" class="den-modal-body"></div>
-                <button id="den-back" class="den-back" type="button">Вернуться в берлогу</button>
             </section>
         </div>
 
         <div id="leaderboard-modal" class="den-modal leaderboard-modal">
-            <section class="den-modal-card" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
+            <section class="den-modal-card" aria-labelledby="leaderboard-title">
                 <header class="den-modal-head">
                     <h2 id="leaderboard-title" class="den-modal-title">Топ игроков</h2>
-                    <button id="leaderboard-close" class="den-close" type="button" aria-label="Закрыть">✕</button>
                 </header>
                 <div id="leaderboard-tabs" class="den-tabs"></div>
                 <div id="leaderboard-body" class="den-modal-body"></div>
@@ -285,10 +296,9 @@
         </div>
 
         <div id="admin-modal" class="den-modal admin-modal">
-            <section class="den-modal-card admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+            <section class="den-modal-card admin-modal-card" aria-labelledby="admin-title">
                 <header class="den-modal-head">
                     <div><div class="admin-kicker">SHAGGY TYCOON · DEV TOOLS</div><h2 id="admin-title" class="den-modal-title">Панель администратора</h2></div>
-                    <button id="admin-close" class="den-close" type="button" aria-label="Закрыть">✕</button>
                 </header>
                 <div class="admin-preview-note"><b>Макет интерфейса</b><span>Действия включим после подключения сервера и проверки прав разработчика.</span></div>
                 <nav class="admin-tabs" aria-label="Разделы панели администратора">

@@ -1,11 +1,11 @@
         /* ---------------- БЕРЛОГА ---------------- */
         #screen-den { overflow: hidden; background: #102d53; }
         #den-room {
-            position: absolute; inset: 0 0 75px;
+            position: absolute; inset: calc(96px + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))) 0 75px;
             display: flex; flex-direction: column; overflow: hidden;
             background: linear-gradient(180deg, #153d65, #0b2440);
         }
-        .den-room-art { display: block; flex: 1 1 62%; width: 100%; min-height: 0; object-fit: cover; object-position: center; }
+        .den-room-art { display: block; flex: 1 1 62%; width: 100%; min-height: 0; object-fit: contain; object-position: center; background: #123760; }
         .den-menu-grid {
             flex: 0 0 38%; min-height: 190px; display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -188,4 +188,61 @@
             .admin-modal-card { gap: 9px; padding: 11px; }
             .admin-tab { padding: 7px 8px; font-size: 11px; }
             .admin-welcome { padding: 10px; }
+        }
+
+        /* Берлога-разделы работают как самостоятельные страницы, а не всплывающие окна. */
+        .den-modal {
+            position: absolute; inset: 0 0 75px; z-index: 80; display: none;
+            justify-content: center; align-items: stretch; overflow: hidden;
+            padding: calc(96px + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))) 12px 12px;
+            background: linear-gradient(180deg, #153d65, #0b2440);
+        }
+        .den-modal.show { display: flex; }
+        .den-modal-card, #admin-modal .admin-modal-card {
+            width: min(100%, 720px); height: 100%; max-height: none; min-height: 0;
+            display: flex; flex-direction: column; gap: 10px; overflow: hidden;
+            margin: 0 auto; padding: 0; color: #eff6ff;
+            border: 0; border-radius: 0; background: transparent; box-shadow: none;
+        }
+        .den-modal-head {
+            flex: none; min-height: 54px; padding: 8px 10px;
+            border: 1px solid rgba(155,218,250,.8); border-radius: 14px;
+            background: linear-gradient(145deg, rgba(45,101,148,.98), rgba(20,57,91,.98));
+            box-shadow: 0 3px 0 rgba(7,29,51,.65);
+        }
+        .page-back {
+            flex: none; min-height: 38px; border: 1px solid #b9e8ff; border-radius: 11px;
+            padding: 7px 11px; color: #f4fbff; background: linear-gradient(#4388bd,#24547f);
+            box-shadow: 0 2px 0 #123b60; font-family: inherit; font-size: 12px; font-weight: 900; cursor: pointer;
+        }
+        .page-back:active { transform: translateY(1px); box-shadow: 0 1px 0 #123b60; }
+        .den-modal-body { flex: 1 1 auto; min-height: 0; }
+        #den-modal[data-section="quests"] .den-modal-body { overflow: hidden; }
+        #den-modal[data-section="quests"] .den-list { flex: 1 1 auto; min-height: 0; display: grid; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 5px; }
+        #den-modal[data-section="quests"] .den-card { min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 5px 8px; }
+        #den-modal[data-section="quests"] .den-card h3 { margin-bottom: 1px; font-size: 13px; }
+        #den-modal[data-section="quests"] .den-card p { font-size: 10px; line-height: 1.2; }
+        #den-modal[data-section="quests"] .den-status { padding: 3px 5px; font-size: 9px; }
+        #den-modal[data-section="quests"] .den-progress-label { margin: 2px 0 1px; font-size: 9px; }
+        #den-modal[data-section="quests"] .den-progress { height: 5px; }
+        #den-modal[data-section="quests"] .den-action { margin-top: 2px; padding: 4px 8px; font-size: 10px; }
+        #admin-modal .admin-panel-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+        #admin-modal .admin-modal-footer { flex: none; }
+        @media (max-width: 420px) {
+            .den-modal { padding: calc(96px + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))) 9px 9px; }
+            .den-modal-head { gap: 6px; padding: 7px; }
+            .page-back { min-height: 36px; padding: 6px 8px; font-size: 11px; }
+        }
+        @media (max-height: 700px) {
+            #den-modal[data-section="quests"] .den-modal-card { gap: 6px; }
+            #den-modal[data-section="quests"] .den-modal-head { min-height: 44px; padding: 5px 8px; }
+            #den-modal[data-section="quests"] .den-modal-body { gap: 4px; }
+            #den-modal[data-section="quests"] .den-card { padding: 3px 6px; }
+            #den-modal[data-section="quests"] .den-card h3 { font-size: 12px; }
+            #den-modal[data-section="quests"] .den-card p { font-size: 9px; }
+        }
+        @media (max-height: 620px) {
+            #den-modal[data-section="quests"] .den-card p { display: none; }
+            #den-modal[data-section="quests"] .den-card { gap: 2px; }
+            #den-modal[data-section="quests"] .den-action { padding: 3px 7px; }
         }

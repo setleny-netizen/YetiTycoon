@@ -10,6 +10,9 @@
         if (telegramUserId && userId) telegramUserId.textContent = String(userId);
         const playerNameKey = 'shaggyTycoonPlayerName';
         const playerNameInput = document.getElementById('player-name-input');
+        const profilePageName = document.getElementById('profile-page-name');
+        const nameEditor = document.getElementById('profile-name-editor');
+        const editNameButton = document.getElementById('edit-player-name');
         const playerDisplayName = document.getElementById('player-display-name');
         const savePlayerNameButton = document.getElementById('save-player-name');
         const telegramDefaultName = telegramUser && (telegramUser.first_name || telegramUser.username);
@@ -19,6 +22,7 @@
         function renderPlayerName() {
             const name = storedPlayerName() || telegramDefaultName || 'Игрок';
             playerDisplayName.textContent = name;
+            profilePageName.textContent = name;
             playerNameInput.value = storedPlayerName() || telegramDefaultName || '';
         }
         function formatLevelNumber(value) {
@@ -42,7 +46,12 @@
             if (!name) { toast('Имя не может быть пустым'); return; }
             try { localStorage.setItem(playerNameKey, name); } catch (e) {}
             renderPlayerName();
+            nameEditor.hidden = true;
             toast('Имя сохранено');
+        });
+        editNameButton.addEventListener('click', () => {
+            nameEditor.hidden = !nameEditor.hidden;
+            if (!nameEditor.hidden) playerNameInput.focus();
         });
         playerNameInput.addEventListener('keydown', event => {
             if (event.key === 'Enter') { event.preventDefault(); savePlayerNameButton.click(); }
@@ -72,13 +81,9 @@
         }
 
         profileBox.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-            disarmReset();
-        });
-
-        document.addEventListener('pointerdown', (e) => {
-            if (profileMenu.contains(e.target) || profileBox.contains(e.target)) return;
-            profileMenu.classList.remove('show');
+            profileMenu.classList.add('show');
+            document.querySelectorAll('.nav-btn').forEach(button => button.classList.remove('active'));
+            if (window.yetiRenderProfileStats) window.yetiRenderProfileStats();
             disarmReset();
         });
 

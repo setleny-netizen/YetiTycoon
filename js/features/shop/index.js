@@ -185,7 +185,6 @@
         document.querySelectorAll('[data-shop-category]').forEach(button => {
             button.addEventListener('click', () => openShopCategory(button.dataset.shopCategory));
         });
-        document.getElementById('shop-back').addEventListener('click', showShopCategories);
         document.getElementById('shop-prev').addEventListener('click', () => stepShopProduct(-1));
         document.getElementById('shop-next').addEventListener('click', () => stepShopProduct(1));
         shopCarousel.addEventListener('pointerdown', event => {

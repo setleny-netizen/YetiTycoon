@@ -322,27 +322,17 @@
     const denModal = document.getElementById('den-modal');
     const denTitle = document.getElementById('den-modal-title');
     const denBody = document.getElementById('den-modal-body');
+    const profileStatsBody = document.getElementById('profile-stats-body');
     const achievementTabs = document.getElementById('den-achievement-tabs');
     const profileMenu = document.getElementById('profile-menu');
     const leaderboardModal = document.getElementById('leaderboard-modal');
     let activeAchievementCategory = CATEGORIES[0];
-
     function openDenModal(title) {
         denTitle.textContent = title;
         denBody.classList.toggle('den-stats-body', title === 'Статистика');
         denModal.classList.add('show');
         denBody.scrollTop = 0;
     }
-
-    function closeDenModal() {
-        denModal.classList.remove('show');
-    }
-
-    document.getElementById('den-close').addEventListener('click', closeDenModal);
-    document.getElementById('den-back').addEventListener('click', closeDenModal);
-    denModal.addEventListener('pointerdown', function (event) {
-        if (event.target === denModal) closeDenModal();
-    });
 
     function renderQuests() {
         ensureDaily();
@@ -421,18 +411,20 @@
         const m = meta.metrics;
         const lines = [
             ['Общий капитал', '$' + fmtDollars(net)],
-            ['Деньги на счету', '$' + fmtDollars(dollarCount)],
+            ['Валюты на счету', '$' + fmtDollars(dollarCount)],
             ['Лёд на счету', fmtNumber(iceCount)],
             ['Добыто льда вручную', fmtNumber(m.manualIce)],
             ['Заработано на трейдинге', '$' + fmtDollars(m.salesRevenue)],
             ['Время в игре', typeof fmtDuration === 'function' ? fmtDuration(m.playMs) : '0 мин'],
-            ['Открыто ферм', fmtNumber(farms.length)]
+            ['Сколько ферм открыто', fmtNumber(farms.length)]
         ];
-        denBody.innerHTML =
-            '<div class="den-stat-grid">' + lines.map(function (line, index) {
+        const markup = '<div class="den-stat-grid">' + lines.map(function (line, index) {
                 return '<div class="den-stat' + (index === 0 ? ' den-stat-total' : '') + '"><span>' + line[0] + '</span><b>' + line[1] + '</b></div>';
             }).join('') + '</div>';
+        denBody.innerHTML = markup;
+        profileStatsBody.innerHTML = markup;
     }
+    window.yetiRenderProfileStats = renderStats;
 
     function renderPromo() {
         denBody.innerHTML =
@@ -464,13 +456,15 @@
     }
 
     function refreshOpenPanel() {
-        if (!denModal.classList.contains('show')) return;
-        const type = denModal.dataset.section;
-        const scrollTop = denBody.scrollTop;
-        if (type === 'quests') renderQuests();
-        if (type === 'achievements') renderAchievements();
-        if (type === 'stats') renderStats();
-        denBody.scrollTop = scrollTop;
+        if (denModal.classList.contains('show')) {
+            const type = denModal.dataset.section;
+            const scrollTop = denBody.scrollTop;
+            if (type === 'quests') renderQuests();
+            if (type === 'achievements') renderAchievements();
+            if (type === 'stats') renderStats();
+            denBody.scrollTop = scrollTop;
+        }
+        if (profileMenu.classList.contains('show')) renderStats();
     }
 
     function openSection(section) {
@@ -480,20 +474,22 @@
         if (section === 'quests') { openDenModal('Задания'); renderQuests(); }
         if (section === 'achievements') { openDenModal('Достижения'); renderAchievements(); }
         if (section === 'stats') { openDenModal('Статистика'); renderStats(); }
-        if (section === 'promo') { openDenModal('Промокод'); renderPromo(); }
+        if (section === 'promo') { openDenModal('Промокоды'); renderPromo(); }
         if (section === 'mail') { openDenModal('Почта'); renderMail(); }
+        if (section === 'clan') {
+            openDenModal('Клан');
+            denBody.innerHTML = '<div class="den-empty"><span class="den-empty-icon">⚑</span><b>Кланы появятся позже</b><p>Раздел кланов подготовлен для будущего подключения.</p></div>';
+        }
     }
 
     document.querySelectorAll('.den-menu-button[data-section]').forEach(function (button) {
         button.addEventListener('click', function () { openSection(button.dataset.section); });
     });
-    document.getElementById('profile-stats-open').addEventListener('click', function () {
-        profileMenu.classList.remove('show');
-        openSection('stats');
-    });
-
     const adminEntry = document.getElementById('den-admin-entry');
     const adminModal = document.getElementById('admin-modal');
+    window.yetiCloseSectionPages = function () {
+        [denModal, leaderboardModal, profileMenu, adminModal].forEach(function (page) { page.classList.remove('show'); });
+    };
     function showAdminTab(tabId) {
         adminModal.querySelectorAll('[data-admin-tab]').forEach(function (tab) {
             const active = tab.dataset.adminTab === tabId;
@@ -514,10 +510,6 @@
     });
     adminModal.querySelectorAll('[data-admin-jump]').forEach(function (button) {
         button.addEventListener('click', function () { showAdminTab(button.dataset.adminJump); });
-    });
-    document.getElementById('admin-close').addEventListener('click', function () { adminModal.classList.remove('show'); });
-    adminModal.addEventListener('pointerdown', function (event) {
-        if (event.target === adminModal) adminModal.classList.remove('show');
     });
 
     const topButton = document.getElementById('leaderboard-open');
@@ -551,12 +543,6 @@
         profileMenu.classList.remove('show');
         renderLeaderboard();
         leaderboardModal.classList.add('show');
-    });
-    document.getElementById('leaderboard-close').addEventListener('click', function () {
-        leaderboardModal.classList.remove('show');
-    });
-    leaderboardModal.addEventListener('pointerdown', function (event) {
-        if (event.target === leaderboardModal) leaderboardModal.classList.remove('show');
     });
 
     let lastSecond = Date.now();

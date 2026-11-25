@@ -46,11 +46,6 @@
         autoMinerToggle.addEventListener('click', toggleAutoMiner);
         ['pointerdown', 'touchstart', 'mousedown'].forEach(name => leaderboardTrophy.addEventListener(name, event => event.stopPropagation(), { passive: false }));
         ['pointerdown', 'touchstart', 'mousedown'].forEach(name => clanEntry.addEventListener(name, event => event.stopPropagation(), { passive: false }));
-        clanEntry.addEventListener('click', event => {
-            event.preventDefault();
-            event.stopPropagation();
-            toast('Кланы появятся позже');
-        });
         window.yetiSetClanEmblem = function (imageUrl) {
             if (!imageUrl) {
                 clanEntryEmblem.removeAttribute('src');

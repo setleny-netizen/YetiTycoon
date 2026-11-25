@@ -32,18 +32,22 @@
 
         /* ---------------- МЕНЮ ПРОФИЛЯ ---------------- */
         #profile-menu {
-            position: absolute;
-            top: 80px;
-            left: 10px;
-            display: none;
-            z-index: 600;
-            background: rgba(255,255,255,0.97);
-            border: 2px solid #3b82f6;
-            border-radius: 14px;
-            padding: 10px;
-            box-shadow: 0 4px 0 #1e40af, 0 6px 14px rgba(0,0,0,0.35);
+            position: absolute; inset: 0 0 75px; display: none; z-index: 80; overflow: hidden;
+            padding: calc(96px + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))) 12px 12px;
+            background: linear-gradient(180deg, #153d65, #0b2440);
         }
-        #profile-menu.show { display: flex; flex-direction: column; gap: 10px; min-width: 190px; }
+        #profile-menu.show { display: flex; }
+        .profile-page-shell { width: min(100%, 720px); height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px; margin: 0 auto; }
+        .profile-page-head { flex: none; min-height: 54px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid rgba(155,218,250,.8); border-radius: 14px; background: linear-gradient(145deg, rgba(45,101,148,.98), rgba(20,57,91,.98)); box-shadow: 0 3px 0 rgba(7,29,51,.65); }
+        .profile-page-title { flex: 1; margin: 0; color: #ffdf9b; font-size: clamp(18px, 5vw, 24px); font-weight: 900; text-shadow: 0 2px 0 #6b421f; }
+        .profile-page-content { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; padding: 2px; }
+        .profile-page-card { width: min(100%, 620px); height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 8px; margin: 0 auto; padding: clamp(10px, 3vw, 16px); overflow: hidden; border: 1px solid #b9dafa; border-radius: 17px; background: rgba(245,250,255,.97); box-shadow: 0 4px 0 rgba(8,34,58,.55); }
+        .profile-name-row { min-height: 36px; display: flex; align-items: center; gap: 8px; color: #173c76; }
+        .profile-name-row strong { flex: 1; min-width: 0; overflow: hidden; font-size: 18px; font-weight: 1000; text-overflow: ellipsis; white-space: nowrap; }
+        #edit-player-name { width: 34px; height: 34px; border: 1px solid #78a9dc; border-radius: 10px; color: #1e4e86; background: #e6f3ff; font-size: 20px; font-weight: 900; cursor: pointer; }
+        .pm-name-editor[hidden] { display: none; }
+        .profile-page-card .pm-name-input-row input { min-height: 34px; font-size: 13px; }
+        .profile-page-card #save-player-name { min-width: 84px; }
         .pm-profile-row, .pm-language-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #1e3a8a; font-size: 13px; font-weight: 900; }
         .pm-profile-row b { max-width: 105px; overflow: hidden; text-overflow: ellipsis; direction: rtl; }
         .pm-name-editor { display: flex; flex-direction: column; gap: 5px; color: #1e3a8a; font-size: 12px; font-weight: 900; }
@@ -51,9 +55,15 @@
         .pm-name-input-row input { flex: 1; width: 100px; min-width: 0; border: 1px solid #93b9e4; border-radius: 8px; padding: 7px; color: #17324a; background: #f4f9ff; font: inherit; font-size: 12px; outline: none; user-select: text; -webkit-user-select: text; }
         .pm-name-input-row input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.18); }
         #save-player-name, .pm-profile-action { border: 1px solid #2563eb; border-radius: 8px; padding: 7px 9px; color: #fff; background: linear-gradient(#60a5fa,#2563eb); font: inherit; font-size: 11px; font-weight: 900; cursor: pointer; }
-        .pm-profile-action { width: 100%; padding: 8px 10px; font-size: 12px; }
-        .pm-language-switch { display: flex; gap: 4px; padding: 3px; border-radius: 9px; background: #dbeafe; }
-        .pm-language-switch button { border: 0; border-radius: 6px; padding: 5px 8px; color: #1e3a8a; background: transparent; font: inherit; font-size: 12px; font-weight: 1000; cursor: pointer; }
+        .profile-stats-section { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 5px; }
+        .profile-stats-section h2 { flex: none; color: #1e3a8a; font-size: 14px; font-weight: 1000; }
+        .profile-stats-body { flex: 1 1 auto; min-height: 0; width: 100%; }
+        .profile-stats-body .den-stat { padding: 5px 8px; }
+        .profile-stats-body .den-stat span { font-size: 10px; }
+        .profile-stats-body .den-stat b { font-size: 12px; }
+        .pm-language-switch { flex: none; display: flex; align-items: center; gap: 2px; padding: 3px 5px; border-radius: 9px; color: #7392b2; background: rgba(219,234,254,.88); }
+        .pm-language-switch span { font-size: 12px; font-weight: 900; }
+        .pm-language-switch button { border: 0; border-radius: 6px; padding: 4px 5px; color: #1e3a8a; background: transparent; font: inherit; font-size: 11px; font-weight: 1000; cursor: pointer; }
         .pm-language-switch button.active { color: #fff; background: #2563eb; }
         .pm-block { display: flex; flex-direction: column; gap: 6px; }
         .pm-title { font-weight: 900; font-size: 13px; color: #1e3a8a; }
@@ -65,6 +75,18 @@
         }
         #reset-btn.armed { background: linear-gradient(to bottom, #fbbf24, #d97706); box-shadow: 0 3px 0 #92400e; }
         .profile-top-button { width: 100%; font-size: 15px; }
+        @media (max-height: 700px) {
+            .profile-page-shell { gap: 7px; }
+            .profile-page-head { min-height: 48px; }
+            .profile-page-card { gap: 5px; padding: 8px; }
+            .profile-name-row { min-height: 31px; }
+            .profile-name-row strong { font-size: 16px; }
+            .profile-stats-section { gap: 3px; }
+            .profile-stats-body .den-stat { padding: 3px 7px; }
+            .profile-stats-body .den-stat span { font-size: 9px; }
+            .profile-stats-body .den-stat b { font-size: 11px; }
+            #reset-btn { padding: 9px 14px; font-size: 13px; }
+        }
 
         /* Подсказка */
         #toast {
