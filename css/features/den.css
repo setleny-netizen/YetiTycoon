@@ -1,9 +1,39 @@
         /* ---------------- БЕРЛОГА ---------------- */
         #screen-den { overflow: hidden; background: #102d53; }
         #den-room {
-            position: absolute; inset: 0;
-            background: #123760 url('../../assets/berloga.png') center / 100% 100% no-repeat;
+            position: absolute; inset: 0 0 75px;
+            display: flex; flex-direction: column; overflow: hidden;
+            background: linear-gradient(180deg, #153d65, #0b2440);
         }
+        .den-room-art { display: block; flex: 1 1 62%; width: 100%; min-height: 0; object-fit: cover; object-position: center; }
+        .den-menu-grid {
+            flex: 0 0 38%; min-height: 190px; display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 7px;
+            padding: 8px 10px max(8px, env(safe-area-inset-bottom, 0px));
+            border-top: 2px solid rgba(175,225,255,.7);
+            background: linear-gradient(180deg, rgba(28,77,119,.96), rgba(9,35,64,.98));
+            box-shadow: 0 -5px 18px rgba(5,18,35,.35);
+        }
+        .den-menu-button {
+            position: relative; z-index: 20; min-width: 0; min-height: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+            padding: 5px 3px; border: 1px solid #9bdafa; border-radius: 13px;
+            color: #f4fbff; background: linear-gradient(155deg, #4388bd, #24547f 65%, #163e65);
+            box-shadow: 0 3px 0 #0c2c4c, 0 5px 9px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.3);
+            font-family: inherit; font-size: clamp(10px, 3vw, 13px); font-weight: 900;
+            line-height: 1.05; text-align: center; text-shadow: 0 1px 2px #102e4b;
+            cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+        }
+        .den-menu-button:active { transform: translateY(2px); box-shadow: 0 1px 0 #0c2c4c, inset 0 1px 0 rgba(255,255,255,.3); }
+        .den-menu-button:focus-visible { outline: 3px solid #ffe18a; outline-offset: 2px; }
+        .den-menu-icon { font-size: clamp(19px, 6vw, 27px); line-height: 1; }
+        .den-menu-admin { grid-column: 1 / -1; flex-direction: row; gap: 9px; font-size: 14px; background: linear-gradient(100deg, #946434, #d39a4d 48%, #80552d); border-color: #ffe1a2; box-shadow: 0 3px 0 #50351e, 0 5px 9px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.34); }
+        .den-menu-admin .den-menu-icon { font-size: 22px; }
+        .den-clan-mark { width: 27px; height: 27px; display: grid; place-items: center; border: 2px solid #d9f4ff; border-radius: 6px 6px 12px 12px; color: #fff; background: linear-gradient(#75caff,#2267a7); font-size: 18px; }
+        .den-clan-emblem { position: absolute; top: 5px; width: 27px; height: 27px; object-fit: contain; }
+        .den-clan-emblem[hidden] { display: none; }
+        @media (max-height: 680px) { .den-menu-grid { flex-basis: 43%; min-height: 174px; gap: 5px; padding: 6px 8px; } }
         .den-hotspot {
             position: absolute; z-index: 20; display: block; padding: 0;
             border: 0; border-radius: 12px; background: transparent; cursor: pointer;

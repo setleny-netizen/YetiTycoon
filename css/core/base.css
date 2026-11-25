@@ -117,6 +117,14 @@
             pointer-events: none;
         }
 
+        .profile-area { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; max-width: calc(100% - 128px); }
+        .profile-summary { width: clamp(88px, 29vw, 148px); min-width: 0; display: flex; flex-direction: column; gap: 3px; color: #fff; text-shadow: 0 1px 3px #102b49; pointer-events: none; }
+        .player-display-name { overflow: hidden; color: #fff; font-size: clamp(11px, 3.5vw, 15px); font-weight: 1000; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-level-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; overflow: hidden; font-size: 9px; font-weight: 900; line-height: 1; white-space: nowrap; }
+        #player-level-progress { opacity: .9; }
+        .profile-level-track { height: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,.86); border-radius: 99px; background: rgba(3,21,41,.58); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+        .profile-level-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4bd6ff, #b8f4ff); box-shadow: 0 0 8px #79ddff; transition: width .25s ease; }
+
         .profile-box {
             position: relative;
             width: 55px;

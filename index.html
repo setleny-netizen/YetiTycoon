@@ -33,7 +33,14 @@
     <div id="game-container">
 
         <div id="top-ui">
-            <div class="profile-box"><span class="profile-vip" id="profile-vip"></span></div>
+            <div class="profile-area">
+                <div class="profile-box"><span class="profile-vip" id="profile-vip"></span></div>
+                <div class="profile-summary" aria-live="polite">
+                    <div id="player-display-name" class="player-display-name" data-no-i18n>Игрок</div>
+                    <div class="profile-level-row"><span id="player-level-label">Уровень 0</span><span id="player-level-progress">0 / 1 000</span></div>
+                    <div class="profile-level-track"><span id="player-level-bar"></span></div>
+                </div>
+            </div>
             <div class="resources">
                 <div class="resource-box" id="ui-ice-box">
                     <div class="resource-icon icon-ice"></div>
@@ -48,25 +55,6 @@
 
         <!-- ===== ЭКРАН: ЛЕДНИК ===== -->
         <div id="screen-glacier" class="screen">
-            <button id="leaderboard-open" class="leaderboard-trophy" type="button" aria-label="Топ игроков" title="Топ игроков">
-                <span class="glacier-shortcut-icon"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-                    <path d="M9 5h14v5c0 6-3 10-7 10S9 16 9 10V5Z" fill="#ffd45c" stroke="#fff4c2" stroke-width="1.5"/>
-                    <path d="M9 8H5v3c0 4 2 6 6 6M23 8h4v3c0 4-2 6-6 6" fill="none" stroke="#ffd45c" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M16 20v5m-5 2h10m-8-2h6" fill="none" stroke="#fff4c2" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="m16 8 1.1 2.2 2.4.3-1.8 1.7.4 2.4-2.1-1.2-2.1 1.2.4-2.4-1.8-1.7 2.4-.3L16 8Z" fill="#fff"/>
-                </svg></span>
-                <span class="glacier-shortcut-label">Топ</span>
-            </button>
-            <button id="clan-entry" class="clan-entry" type="button" aria-label="Кланы" title="Кланы">
-                <span class="glacier-shortcut-icon clan-pennant-frame"><svg class="clan-pennant-placeholder" viewBox="0 0 44 48" aria-hidden="true" focusable="false">
-                    <path d="M8 4h28v27l-7 13-7-8-7 8-7-13V4Z" fill="#2578bd" stroke="#d8f3ff" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M11 7h22v22l-5 10-6-7-6 7-5-10V7Z" fill="url(#clanPennantFill)"/>
-                    <defs><linearGradient id="clanPennantFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a9ecff"/><stop offset="1" stop-color="#287ac4"/></linearGradient></defs>
-                </svg>
-                <span id="clan-entry-question" class="clan-entry-question" aria-hidden="true">?</span>
-                <img id="clan-entry-emblem" class="clan-entry-emblem" alt="Эмблема клана" hidden draggable="false"></span>
-                <span class="glacier-shortcut-label">Кланы</span>
-            </button>
             <img id="floor" data-src="pol" alt="">
 
             <div id="miner-wrapper">
@@ -233,21 +221,27 @@
         <!-- ===== КОМНАТА: БЕРЛОГА ===== -->
         <div id="screen-den" class="screen hidden">
             <div id="den-room" aria-label="Ледяная берлога">
-                <button class="den-hotspot den-inventory" data-section="inventory" aria-label="Инвентарь"></button>
-                <button class="den-hotspot den-quests" data-section="quests" aria-label="Задания"></button>
-                <button class="den-hotspot den-achievements" data-section="achievements" aria-label="Достижения"></button>
-                <button class="den-hotspot den-stats" data-section="stats" aria-label="Статистика"></button>
-                <button class="den-hotspot den-promo" data-section="promo" aria-label="Промокоды"></button>
-                <button class="den-hotspot den-mail" data-section="mail" aria-label="Почта"></button>
-                <button id="den-admin-entry" class="den-admin-entry" type="button" aria-label="Открыть панель администратора" title="Панель администратора">
-                    <img src="assets/admin.png" alt="Админ-панель" draggable="false">
-                </button>
+                <img class="den-room-art" src="assets/berloga1.png" alt="Берлога Shaggy Tycoon" draggable="false">
+                <div class="den-menu-grid">
+                    <button class="den-menu-button" data-section="quests" type="button"><span class="den-menu-icon">📜</span><span>Задания</span></button>
+                    <button class="den-menu-button" data-section="achievements" type="button"><span class="den-menu-icon">🏆</span><span>Достижения</span></button>
+                    <button id="leaderboard-open" class="den-menu-button" type="button" aria-label="Топ игроков" title="Топ игроков"><span class="den-menu-icon">🥇</span><span>Топ</span></button>
+                    <button class="den-menu-button" data-section="promo" type="button"><span class="den-menu-icon">🎟️</span><span>Промокоды</span></button>
+                    <button class="den-menu-button" data-section="mail" type="button"><span class="den-menu-icon">✉️</span><span>Почта</span></button>
+                    <button id="clan-entry" class="den-menu-button" type="button" aria-label="Кланы" title="Кланы"><span id="clan-entry-question" class="den-menu-icon den-clan-mark" aria-hidden="true">?</span><span>Клан</span><img id="clan-entry-emblem" class="den-clan-emblem" alt="Эмблема клана" hidden draggable="false"></button>
+                    <button id="den-admin-entry" class="den-menu-button den-menu-admin" type="button" aria-label="Открыть панель администратора" title="Панель администратора"><span class="den-menu-icon">🛠️</span><span>Админ панель</span></button>
+                </div>
             </div>
         </div>
 
         <div id="particles-layer"></div>
 
         <div id="profile-menu">
+            <div class="pm-name-editor">
+                <label for="player-name-input" data-i18n="playerName">Имя игрока</label>
+                <div class="pm-name-input-row"><input id="player-name-input" type="text" maxlength="22" autocomplete="off" placeholder="Введите имя"><button id="save-player-name" type="button" data-i18n="saveName">Сохранить</button></div>
+            </div>
+            <button id="profile-stats-open" class="pm-profile-action" type="button" data-i18n="statistics">Статистика</button>
             <div class="pm-profile-row"><span data-i18n="telegramId">ID Telegram</span><b id="telegram-user-id">—</b></div>
             <div class="pm-language-row"><span data-i18n="language">Язык</span><div class="pm-language-switch" role="group" aria-label="Language"><button type="button" data-language="ru">RU</button><button type="button" data-language="en">EN</button></div></div>
             <button id="reset-btn" data-i18n="resetProgress">Сбросить прогресс</button>

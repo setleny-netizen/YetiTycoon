@@ -46,6 +46,12 @@
         #profile-menu.show { display: flex; flex-direction: column; gap: 10px; min-width: 190px; }
         .pm-profile-row, .pm-language-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #1e3a8a; font-size: 13px; font-weight: 900; }
         .pm-profile-row b { max-width: 105px; overflow: hidden; text-overflow: ellipsis; direction: rtl; }
+        .pm-name-editor { display: flex; flex-direction: column; gap: 5px; color: #1e3a8a; font-size: 12px; font-weight: 900; }
+        .pm-name-input-row { display: flex; gap: 5px; }
+        .pm-name-input-row input { flex: 1; width: 100px; min-width: 0; border: 1px solid #93b9e4; border-radius: 8px; padding: 7px; color: #17324a; background: #f4f9ff; font: inherit; font-size: 12px; outline: none; user-select: text; -webkit-user-select: text; }
+        .pm-name-input-row input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.18); }
+        #save-player-name, .pm-profile-action { border: 1px solid #2563eb; border-radius: 8px; padding: 7px 9px; color: #fff; background: linear-gradient(#60a5fa,#2563eb); font: inherit; font-size: 11px; font-weight: 900; cursor: pointer; }
+        .pm-profile-action { width: 100%; padding: 8px 10px; font-size: 12px; }
         .pm-language-switch { display: flex; gap: 4px; padding: 3px; border-radius: 9px; background: #dbeafe; }
         .pm-language-switch button { border: 0; border-radius: 6px; padding: 5px 8px; color: #1e3a8a; background: transparent; font: inherit; font-size: 12px; font-weight: 1000; cursor: pointer; }
         .pm-language-switch button.active { color: #fff; background: #2563eb; }

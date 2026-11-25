@@ -7,6 +7,9 @@
         glacier: ['Ледник', 'Glacier'],
         den: ['Берлога', 'Den'],
         shop: ['Магазин', 'Shop'],
+        statistics: ['Статистика', 'Statistics'],
+        playerName: ['Имя игрока', 'Display name'],
+        saveName: ['Сохранить', 'Save'],
         telegramId: ['ID Telegram', 'Telegram ID'],
         language: ['Язык', 'Language'],
         resetProgress: ['Сбросить прогресс', 'Reset progress'],
@@ -127,6 +130,8 @@
         'Нанять': 'Hire', 'Уволить': 'Fire', 'Пока никого нет. Генераторы чините вручную.': 'No mechanics yet. Repair generators manually.',
         'Оплата Stars появится после подключения игры к Telegram': 'Stars payment will be available after the game is connected to Telegram',
         'Сейчас': 'Now', 'Скоро': 'Coming soon', ' ч ': ' h ', ' мин': ' min', ' сек': ' sec', ' д': ' d',
+        'Введите имя': 'Enter a name', 'Имя сохранено': 'Name saved', 'Имя не может быть пустым': 'Name cannot be empty',
+        'Игрок': 'Player', 'Уровень': 'Level', 'Клан': 'Clan', 'Админ панель': 'Admin panel',
         'Общие фермы': 'Businesses', 'Только вручную': 'Manual only', '1 час': '1 hour', '6 часов': '6 hours', '12 часов': '12 hours',
         '30 минут': '30 minutes', '2 часа': '2 hours', '4 часа': '4 hours', '8 часов': '8 hours',
         'Ручная добыча': 'Manual mining', 'Финансы': 'Finances', 'Активность': 'Activity', 'Бизнес': 'Business',
@@ -159,6 +164,7 @@
 
     function localizeNode(node) {
         if (node.nodeType !== Node.TEXT_NODE) return;
+        if (node.parentElement && node.parentElement.closest('[data-no-i18n]')) return;
         const original = node.__yetiOriginalText || node.nodeValue;
         if (!node.__yetiOriginalText) node.__yetiOriginalText = original;
         const key = original.trim();

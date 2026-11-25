@@ -149,6 +149,7 @@
     }
 
     const meta = loadMeta();
+    window.yetiManualIceTotal = function () { return Number(meta.metrics.manualIce) || 0; };
     function persistMeta() {
         try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (e) {}
     }
@@ -256,6 +257,7 @@
             const amount = Math.max(0, Number(value) || 0);
             m.manualIce += amount;
             dailyAdd('manualIce', amount);
+            if (typeof window.yetiRefreshProfileProgress === 'function') window.yetiRefreshProfileProgress();
         } else if (eventName === 'marketSell') {
             const amount = Math.max(0, Number(value.amount) || 0);
             const revenue = Math.max(0, Number(value.revenue) || 0);
@@ -482,8 +484,12 @@
         if (section === 'mail') { openDenModal('Почта'); renderMail(); }
     }
 
-    document.querySelectorAll('.den-hotspot').forEach(function (button) {
+    document.querySelectorAll('.den-menu-button[data-section]').forEach(function (button) {
         button.addEventListener('click', function () { openSection(button.dataset.section); });
+    });
+    document.getElementById('profile-stats-open').addEventListener('click', function () {
+        profileMenu.classList.remove('show');
+        openSection('stats');
     });
 
     const adminEntry = document.getElementById('den-admin-entry');
@@ -588,4 +594,5 @@
         meta.daily.loginRecorded = true;
     }
     updateDerivedProgress();
+    if (typeof window.yetiRefreshProfileProgress === 'function') window.yetiRefreshProfileProgress();
 })();
