@@ -117,22 +117,22 @@
             pointer-events: none;
         }
 
-        .profile-area { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; max-width: calc(100% - 128px); }
-        .profile-summary { width: clamp(88px, 29vw, 148px); min-width: 0; display: flex; flex-direction: column; gap: 3px; color: #fff; text-shadow: 0 1px 3px #102b49; pointer-events: none; }
+        .profile-area { display: flex; align-items: center; gap: 7px; flex: 1 1 auto; min-width: 0; max-width: min(62vw, 260px); padding: 5px 7px; border: 1px solid rgba(155,218,250,.9); border-radius: 15px; background: linear-gradient(145deg, rgba(45,101,148,.98), rgba(20,57,91,.98)); box-shadow: 0 3px 0 rgba(7,29,51,.75), 0 5px 12px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18); }
+        .profile-summary { flex: 1 1 auto; width: auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; color: #eff9ff; text-shadow: 0 1px 3px #102b49; pointer-events: none; }
         .player-display-name { overflow: hidden; color: #fff; font-size: clamp(11px, 3.5vw, 15px); font-weight: 1000; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
-        .profile-level-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; overflow: hidden; font-size: 9px; font-weight: 900; line-height: 1; white-space: nowrap; }
+        .profile-level-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; overflow: hidden; color: #d9f2ff; font-size: 9px; font-weight: 900; line-height: 1; white-space: nowrap; }
         #player-level-progress { opacity: .9; }
         .profile-level-track { height: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,.86); border-radius: 99px; background: rgba(3,21,41,.58); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
         .profile-level-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4bd6ff, #b8f4ff); box-shadow: 0 0 8px #79ddff; transition: width .25s ease; }
 
         .profile-box {
             position: relative;
-            width: 55px;
-            height: 55px;
-            background: #fff;
-            border: 3px solid #4A90E2;
+            width: 45px;
+            height: 45px;
+            background-color: #d7f1ff;
+            border: 2px solid #b9e8ff;
             border-radius: 50%;
-            box-shadow: 0 4px 0 #2C5F9E, 0 6px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 0 #123b60, 0 4px 8px rgba(0,0,0,0.28);
             overflow: visible;
             flex-shrink: 0;
             background-image: var(--img-profile);
@@ -141,32 +141,35 @@
             pointer-events: auto;
             cursor: pointer;
         }
-        .profile-vip { position: absolute; top: 57px; left: 4px; max-width: 112px; padding: 3px 6px; border: 1px solid #ffe08a; border-radius: 9px; background: linear-gradient(135deg,#fff3b0,#ffbd39); color: #573b06; font-size: 9px; line-height: 1.15; font-weight: 1000; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,.25); }
+        .profile-vip { position: absolute; top: 42px; left: 0; max-width: 112px; padding: 3px 6px; border: 1px solid #b9e8ff; border-radius: 9px; background: linear-gradient(135deg,#dff6ff,#78caff); color: #123b60; font-size: 9px; line-height: 1.15; font-weight: 1000; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,.25); }
         .profile-vip:empty { display: none; }
 
         .resources {
             display: flex;
-            flex-direction: row;
-            gap: 8px;
-            align-items: center;
+            flex: 0 0 clamp(96px, 32vw, 124px);
+            flex-direction: column;
+            gap: 4px;
+            align-items: stretch;
         }
 
         .resource-box {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #3b82f6;
-            border-radius: 12px;
-            padding: 3px 10px 3px 4px;
-            box-shadow: 0 3px 0 #1e40af, 0 4px 8px rgba(0,0,0,0.25);
-            min-width: 80px;
+            min-width: 0;
+            min-height: 30px;
+            padding: 3px 8px;
+            border: 1px solid rgba(155,218,250,.9);
+            border-radius: 11px;
+            color: #f2fbff;
+            background: linear-gradient(145deg, rgba(45,101,148,.98), rgba(20,57,91,.98));
+            box-shadow: 0 2px 0 rgba(7,29,51,.75), 0 4px 8px rgba(0,0,0,.23), inset 0 1px 0 rgba(255,255,255,.15);
             position: relative;
             transition: transform 0.1s, background 0.2s;
         }
 
         .pop {
             transform: scale(1.1);
-            background: #ffffff;
+            background: linear-gradient(145deg, #72caff, #2f83bb);
         }
 
         .resource-box.deny {
@@ -182,40 +185,32 @@
         }
 
         .resource-icon {
-            width: 24px;
-            height: 24px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            margin-right: 6px;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+            width: 22px;
+            height: 22px;
+            display: grid;
+            place-items: center;
+            margin-right: 7px;
+            font-size: 17px;
+            line-height: 1;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
             flex-shrink: 0;
         }
 
-        .icon-ice { background-image: var(--img-ice); }
+        .icon-ice, .icon-dollar { background: none; border-radius: 0; border: 0; box-shadow: none; }
 
-        .icon-dollar {
-            background: #4caf50;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #2e7d32;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-        }
         .icon-dollar::after {
-            content: '$';
-            color: #fff;
-            font-size: 14px;
-            font-weight: 900;
-            text-shadow: 1px 1px 0 #1b5e20;
+            content: none;
         }
 
         .resource-value {
+            min-width: 0;
+            overflow: hidden;
             font-weight: 900;
-            font-size: 14px;
-            color: #1e3a8a;
-            text-shadow: 0 1px 0 #fff;
+            font-size: clamp(10px, 3vw, 13px);
+            color: #f2fbff;
+            text-shadow: 0 1px 2px #102b49;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* ---------------- НИЖНЕЕ МЕНЮ ---------------- */
